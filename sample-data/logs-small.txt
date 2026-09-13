@@ -1,0 +1,1000 @@
+2026-09-13T00:00:00Z | DEBUG | INVENTORY | 178.213.150.250 | PUT | /health | 200 | 534 | req-44310 | user-4982 | order processed successfully
+2026-09-13T00:00:00.001Z | ERROR | DATABASE | 155.231.232.52 | PUT | /api/notifications | 200 | 1154 | req-23959 | user-8639 | resource not found
+2026-09-13T00:00:00.002Z | INFO | AUTH | 122.94.46.202 | PATCH | /api/orders/{id} | 500 | 1274 | req-53319 | - | order processed successfully
+2026-09-13T00:00:00.003Z | ERROR | NOTIFICATION | 41.52.170.252 | GET | /health | 201 | 1489 | req-46421 | user-196 | inventory lookup failed
+2026-09-13T00:00:00.004Z | ERROR | INVENTORY | 5.180.104.89 | GET | /api/inventory | 204 | 1082 | req-27480 | user-7204 | request completed
+2026-09-13T00:00:00.005Z | INFO | USER | 218.116.128.23 | PATCH | /api/notifications | 404 | 263 | req-38543 | user-6189 | user session created
+2026-09-13T00:00:00.006Z | INFO | NOTIFICATION | 176.188.1.21 | POST | /api/payments | 200 | 501 | req-54343 | user-652 | order processed successfully
+2026-09-13T00:00:00.007Z | ERROR | API_GATEWAY | 129.165.39.66 | POST | /logout | 200 | 588 | req-30403 | - | cache miss
+2026-09-13T00:00:00.008Z | INFO | NOTIFICATION | 67.55.61.25 | PUT | /health | 204 | 921 | req-2207 | user-8794 | request completed
+2026-09-13T00:00:00.009Z | INFO | PAYMENT | 172.146.6.199 | DELETE | /login | 204 | 207 | req-89478 | user-3588 | order processed successfully
+2026-09-13T00:00:00.010Z | ERROR | PAYMENT | 69.197.147.139 | PUT | /api/orders/{id} | 400 | 1117 | req-42207 | user-6854 | authentication failed
+2026-09-13T00:00:00.011Z | INFO | AUTH | 8.93.11.118 | POST | /api/notifications | 401 | 1210 | req-43338 | user-3584 | request completed
+2026-09-13T00:00:00.012Z | WARN | ORDER | 222.92.201.149 | PUT | /api/orders | 200 | 758 | req-88978 | user-2237 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.013Z | DEBUG | PAYMENT | 51.62.234.111 | PUT | /logout | 200 | 1286 | req-80065 | user-6292 | data validation failed
+2026-09-13T00:00:00.014Z | DEBUG | USER | 125.207.33.34 | DELETE | /api/users | 500 | 1244 | req-45333 | user-6191 | user session created
+2026-09-13T00:00:00.015Z | INFO | DATABASE | 204.172.56.161 | DELETE | /api/users | 201 | 59 | req-59694 | user-1183 | cache miss
+2026-09-13T00:00:00.016Z | ERROR | DATABASE | 146.122.212.214 | POST | /health | 500 | 828 | req-70473 | - | request completed
+2026-09-13T00:00:00.017Z | INFO | AUTH | 194.115.104.128 | PUT | /api/inventory | 401 | 533 | req-43507 | user-7590 | cache miss
+2026-09-13T00:00:00.018Z | ERROR | API_GATEWAY | 67.24.195.238 | GET | /api/inventory | 204 | 23 | req-71456 | user-269 | notification sent
+2026-09-13T00:00:00.019Z | DEBUG | AUTH | 167.152.181.158 | PUT | /api/inventory | 401 | 1098 | req-45779 | - | resource not found
+2026-09-13T00:00:00.020Z | ERROR | ORDER | 209.108.47.76 | PUT | /api/orders | 500 | 634 | req-55256 | - | order processed successfully
+2026-09-13T00:00:00.021Z | ERROR | AUTH | 187.111.218.110 | PUT | /api/orders/{id} | 201 | 123 | req-77245 | user-2817 | request completed
+2026-09-13T00:00:00.022Z | ERROR | AUTH | 86.92.222.190 | PATCH | /api/notifications | 204 | 116 | req-22624 | user-2540 | request completed
+2026-09-13T00:00:00.023Z | WARN | PAYMENT | 165.161.204.25 | GET | /logout | 204 | 96 | req-33553 | user-6511 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.024Z | INFO | AUTH | 74.113.71.243 | PUT | /api/inventory | 200 | 90 | req-36864 | user-7560 | cache miss
+2026-09-13T00:00:00.025Z | ERROR | USER | 145.89.98.176 | PUT | /api/orders | 201 | 1267 | req-86119 | user-8063 | request completed
+2026-09-13T00:00:00.026Z | ERROR | NOTIFICATION | 182.183.195.248 | GET | /health | 500 | 1046 | req-57096 | user-6656 | authentication failed
+2026-09-13T00:00:00.027Z | INFO | ORDER | 191.74.38.232 | PATCH | /login | 403 | 352 | req-33329 | user-6877 | notification sent
+2026-09-13T00:00:00.028Z | ERROR | API_GATEWAY | 203.40.90.72 | PUT | /api/notifications | 204 | 1327 | req-29697 | - | inventory lookup failed
+2026-09-13T00:00:00.029Z | DEBUG | NOTIFICATION | 134.82.200.74 | POST | /api/orders/{id} | 403 | 594 | req-80914 | user-5322 | request completed
+2026-09-13T00:00:00.030Z | ERROR | ORDER | 134.102.243.76 | POST | /health | 500 | 697 | req-32757 | user-2519 | inventory lookup failed
+2026-09-13T00:00:00.031Z | DEBUG | DATABASE | 119.125.24.178 | GET | /logout | 201 | 841 | req-62034 | user-4304 | notification sent
+2026-09-13T00:00:00.032Z | WARN | INVENTORY | 190.59.250.217 | POST | /api/inventory | 204 | 496 | req-54202 | - | retry scheduled after 2 attempts
+2026-09-13T00:00:00.033Z | INFO | AUTH | 39.239.217.152 | PUT | /health | 201 | 53 | req-48306 | user-840 | cache miss
+2026-09-13T00:00:00.034Z | ERROR | DATABASE | 14.218.243.197 | PUT | /api/inventory | 200 | 1460 | req-55886 | user-7927 | order processed successfully
+2026-09-13T00:00:00.035Z | ERROR | USER | 45.84.249.173 | POST | /health | 204 | 1316 | req-72790 | - | resource not found
+2026-09-13T00:00:00.036Z | INFO | NOTIFICATION | 183.221.115.143 | DELETE | /api/payments | 200 | 1443 | req-73633 | - | resource not found
+2026-09-13T00:00:00.037Z | ERROR | ORDER | 115.64.160.239 | DELETE | /login | 204 | 777 | req-39977 | user-6932 | notification sent
+2026-09-13T00:00:00.038Z | ERROR | API_GATEWAY | 126.149.223.242 | PUT | /api/payments | 204 | 122 | req-71555 | user-6432 | data validation failed
+2026-09-13T00:00:00.039Z | DEBUG | NOTIFICATION | 200.153.167.36 | PUT | /api/orders | 200 | 1056 | req-25585 | user-2153 | order processed successfully
+2026-09-13T00:00:00.040Z | WARN | API_GATEWAY | 13.237.205.152 | DELETE | /api/orders/{id} | 401 | 258 | req-43613 | user-1552 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.041Z | INFO | NOTIFICATION | 169.30.205.222 | PUT | /api/inventory | 500 | 1096 | req-67901 | user-116 | notification sent
+2026-09-13T00:00:00.042Z | ERROR | INVENTORY | 135.96.108.170 | POST | /login | 201 | 861 | req-20844 | user-7312 | order processed successfully
+2026-09-13T00:00:00.043Z | WARN | PAYMENT | 136.73.8.215 | PATCH | /api/orders | 200 | 1137 | req-25975 | - | retry scheduled after 5 attempts
+2026-09-13T00:00:00.044Z | INFO | USER | 74.129.92.201 | PUT | /api/orders | 200 | 1040 | req-66303 | user-549 | user session created
+2026-09-13T00:00:00.045Z | DEBUG | DATABASE | 1.167.11.66 | PUT | /api/orders/{id} | 200 | 1150 | req-48422 | user-1451 | user session created
+2026-09-13T00:00:00.046Z | ERROR | USER | 192.100.47.147 | DELETE | /api/orders | 200 | 824 | req-31899 | user-5680 | data validation failed
+2026-09-13T00:00:00.047Z | DEBUG | API_GATEWAY | 17.173.219.84 | DELETE | /api/inventory | 500 | 946 | req-1914 | user-7790 | notification sent
+2026-09-13T00:00:00.048Z | INFO | DATABASE | 2.188.250.43 | GET | /api/inventory | 204 | 736 | req-56905 | user-3029 | cache miss
+2026-09-13T00:00:00.049Z | INFO | ORDER | 195.63.20.210 | POST | /health | 403 | 253 | req-64778 | user-7961 | resource not found
+2026-09-13T00:00:00.050Z | ERROR | PAYMENT | 69.213.169.73 | POST | /api/orders/{id} | 502 | 720 | req-90865 | - | connection timeout
+2026-09-13T00:00:00.051Z | ERROR | INVENTORY | 162.208.232.61 | POST | /api/users | 400 | 278 | req-73668 | user-3782 | database connection failed
+2026-09-13T00:00:00.052Z | ERROR | API_GATEWAY | 43.2.151.234 | PATCH | /api/orders/{id} | 201 | 1055 | req-34864 | user-5463 | notification sent
+2026-09-13T00:00:00.053Z | WARN | API_GATEWAY | 24.173.12.91 | DELETE | /api/notifications | 500 | 183 | req-81920 | user-446 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.054Z | DEBUG | AUTH | 95.21.90.125 | PUT | /api/users | 401 | 1326 | req-71998 | user-4992 | cache miss
+2026-09-13T00:00:00.055Z | DEBUG | INVENTORY | 94.123.120.6 | GET | /api/notifications | 201 | 1255 | req-11040 | user-6543 | notification sent
+2026-09-13T00:00:00.056Z | INFO | AUTH | 28.242.190.222 | PATCH | /logout | 204 | 526 | req-52036 | user-344 | notification sent
+2026-09-13T00:00:00.057Z | ERROR | NOTIFICATION | 182.119.109.79 | GET | /api/orders/{id} | 204 | 394 | req-50841 | user-1081 | order processed successfully
+2026-09-13T00:00:00.058Z | ERROR | ORDER | 90.118.248.206 | GET | /api/notifications | 204 | 924 | req-52119 | - | resource not found
+2026-09-13T00:00:00.059Z | WARN | API_GATEWAY | 104.63.160.215 | DELETE | /api/orders | 200 | 947 | req-64915 | - | retry scheduled after 5 attempts
+2026-09-13T00:00:00.060Z | ERROR | API_GATEWAY | 188.156.110.75 | PATCH | /api/inventory | 200 | 506 | req-48941 | user-2399 | data validation failed
+2026-09-13T00:00:00.061Z | DEBUG | USER | 49.23.124.113 | GET | /health | 201 | 563 | req-9583 | user-7614 | cache miss
+2026-09-13T00:00:00.062Z | WARN | USER | 66.222.209.197 | GET | /api/payments | 404 | 1279 | req-78260 | user-8866 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.063Z | INFO | API_GATEWAY | 86.34.48.205 | PATCH | /api/payments | 200 | 1164 | req-25325 | user-6136 | data validation failed
+2026-09-13T00:00:00.064Z | DEBUG | PAYMENT | 9.94.213.34 | GET | /logout | 201 | 196 | req-1931 | user-1275 | order processed successfully
+2026-09-13T00:00:00.065Z | ERROR | API_GATEWAY | 42.118.138.124 | GET | /logout | 204 | 441 | req-23099 | user-2059 | resource not found
+2026-09-13T00:00:00.066Z | ERROR | ORDER | 62.147.104.32 | GET | /api/orders/{id} | 200 | 975 | req-21366 | - | request completed
+2026-09-13T00:00:00.067Z | ERROR | INVENTORY | 209.2.142.229 | POST | /api/notifications | 401 | 1235 | req-8410 | user-1091 | request completed
+2026-09-13T00:00:00.068Z | ERROR | DATABASE | 117.214.19.23 | POST | /api/users | 200 | 925 | req-90575 | - | order processed successfully
+2026-09-13T00:00:00.069Z | DEBUG | NOTIFICATION | 115.206.34.106 | DELETE | /api/inventory | 204 | 1443 | req-2868 | user-2445 | user session created
+2026-09-13T00:00:00.070Z | DEBUG | USER | 101.87.211.54 | PATCH | /health | 201 | 53 | req-15400 | user-3514 | user session created
+2026-09-13T00:00:00.071Z | INFO | USER | 189.3.46.196 | PATCH | /api/users | 204 | 338 | req-24689 | user-4681 | cache miss
+2026-09-13T00:00:00.072Z | ERROR | DATABASE | 205.225.253.193 | PUT | /api/payments | 403 | 109 | req-57588 | - | authentication failed
+2026-09-13T00:00:00.073Z | DEBUG | AUTH | 113.57.66.179 | PUT | /api/notifications | 401 | 345 | req-16575 | user-118 | user session created
+2026-09-13T00:00:00.074Z | DEBUG | INVENTORY | 142.49.193.228 | PUT | /logout | 201 | 1107 | req-54758 | user-4722 | order processed successfully
+2026-09-13T00:00:00.075Z | DEBUG | INVENTORY | 104.53.34.30 | GET | /login | 201 | 324 | req-55900 | user-4107 | resource not found
+2026-09-13T00:00:00.076Z | INFO | API_GATEWAY | 219.6.72.28 | POST | /login | 200 | 1227 | req-41680 | user-9054 | request completed
+2026-09-13T00:00:00.077Z | DEBUG | INVENTORY | 70.116.109.36 | PATCH | /api/inventory | 200 | 94 | req-58696 | user-8061 | resource not found
+2026-09-13T00:00:00.078Z | DEBUG | AUTH | 190.31.224.224 | PUT | /login | 201 | 814 | req-29624 | user-3396 | user session created
+2026-09-13T00:00:00.079Z | INFO | AUTH | 196.11.36.104 | POST | /api/orders/{id} | 204 | 769 | req-22915 | - | notification sent
+2026-09-13T00:00:00.080Z | INFO | USER | 123.241.188.246 | PATCH | /health | 204 | 1275 | req-49073 | user-1670 | request completed
+2026-09-13T00:00:00.081Z | WARN | ORDER | 190.191.186.99 | DELETE | /api/payments | 200 | 142 | req-39012 | - | retry scheduled after 4 attempts
+2026-09-13T00:00:00.082Z | ERROR | NOTIFICATION | 66.217.164.75 | GET | /api/orders | 204 | 693 | req-20921 | - | cache miss
+2026-09-13T00:00:00.083Z | ERROR | INVENTORY | 114.191.59.243 | PUT | /api/users | 500 | 492 | req-83631 | - | cache miss
+2026-09-13T00:00:00.084Z | DEBUG | NOTIFICATION | 104.67.52.82 | PATCH | /api/users | 201 | 338 | req-2971 | - | request completed
+2026-09-13T00:00:00.085Z | WARN | USER | 157.166.25.199 | POST | /api/inventory | 500 | 669 | req-86932 | - | retry scheduled after 5 attempts
+2026-09-13T00:00:00.086Z | ERROR | AUTH | 99.157.158.164 | DELETE | /logout | 204 | 577 | req-34747 | user-8665 | inventory lookup failed
+2026-09-13T00:00:00.087Z | INFO | AUTH | 53.146.168.238 | PUT | /api/inventory | 204 | 1357 | req-56344 | user-138 | request completed
+2026-09-13T00:00:00.088Z | ERROR | USER | 194.149.53.184 | DELETE | /health | 502 | 13 | req-27024 | user-1726 | order processed successfully
+2026-09-13T00:00:00.089Z | INFO | API_GATEWAY | 91.181.143.124 | DELETE | /api/notifications | 500 | 246 | req-70996 | user-2837 | order processed successfully
+2026-09-13T00:00:00.090Z | DEBUG | AUTH | 103.167.214.48 | PATCH | /api/inventory | 204 | 1174 | req-48487 | user-6902 | user session created
+2026-09-13T00:00:00.091Z | WARN | ORDER | 201.188.32.253 | PUT | /api/inventory | 204 | 30 | req-62316 | user-7736 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.092Z | INFO | DATABASE | 122.38.84.191 | GET | /health | 200 | 312 | req-11820 | user-6399 | resource not found
+2026-09-13T00:00:00.093Z | ERROR | PAYMENT | 220.10.221.113 | POST | /api/users | 201 | 1298 | req-46859 | user-3316 | database connection failed
+2026-09-13T00:00:00.094Z | INFO | INVENTORY | 140.221.47.206 | DELETE | /api/orders | 404 | 450 | req-34507 | user-2095 | data validation failed
+2026-09-13T00:00:00.095Z | DEBUG | DATABASE | 204.171.99.226 | PUT | /api/inventory | 401 | 636 | req-54417 | user-3041 | request completed
+2026-09-13T00:00:00.096Z | INFO | DATABASE | 66.3.205.242 | POST | /login | 204 | 234 | req-51501 | user-6016 | resource not found
+2026-09-13T00:00:00.097Z | ERROR | PAYMENT | 96.48.7.110 | POST | /api/users | 204 | 1108 | req-1261 | user-1672 | data validation failed
+2026-09-13T00:00:00.098Z | INFO | INVENTORY | 209.60.129.187 | DELETE | /health | 502 | 873 | req-57826 | user-6720 | data validation failed
+2026-09-13T00:00:00.099Z | WARN | ORDER | 151.81.43.51 | GET | /login | 201 | 682 | req-39153 | - | retry scheduled after 2 attempts
+2026-09-13T00:00:00.100Z | ERROR | DATABASE | 78.135.248.56 | GET | /logout | 200 | 534 | req-53018 | user-3660 | resource not found
+2026-09-13T00:00:00.101Z | ERROR | AUTH | 173.33.247.110 | GET | /api/payments | 401 | 1328 | req-23496 | - | authentication failed
+2026-09-13T00:00:00.102Z | ERROR | AUTH | 109.88.53.189 | POST | /api/notifications | 401 | 753 | req-71001 | user-3950 | payment service unavailable
+2026-09-13T00:00:00.103Z | INFO | ORDER | 99.30.101.219 | GET | /api/orders | 503 | 869 | req-38178 | user-2074 | notification sent
+2026-09-13T00:00:00.104Z | ERROR | AUTH | 98.68.176.65 | DELETE | /health | 401 | 927 | req-75088 | user-8634 | cache miss
+2026-09-13T00:00:00.105Z | INFO | INVENTORY | 24.229.74.21 | GET | /api/inventory | 204 | 130 | req-37765 | user-2078 | request completed
+2026-09-13T00:00:00.106Z | INFO | PAYMENT | 189.86.243.248 | POST | /api/inventory | 200 | 822 | req-84956 | user-2528 | user session created
+2026-09-13T00:00:00.107Z | INFO | DATABASE | 5.229.154.116 | GET | /api/inventory | 201 | 598 | req-14809 | user-2592 | data validation failed
+2026-09-13T00:00:00.108Z | ERROR | NOTIFICATION | 153.221.44.99 | DELETE | /api/notifications | 404 | 1354 | req-37925 | user-8384 | payment service unavailable
+2026-09-13T00:00:00.109Z | INFO | INVENTORY | 95.140.64.4 | PATCH | /api/users | 201 | 1390 | req-12012 | user-5316 | notification sent
+2026-09-13T00:00:00.110Z | ERROR | DATABASE | 135.18.116.165 | PATCH | /api/orders/{id} | 204 | 1179 | req-34881 | user-7857 | data validation failed
+2026-09-13T00:00:00.111Z | DEBUG | DATABASE | 20.51.15.128 | GET | /api/notifications | 204 | 316 | req-65911 | - | resource not found
+2026-09-13T00:00:00.112Z | INFO | DATABASE | 205.68.78.40 | POST | /api/orders | 200 | 993 | req-35882 | user-5641 | notification sent
+2026-09-13T00:00:00.113Z | ERROR | USER | 70.32.251.120 | PATCH | /api/inventory | 201 | 1123 | req-39623 | user-3033 | inventory lookup failed
+2026-09-13T00:00:00.114Z | DEBUG | AUTH | 209.164.232.70 | POST | /api/notifications | 201 | 1374 | req-76300 | user-1862 | user session created
+2026-09-13T00:00:00.115Z | INFO | API_GATEWAY | 124.212.64.145 | DELETE | /login | 201 | 1461 | req-35756 | user-8297 | order processed successfully
+2026-09-13T00:00:00.116Z | DEBUG | API_GATEWAY | 184.216.190.71 | DELETE | /logout | 503 | 161 | req-80998 | user-7304 | data validation failed
+2026-09-13T00:00:00.117Z | DEBUG | ORDER | 126.165.85.193 | PATCH | /api/payments | 204 | 216 | req-10036 | user-2578 | user session created
+2026-09-13T00:00:00.118Z | WARN | INVENTORY | 9.84.201.31 | DELETE | /api/notifications | 200 | 697 | req-29461 | user-4944 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.119Z | DEBUG | INVENTORY | 97.113.222.92 | GET | /api/orders/{id} | 200 | 688 | req-69065 | user-3783 | order processed successfully
+2026-09-13T00:00:00.120Z | ERROR | USER | 28.88.165.21 | PATCH | /login | 200 | 615 | req-79502 | - | cache miss
+2026-09-13T00:00:00.121Z | ERROR | PAYMENT | 185.175.114.57 | PUT | /api/orders | 200 | 997 | req-40726 | user-733 | request completed
+2026-09-13T00:00:00.122Z | ERROR | USER | 130.25.48.31 | PATCH | /health | 200 | 1163 | req-8433 | - | connection timeout
+2026-09-13T00:00:00.123Z | INFO | USER | 121.38.95.24 | DELETE | /logout | 200 | 1289 | req-65095 | - | notification sent
+2026-09-13T00:00:00.124Z | ERROR | AUTH | 105.222.71.22 | PUT | /login | 401 | 940 | req-28831 | user-3127 | user session created
+2026-09-13T00:00:00.125Z | ERROR | PAYMENT | 204.29.249.118 | PUT | /login | 204 | 1229 | req-85233 | user-362 | user session created
+2026-09-13T00:00:00.126Z | INFO | NOTIFICATION | 219.255.115.21 | PUT | /login | 201 | 1040 | req-79885 | user-5206 | notification sent
+2026-09-13T00:00:00.127Z | ERROR | ORDER | 197.185.197.123 | POST | /logout | 204 | 1219 | req-8321 | user-8800 | database connection failed
+2026-09-13T00:00:00.128Z | INFO | INVENTORY | 75.92.16.127 | PUT | /health | 403 | 1153 | req-80942 | user-959 | request completed
+2026-09-13T00:00:00.129Z | ERROR | PAYMENT | 150.26.144.220 | POST | /api/notifications | 201 | 1181 | req-52670 | user-7822 | payment service unavailable
+2026-09-13T00:00:00.130Z | INFO | ORDER | 209.181.24.62 | POST | /api/notifications | 503 | 831 | req-34084 | user-2904 | data validation failed
+2026-09-13T00:00:00.131Z | ERROR | NOTIFICATION | 192.143.143.192 | DELETE | /health | 403 | 1098 | req-83229 | user-8059 | cache miss
+2026-09-13T00:00:00.132Z | ERROR | USER | 118.241.55.167 | POST | /login | 204 | 892 | req-24559 | user-8384 | request completed
+2026-09-13T00:00:00.133Z | ERROR | INVENTORY | 98.165.214.47 | PATCH | /api/inventory | 400 | 32 | req-19599 | - | request completed
+2026-09-13T00:00:00.134Z | ERROR | NOTIFICATION | 9.47.160.238 | PUT | /logout | 204 | 401 | req-35243 | - | data validation failed
+2026-09-13T00:00:00.135Z | INFO | PAYMENT | 121.161.42.100 | DELETE | /api/users | 200 | 1352 | req-18543 | user-1802 | order processed successfully
+2026-09-13T00:00:00.136Z | WARN | USER | 189.48.179.145 | DELETE | /api/users | 201 | 1213 | req-85188 | user-2733 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.137Z | INFO | ORDER | 54.53.149.167 | GET | /api/users | 200 | 507 | req-50533 | user-1040 | resource not found
+2026-09-13T00:00:00.138Z | DEBUG | AUTH | 45.58.77.109 | POST | /api/payments | 201 | 150 | req-16275 | user-2207 | order processed successfully
+2026-09-13T00:00:00.139Z | ERROR | ORDER | 157.90.239.85 | PUT | /login | 201 | 854 | req-16748 | user-7365 | notification sent
+2026-09-13T00:00:00.140Z | INFO | DATABASE | 162.60.80.155 | POST | /api/orders | 204 | 696 | req-84652 | user-2573 | resource not found
+2026-09-13T00:00:00.141Z | DEBUG | PAYMENT | 159.171.173.177 | POST | /logout | 204 | 1061 | req-15841 | - | cache miss
+2026-09-13T00:00:00.142Z | INFO | DATABASE | 70.21.135.191 | PATCH | /health | 201 | 990 | req-72351 | user-3109 | resource not found
+2026-09-13T00:00:00.143Z | WARN | API_GATEWAY | 56.101.211.102 | POST | /logout | 204 | 735 | req-22453 | user-2850 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.144Z | ERROR | PAYMENT | 57.64.30.68 | DELETE | /api/notifications | 201 | 900 | req-20331 | user-7218 | user session created
+2026-09-13T00:00:00.145Z | ERROR | USER | 102.51.48.143 | PUT | /api/orders | 200 | 498 | req-60220 | user-1445 | cache miss
+2026-09-13T00:00:00.146Z | INFO | API_GATEWAY | 43.115.77.6 | GET | /logout | 204 | 956 | req-40423 | user-7639 | user session created
+2026-09-13T00:00:00.147Z | WARN | USER | 82.241.40.98 | POST | /api/inventory | 200 | 607 | req-9101 | user-4251 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.148Z | DEBUG | ORDER | 205.72.14.190 | GET | /api/orders | 204 | 142 | req-39001 | user-3260 | resource not found
+2026-09-13T00:00:00.149Z | ERROR | API_GATEWAY | 22.118.7.167 | PUT | /api/payments | 502 | 624 | req-23145 | user-462 | authentication failed
+2026-09-13T00:00:00.150Z | INFO | USER | 159.124.59.249 | POST | /health | 201 | 1205 | req-25534 | user-4758 | order processed successfully
+2026-09-13T00:00:00.151Z | ERROR | API_GATEWAY | 142.44.194.189 | PUT | /api/payments | 200 | 1002 | req-69734 | user-5254 | payment service unavailable
+2026-09-13T00:00:00.152Z | DEBUG | DATABASE | 213.60.92.62 | PATCH | /api/payments | 204 | 845 | req-87852 | user-1929 | request completed
+2026-09-13T00:00:00.153Z | ERROR | AUTH | 113.244.63.74 | GET | /health | 401 | 1390 | req-16092 | user-1170 | resource not found
+2026-09-13T00:00:00.154Z | WARN | INVENTORY | 194.48.231.94 | DELETE | /login | 204 | 1083 | req-71880 | user-5960 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.155Z | ERROR | DATABASE | 124.155.61.243 | POST | /health | 204 | 656 | req-34575 | user-1293 | connection timeout
+2026-09-13T00:00:00.156Z | DEBUG | DATABASE | 142.216.230.197 | DELETE | /logout | 201 | 916 | req-37173 | user-4603 | notification sent
+2026-09-13T00:00:00.157Z | INFO | DATABASE | 77.117.160.162 | PATCH | /api/orders | 201 | 430 | req-15203 | user-338 | order processed successfully
+2026-09-13T00:00:00.158Z | ERROR | PAYMENT | 14.126.232.36 | DELETE | /api/notifications | 201 | 1203 | req-85569 | user-8651 | resource not found
+2026-09-13T00:00:00.159Z | ERROR | USER | 69.20.100.53 | PATCH | /api/users | 404 | 1446 | req-23139 | - | user session created
+2026-09-13T00:00:00.160Z | ERROR | AUTH | 123.36.131.198 | PUT | /login | 401 | 33 | req-51401 | user-2989 | request completed
+2026-09-13T00:00:00.161Z | ERROR | API_GATEWAY | 8.234.33.34 | PUT | /api/inventory | 201 | 1496 | req-29302 | user-8889 | data validation failed
+2026-09-13T00:00:00.162Z | WARN | API_GATEWAY | 212.41.96.162 | PUT | /login | 204 | 1232 | req-70111 | user-410 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.163Z | ERROR | AUTH | 143.25.66.160 | GET | /logout | 204 | 116 | req-10444 | user-7916 | user session created
+2026-09-13T00:00:00.164Z | INFO | ORDER | 15.199.40.248 | DELETE | /logout | 200 | 1270 | req-80005 | - | user session created
+2026-09-13T00:00:00.165Z | DEBUG | ORDER | 34.159.108.128 | POST | /api/notifications | 401 | 1089 | req-81914 | user-5826 | request completed
+2026-09-13T00:00:00.166Z | INFO | DATABASE | 137.124.157.121 | POST | /api/orders/{id} | 204 | 618 | req-34934 | user-2741 | data validation failed
+2026-09-13T00:00:00.167Z | ERROR | NOTIFICATION | 83.207.83.184 | DELETE | /api/users | 400 | 1496 | req-3727 | user-4843 | order processed successfully
+2026-09-13T00:00:00.168Z | DEBUG | NOTIFICATION | 77.5.121.220 | DELETE | /api/payments | 200 | 1063 | req-38612 | user-4631 | request completed
+2026-09-13T00:00:00.169Z | ERROR | PAYMENT | 102.65.184.148 | PATCH | /api/inventory | 204 | 1367 | req-45078 | user-6689 | database connection failed
+2026-09-13T00:00:00.170Z | ERROR | NOTIFICATION | 146.111.88.151 | POST | /api/notifications | 200 | 1447 | req-74782 | user-1348 | data validation failed
+2026-09-13T00:00:00.171Z | INFO | DATABASE | 186.100.253.231 | PATCH | /login | 201 | 48 | req-32264 | user-8396 | notification sent
+2026-09-13T00:00:00.172Z | DEBUG | AUTH | 126.223.101.234 | DELETE | /logout | 401 | 488 | req-50438 | user-5671 | request completed
+2026-09-13T00:00:00.173Z | INFO | AUTH | 208.72.91.169 | GET | /api/users | 200 | 634 | req-79515 | user-2122 | cache miss
+2026-09-13T00:00:00.174Z | INFO | AUTH | 57.83.21.156 | PATCH | /login | 201 | 1108 | req-52490 | user-206 | data validation failed
+2026-09-13T00:00:00.175Z | WARN | USER | 12.227.115.42 | DELETE | /api/notifications | 403 | 924 | req-58284 | user-3775 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.176Z | ERROR | ORDER | 68.66.156.145 | POST | /api/notifications | 502 | 632 | req-29311 | user-6239 | cache miss
+2026-09-13T00:00:00.177Z | ERROR | PAYMENT | 155.220.82.35 | DELETE | /api/inventory | 404 | 1167 | req-26936 | - | data validation failed
+2026-09-13T00:00:00.178Z | ERROR | API_GATEWAY | 133.35.91.50 | DELETE | /api/orders | 200 | 1407 | req-47553 | user-5903 | resource not found
+2026-09-13T00:00:00.179Z | INFO | API_GATEWAY | 153.200.40.203 | PATCH | /api/inventory | 204 | 1438 | req-50174 | user-4927 | request completed
+2026-09-13T00:00:00.180Z | ERROR | ORDER | 223.9.228.13 | GET | /health | 401 | 297 | req-29452 | user-7985 | payment service unavailable
+2026-09-13T00:00:00.181Z | DEBUG | DATABASE | 141.243.74.143 | PATCH | /login | 201 | 76 | req-25503 | user-524 | resource not found
+2026-09-13T00:00:00.182Z | ERROR | DATABASE | 33.128.177.201 | DELETE | /api/inventory | 200 | 601 | req-16755 | user-2636 | payment service unavailable
+2026-09-13T00:00:00.183Z | INFO | USER | 25.143.34.58 | DELETE | /health | 204 | 123 | req-10440 | user-6952 | user session created
+2026-09-13T00:00:00.184Z | ERROR | PAYMENT | 93.17.226.247 | DELETE | /api/notifications | 200 | 1139 | req-48785 | user-4170 | notification sent
+2026-09-13T00:00:00.185Z | ERROR | USER | 5.155.58.175 | DELETE | /api/orders/{id} | 201 | 482 | req-27349 | - | connection timeout
+2026-09-13T00:00:00.186Z | INFO | INVENTORY | 88.17.227.219 | GET | /api/orders/{id} | 200 | 275 | req-18788 | - | user session created
+2026-09-13T00:00:00.187Z | INFO | INVENTORY | 106.115.168.27 | PATCH | /health | 200 | 1098 | req-75763 | user-8450 | request completed
+2026-09-13T00:00:00.188Z | WARN | NOTIFICATION | 127.25.146.133 | DELETE | /health | 201 | 1290 | req-73046 | user-3771 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.189Z | WARN | PAYMENT | 37.96.217.91 | DELETE | /api/notifications | 201 | 735 | req-38843 | user-465 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.190Z | WARN | INVENTORY | 86.62.26.60 | PUT | /logout | 204 | 234 | req-84901 | user-7307 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.191Z | ERROR | USER | 117.0.94.169 | POST | /api/orders/{id} | 200 | 811 | req-29293 | user-4505 | payment service unavailable
+2026-09-13T00:00:00.192Z | ERROR | API_GATEWAY | 188.198.239.61 | POST | /api/orders | 204 | 1094 | req-65284 | - | cache miss
+2026-09-13T00:00:00.193Z | ERROR | USER | 62.116.41.100 | PATCH | /api/orders/{id} | 201 | 1455 | req-61634 | user-2089 | cache miss
+2026-09-13T00:00:00.194Z | ERROR | DATABASE | 68.222.164.4 | POST | /health | 200 | 1307 | req-12275 | user-1303 | cache miss
+2026-09-13T00:00:00.195Z | DEBUG | AUTH | 160.135.62.48 | DELETE | /api/users | 401 | 954 | req-17720 | user-7197 | user session created
+2026-09-13T00:00:00.196Z | ERROR | INVENTORY | 174.154.117.114 | PATCH | /api/notifications | 201 | 284 | req-18278 | user-8053 | user session created
+2026-09-13T00:00:00.197Z | INFO | PAYMENT | 139.58.78.51 | PUT | /api/payments | 204 | 693 | req-89145 | - | cache miss
+2026-09-13T00:00:00.198Z | WARN | USER | 115.151.95.20 | POST | /api/payments | 403 | 46 | req-30844 | - | retry scheduled after 1 attempts
+2026-09-13T00:00:00.199Z | ERROR | PAYMENT | 55.18.73.242 | PUT | /api/users | 204 | 401 | req-66666 | - | data validation failed
+2026-09-13T00:00:00.200Z | DEBUG | USER | 198.152.192.150 | PATCH | /logout | 204 | 408 | req-69767 | user-5221 | cache miss
+2026-09-13T00:00:00.201Z | ERROR | DATABASE | 207.64.205.50 | DELETE | /api/orders | 204 | 43 | req-3508 | user-8983 | user session created
+2026-09-13T00:00:00.202Z | WARN | PAYMENT | 28.56.115.253 | POST | /health | 400 | 661 | req-61456 | - | retry scheduled after 4 attempts
+2026-09-13T00:00:00.203Z | DEBUG | USER | 112.209.246.150 | DELETE | /login | 404 | 88 | req-36907 | - | resource not found
+2026-09-13T00:00:00.204Z | DEBUG | AUTH | 4.254.193.122 | DELETE | /api/orders | 201 | 1248 | req-51854 | user-8790 | notification sent
+2026-09-13T00:00:00.205Z | INFO | INVENTORY | 162.42.107.198 | POST | /api/orders/{id} | 403 | 1405 | req-69726 | user-2128 | order processed successfully
+2026-09-13T00:00:00.206Z | ERROR | ORDER | 10.223.165.251 | POST | /health | 204 | 1036 | req-85488 | user-5304 | request completed
+2026-09-13T00:00:00.207Z | DEBUG | DATABASE | 21.200.193.80 | DELETE | /api/notifications | 200 | 204 | req-74052 | user-3788 | resource not found
+2026-09-13T00:00:00.208Z | WARN | AUTH | 201.10.181.224 | PATCH | /api/users | 200 | 1445 | req-7974 | user-2309 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.209Z | ERROR | INVENTORY | 141.174.55.206 | PUT | /login | 200 | 1377 | req-40974 | user-1134 | inventory lookup failed
+2026-09-13T00:00:00.210Z | INFO | DATABASE | 202.250.106.89 | GET | /api/users | 204 | 1066 | req-82562 | user-5567 | data validation failed
+2026-09-13T00:00:00.211Z | ERROR | AUTH | 135.54.67.57 | POST | /logout | 200 | 962 | req-71759 | user-6592 | user session created
+2026-09-13T00:00:00.212Z | DEBUG | NOTIFICATION | 97.162.116.95 | PUT | /api/orders/{id} | 204 | 987 | req-65812 | user-8605 | request completed
+2026-09-13T00:00:00.213Z | ERROR | DATABASE | 110.179.226.44 | PUT | /login | 201 | 932 | req-37551 | user-1702 | user session created
+2026-09-13T00:00:00.214Z | WARN | API_GATEWAY | 59.100.131.188 | POST | /api/inventory | 403 | 495 | req-80169 | user-6497 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.215Z | INFO | NOTIFICATION | 125.108.244.172 | DELETE | /api/users | 503 | 549 | req-36265 | user-3156 | resource not found
+2026-09-13T00:00:00.216Z | INFO | INVENTORY | 73.141.144.114 | POST | /logout | 201 | 38 | req-9572 | user-5517 | notification sent
+2026-09-13T00:00:00.217Z | DEBUG | INVENTORY | 105.175.87.67 | PATCH | /api/orders | 204 | 1129 | req-17579 | - | resource not found
+2026-09-13T00:00:00.218Z | INFO | DATABASE | 17.156.237.160 | DELETE | /api/payments | 200 | 797 | req-53762 | user-1328 | resource not found
+2026-09-13T00:00:00.219Z | DEBUG | USER | 71.216.239.82 | PUT | /login | 201 | 756 | req-75741 | user-357 | order processed successfully
+2026-09-13T00:00:00.220Z | INFO | USER | 112.89.231.228 | PATCH | /api/notifications | 201 | 820 | req-34423 | user-2632 | data validation failed
+2026-09-13T00:00:00.221Z | INFO | DATABASE | 111.9.90.156 | GET | /api/orders | 503 | 1162 | req-16551 | user-4972 | user session created
+2026-09-13T00:00:00.222Z | DEBUG | NOTIFICATION | 209.177.157.56 | PATCH | /api/orders/{id} | 200 | 724 | req-49209 | user-2286 | cache miss
+2026-09-13T00:00:00.223Z | ERROR | NOTIFICATION | 64.40.109.174 | GET | /api/inventory | 502 | 1305 | req-78065 | user-1863 | user session created
+2026-09-13T00:00:00.224Z | ERROR | INVENTORY | 69.143.201.134 | GET | /api/orders | 201 | 639 | req-42355 | user-7030 | inventory lookup failed
+2026-09-13T00:00:00.225Z | WARN | DATABASE | 54.166.216.69 | POST | /api/notifications | 500 | 227 | req-37854 | user-6358 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.226Z | INFO | AUTH | 70.148.20.201 | PATCH | /api/orders | 204 | 531 | req-12264 | user-985 | cache miss
+2026-09-13T00:00:00.227Z | ERROR | ORDER | 158.241.5.3 | GET | /api/payments | 204 | 674 | req-8778 | user-8083 | authentication failed
+2026-09-13T00:00:00.228Z | ERROR | DATABASE | 158.113.101.116 | DELETE | /api/notifications | 200 | 145 | req-48784 | user-8989 | user session created
+2026-09-13T00:00:00.229Z | ERROR | USER | 149.250.133.227 | POST | /login | 204 | 1369 | req-19391 | - | authentication failed
+2026-09-13T00:00:00.230Z | ERROR | DATABASE | 185.234.68.26 | PATCH | /api/users | 204 | 315 | req-83873 | user-7816 | user session created
+2026-09-13T00:00:00.231Z | ERROR | INVENTORY | 125.104.95.7 | POST | /login | 503 | 187 | req-72160 | user-5398 | user session created
+2026-09-13T00:00:00.232Z | ERROR | AUTH | 91.72.76.225 | DELETE | /health | 204 | 839 | req-70443 | - | cache miss
+2026-09-13T00:00:00.233Z | ERROR | PAYMENT | 145.95.10.136 | PATCH | /api/orders/{id} | 200 | 994 | req-52979 | user-6504 | cache miss
+2026-09-13T00:00:00.234Z | ERROR | INVENTORY | 210.121.245.49 | POST | /api/notifications | 500 | 1202 | req-86169 | user-1132 | authentication failed
+2026-09-13T00:00:00.235Z | DEBUG | USER | 1.209.177.176 | GET | /health | 200 | 414 | req-68302 | user-8472 | notification sent
+2026-09-13T00:00:00.236Z | ERROR | USER | 71.234.113.37 | DELETE | /api/inventory | 502 | 360 | req-29002 | - | connection timeout
+2026-09-13T00:00:00.237Z | ERROR | PAYMENT | 109.143.100.63 | GET | /api/inventory | 200 | 1174 | req-28133 | user-8984 | request completed
+2026-09-13T00:00:00.238Z | WARN | API_GATEWAY | 54.246.53.177 | GET | /api/notifications | 201 | 1202 | req-29222 | - | retry scheduled after 4 attempts
+2026-09-13T00:00:00.239Z | INFO | ORDER | 81.198.27.228 | DELETE | /api/users | 204 | 1004 | req-59550 | user-3157 | order processed successfully
+2026-09-13T00:00:00.240Z | WARN | INVENTORY | 51.220.217.182 | GET | /api/orders/{id} | 200 | 645 | req-8615 | user-2474 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.241Z | ERROR | NOTIFICATION | 147.155.21.112 | POST | /health | 200 | 11 | req-83120 | user-1424 | user session created
+2026-09-13T00:00:00.242Z | ERROR | DATABASE | 132.199.96.57 | DELETE | /api/orders/{id} | 201 | 575 | req-69069 | user-1500 | payment service unavailable
+2026-09-13T00:00:00.243Z | ERROR | PAYMENT | 10.49.84.122 | PUT | /api/users | 204 | 139 | req-60029 | user-1378 | connection timeout
+2026-09-13T00:00:00.244Z | INFO | NOTIFICATION | 220.180.98.235 | DELETE | /logout | 200 | 1337 | req-52294 | user-6924 | data validation failed
+2026-09-13T00:00:00.245Z | ERROR | INVENTORY | 191.154.183.140 | PATCH | /api/inventory | 204 | 1127 | req-8816 | user-2188 | resource not found
+2026-09-13T00:00:00.246Z | INFO | NOTIFICATION | 11.50.211.226 | GET | /api/users | 502 | 618 | req-19999 | user-361 | cache miss
+2026-09-13T00:00:00.247Z | DEBUG | INVENTORY | 105.124.6.89 | GET | /logout | 404 | 126 | req-14421 | user-6757 | notification sent
+2026-09-13T00:00:00.248Z | WARN | DATABASE | 7.18.35.1 | DELETE | /api/notifications | 204 | 92 | req-25222 | - | retry scheduled after 3 attempts
+2026-09-13T00:00:00.249Z | DEBUG | PAYMENT | 179.92.94.90 | POST | /health | 204 | 744 | req-23588 | - | user session created
+2026-09-13T00:00:00.250Z | INFO | DATABASE | 220.13.32.123 | DELETE | /api/orders/{id} | 204 | 1148 | req-23346 | user-6532 | request completed
+2026-09-13T00:00:00.251Z | WARN | ORDER | 72.70.143.134 | POST | /api/notifications | 200 | 439 | req-56670 | user-6467 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.252Z | DEBUG | USER | 89.195.196.110 | PUT | /logout | 500 | 770 | req-79047 | user-4474 | request completed
+2026-09-13T00:00:00.253Z | INFO | ORDER | 187.184.188.10 | PUT | /api/users | 401 | 86 | req-15111 | user-6516 | notification sent
+2026-09-13T00:00:00.254Z | WARN | DATABASE | 128.44.79.55 | PATCH | /login | 201 | 1350 | req-65527 | user-131 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.255Z | ERROR | INVENTORY | 42.56.215.121 | DELETE | /logout | 204 | 66 | req-34810 | user-7709 | payment service unavailable
+2026-09-13T00:00:00.256Z | DEBUG | PAYMENT | 70.2.177.85 | PATCH | /health | 404 | 776 | req-13986 | - | data validation failed
+2026-09-13T00:00:00.257Z | INFO | USER | 65.229.21.177 | PATCH | /api/inventory | 201 | 566 | req-63348 | user-7500 | order processed successfully
+2026-09-13T00:00:00.258Z | ERROR | ORDER | 128.43.131.140 | PUT | /login | 200 | 780 | req-65210 | user-7639 | resource not found
+2026-09-13T00:00:00.259Z | ERROR | NOTIFICATION | 156.208.80.227 | GET | /api/notifications | 200 | 428 | req-43132 | user-2848 | notification sent
+2026-09-13T00:00:00.260Z | DEBUG | PAYMENT | 96.98.49.217 | POST | /api/orders | 204 | 1285 | req-18867 | user-897 | data validation failed
+2026-09-13T00:00:00.261Z | INFO | API_GATEWAY | 159.75.227.117 | GET | /api/users | 404 | 1160 | req-11817 | user-2267 | resource not found
+2026-09-13T00:00:00.262Z | ERROR | ORDER | 72.144.8.7 | PATCH | /api/users | 200 | 903 | req-45575 | - | database connection failed
+2026-09-13T00:00:00.263Z | INFO | AUTH | 105.117.217.156 | PUT | /api/orders | 401 | 327 | req-87564 | user-8601 | resource not found
+2026-09-13T00:00:00.264Z | ERROR | AUTH | 6.134.188.184 | PUT | /api/inventory | 401 | 1058 | req-89325 | user-5132 | data validation failed
+2026-09-13T00:00:00.265Z | ERROR | USER | 140.88.5.121 | POST | /api/payments | 200 | 325 | req-8700 | user-6639 | data validation failed
+2026-09-13T00:00:00.266Z | INFO | PAYMENT | 205.224.236.9 | DELETE | /api/users | 201 | 178 | req-60724 | - | data validation failed
+2026-09-13T00:00:00.267Z | ERROR | USER | 13.116.201.43 | PUT | /api/orders | 204 | 409 | req-6415 | user-1196 | database connection failed
+2026-09-13T00:00:00.268Z | ERROR | PAYMENT | 87.15.53.33 | DELETE | /login | 204 | 1260 | req-44592 | user-4086 | order processed successfully
+2026-09-13T00:00:00.269Z | WARN | DATABASE | 223.252.7.16 | PUT | /api/orders/{id} | 201 | 956 | req-61294 | user-2136 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.270Z | DEBUG | DATABASE | 87.12.235.54 | GET | /api/inventory | 200 | 469 | req-21811 | - | notification sent
+2026-09-13T00:00:00.271Z | INFO | ORDER | 111.57.27.225 | POST | /api/users | 204 | 687 | req-69216 | user-1546 | data validation failed
+2026-09-13T00:00:00.272Z | ERROR | DATABASE | 63.251.32.186 | DELETE | /api/users | 500 | 1444 | req-12015 | user-1122 | inventory lookup failed
+2026-09-13T00:00:00.273Z | INFO | API_GATEWAY | 34.142.53.243 | PATCH | /logout | 502 | 178 | req-73766 | user-6485 | request completed
+2026-09-13T00:00:00.274Z | DEBUG | INVENTORY | 182.35.5.184 | GET | /login | 401 | 721 | req-13395 | user-8588 | request completed
+2026-09-13T00:00:00.275Z | ERROR | DATABASE | 159.173.97.53 | GET | /login | 200 | 800 | req-88393 | user-5592 | resource not found
+2026-09-13T00:00:00.276Z | ERROR | USER | 2.216.5.210 | PUT | /api/orders | 201 | 188 | req-8852 | user-3120 | data validation failed
+2026-09-13T00:00:00.277Z | DEBUG | INVENTORY | 63.204.56.221 | POST | /api/inventory | 403 | 738 | req-35866 | user-476 | data validation failed
+2026-09-13T00:00:00.278Z | WARN | API_GATEWAY | 121.238.75.74 | PUT | /api/users | 201 | 236 | req-18694 | user-3890 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.279Z | ERROR | NOTIFICATION | 95.27.242.126 | DELETE | /api/inventory | 204 | 1025 | req-61313 | user-7181 | payment service unavailable
+2026-09-13T00:00:00.280Z | INFO | INVENTORY | 123.92.170.205 | PUT | /api/inventory | 200 | 1413 | req-29414 | user-3326 | cache miss
+2026-09-13T00:00:00.281Z | WARN | DATABASE | 118.237.5.159 | DELETE | /api/payments | 200 | 469 | req-31910 | user-6091 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.282Z | ERROR | ORDER | 173.26.158.25 | DELETE | /api/notifications | 204 | 758 | req-68456 | - | inventory lookup failed
+2026-09-13T00:00:00.283Z | WARN | INVENTORY | 96.20.68.74 | DELETE | /health | 502 | 99 | req-71499 | user-3467 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.284Z | ERROR | AUTH | 210.159.65.216 | DELETE | /health | 200 | 1218 | req-3227 | user-6427 | user session created
+2026-09-13T00:00:00.285Z | INFO | API_GATEWAY | 105.155.161.207 | GET | /api/notifications | 404 | 121 | req-75219 | user-7837 | order processed successfully
+2026-09-13T00:00:00.286Z | ERROR | PAYMENT | 116.247.196.190 | PATCH | /api/payments | 200 | 323 | req-34833 | user-204 | data validation failed
+2026-09-13T00:00:00.287Z | ERROR | API_GATEWAY | 102.164.17.203 | PUT | /logout | 204 | 1277 | req-10328 | user-1335 | notification sent
+2026-09-13T00:00:00.288Z | DEBUG | API_GATEWAY | 105.186.82.108 | POST | /login | 204 | 26 | req-46558 | user-345 | data validation failed
+2026-09-13T00:00:00.289Z | DEBUG | USER | 194.254.129.181 | POST | /health | 201 | 1195 | req-76944 | user-2218 | cache miss
+2026-09-13T00:00:00.290Z | INFO | PAYMENT | 173.208.228.130 | DELETE | /api/orders | 400 | 1327 | req-58667 | user-5460 | order processed successfully
+2026-09-13T00:00:00.291Z | ERROR | USER | 199.79.156.241 | DELETE | /api/orders/{id} | 503 | 962 | req-3907 | user-1177 | connection timeout
+2026-09-13T00:00:00.292Z | ERROR | PAYMENT | 194.68.50.101 | PATCH | /api/users | 403 | 182 | req-78657 | user-1541 | cache miss
+2026-09-13T00:00:00.293Z | ERROR | AUTH | 25.142.216.123 | PUT | /api/payments | 204 | 396 | req-19453 | - | resource not found
+2026-09-13T00:00:00.294Z | INFO | ORDER | 101.29.15.81 | PUT | /api/payments | 500 | 216 | req-24231 | - | notification sent
+2026-09-13T00:00:00.295Z | INFO | AUTH | 168.45.35.7 | POST | /api/notifications | 401 | 192 | req-16616 | - | request completed
+2026-09-13T00:00:00.296Z | INFO | AUTH | 201.114.181.192 | DELETE | /health | 401 | 299 | req-71364 | user-6920 | order processed successfully
+2026-09-13T00:00:00.297Z | INFO | DATABASE | 69.15.179.166 | PUT | /health | 201 | 1456 | req-12447 | user-1348 | notification sent
+2026-09-13T00:00:00.298Z | INFO | API_GATEWAY | 112.193.186.139 | DELETE | /logout | 201 | 1148 | req-49706 | user-338 | resource not found
+2026-09-13T00:00:00.299Z | ERROR | INVENTORY | 64.207.251.214 | POST | /api/orders/{id} | 204 | 835 | req-9986 | - | cache miss
+2026-09-13T00:00:00.300Z | INFO | PAYMENT | 192.35.221.29 | POST | /health | 404 | 1446 | req-48237 | user-4395 | cache miss
+2026-09-13T00:00:00.301Z | ERROR | ORDER | 119.181.222.146 | GET | /logout | 200 | 166 | req-25616 | user-1419 | resource not found
+2026-09-13T00:00:00.302Z | INFO | PAYMENT | 187.79.246.62 | PATCH | /login | 201 | 559 | req-50835 | user-8536 | data validation failed
+2026-09-13T00:00:00.303Z | INFO | PAYMENT | 175.43.21.156 | DELETE | /api/payments | 503 | 1481 | req-1093 | user-6342 | request completed
+2026-09-13T00:00:00.304Z | INFO | ORDER | 163.118.224.167 | PUT | /api/inventory | 502 | 580 | req-3325 | user-6311 | order processed successfully
+2026-09-13T00:00:00.305Z | ERROR | USER | 197.224.174.203 | GET | /login | 401 | 91 | req-36619 | user-1397 | user session created
+2026-09-13T00:00:00.306Z | ERROR | USER | 67.67.121.173 | POST | /logout | 200 | 1235 | req-53947 | user-159 | user session created
+2026-09-13T00:00:00.307Z | DEBUG | NOTIFICATION | 196.196.233.207 | PUT | /logout | 201 | 878 | req-89085 | user-1390 | data validation failed
+2026-09-13T00:00:00.308Z | DEBUG | NOTIFICATION | 70.32.125.208 | PUT | /api/users | 204 | 1378 | req-49648 | - | user session created
+2026-09-13T00:00:00.309Z | INFO | PAYMENT | 155.248.69.4 | PUT | /api/users | 204 | 1409 | req-19920 | user-4791 | request completed
+2026-09-13T00:00:00.310Z | ERROR | DATABASE | 132.106.66.63 | PATCH | /api/users | 201 | 1273 | req-54069 | user-6150 | user session created
+2026-09-13T00:00:00.311Z | ERROR | USER | 101.55.148.101 | GET | /api/payments | 502 | 1374 | req-25534 | user-6908 | data validation failed
+2026-09-13T00:00:00.312Z | DEBUG | NOTIFICATION | 152.252.169.56 | DELETE | /api/users | 200 | 1289 | req-84715 | - | cache miss
+2026-09-13T00:00:00.313Z | ERROR | AUTH | 55.104.41.134 | PUT | /logout | 401 | 953 | req-8285 | user-4540 | user session created
+2026-09-13T00:00:00.314Z | DEBUG | PAYMENT | 104.226.140.23 | PUT | /api/inventory | 204 | 453 | req-44204 | user-4845 | order processed successfully
+2026-09-13T00:00:00.315Z | WARN | AUTH | 81.46.190.133 | DELETE | /api/inventory | 401 | 1186 | req-47569 | user-6237 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.316Z | DEBUG | API_GATEWAY | 58.49.21.217 | PUT | /health | 204 | 880 | req-33266 | user-7027 | order processed successfully
+2026-09-13T00:00:00.317Z | DEBUG | AUTH | 7.92.205.30 | POST | /api/orders | 201 | 590 | req-75721 | user-145 | resource not found
+2026-09-13T00:00:00.318Z | ERROR | INVENTORY | 215.219.92.93 | PUT | /api/notifications | 401 | 1466 | req-55449 | user-3679 | database connection failed
+2026-09-13T00:00:00.319Z | INFO | PAYMENT | 41.185.213.212 | DELETE | /logout | 200 | 565 | req-29731 | - | cache miss
+2026-09-13T00:00:00.320Z | DEBUG | API_GATEWAY | 191.116.238.104 | DELETE | /api/users | 204 | 117 | req-83641 | user-8825 | user session created
+2026-09-13T00:00:00.321Z | DEBUG | USER | 109.107.196.129 | GET | /login | 200 | 1158 | req-48907 | user-7946 | resource not found
+2026-09-13T00:00:00.322Z | WARN | PAYMENT | 14.171.195.4 | PUT | /api/users | 204 | 1470 | req-10494 | user-3552 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.323Z | DEBUG | PAYMENT | 46.237.187.195 | PATCH | /health | 201 | 291 | req-83067 | user-5799 | user session created
+2026-09-13T00:00:00.324Z | INFO | ORDER | 10.68.139.174 | PATCH | /health | 204 | 268 | req-64456 | user-1665 | resource not found
+2026-09-13T00:00:00.325Z | DEBUG | USER | 142.10.62.240 | DELETE | /health | 403 | 689 | req-85522 | user-1293 | notification sent
+2026-09-13T00:00:00.326Z | ERROR | INVENTORY | 59.174.193.250 | PUT | /api/payments | 400 | 759 | req-88706 | user-8559 | notification sent
+2026-09-13T00:00:00.327Z | DEBUG | API_GATEWAY | 80.200.70.160 | GET | /api/inventory | 204 | 964 | req-75692 | user-2754 | cache miss
+2026-09-13T00:00:00.328Z | ERROR | AUTH | 4.229.222.194 | PUT | /api/users | 204 | 328 | req-14596 | user-4352 | cache miss
+2026-09-13T00:00:00.329Z | ERROR | USER | 33.76.188.225 | PUT | /health | 200 | 348 | req-67692 | user-7039 | resource not found
+2026-09-13T00:00:00.330Z | DEBUG | AUTH | 12.154.152.53 | DELETE | /logout | 401 | 345 | req-22995 | user-3613 | resource not found
+2026-09-13T00:00:00.331Z | ERROR | INVENTORY | 170.109.239.101 | POST | /api/notifications | 200 | 1247 | req-87578 | user-1065 | notification sent
+2026-09-13T00:00:00.332Z | DEBUG | ORDER | 19.81.33.108 | PATCH | /api/notifications | 201 | 1179 | req-48292 | user-8530 | resource not found
+2026-09-13T00:00:00.333Z | ERROR | DATABASE | 72.129.102.222 | POST | /login | 204 | 1367 | req-40912 | user-1308 | cache miss
+2026-09-13T00:00:00.334Z | WARN | USER | 163.211.54.150 | GET | /login | 204 | 1374 | req-23084 | user-7086 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.335Z | ERROR | USER | 121.28.14.127 | GET | /api/inventory | 401 | 1178 | req-33455 | user-4051 | inventory lookup failed
+2026-09-13T00:00:00.336Z | ERROR | AUTH | 95.126.89.73 | GET | /api/orders | 502 | 748 | req-32750 | - | data validation failed
+2026-09-13T00:00:00.337Z | INFO | USER | 30.239.249.16 | PUT | /api/notifications | 200 | 1295 | req-1280 | user-284 | cache miss
+2026-09-13T00:00:00.338Z | INFO | ORDER | 117.194.240.21 | GET | /api/notifications | 204 | 800 | req-2817 | user-5172 | data validation failed
+2026-09-13T00:00:00.339Z | ERROR | API_GATEWAY | 218.124.60.141 | POST | /logout | 201 | 576 | req-86924 | user-8260 | payment service unavailable
+2026-09-13T00:00:00.340Z | ERROR | INVENTORY | 180.236.164.102 | PUT | /api/users | 204 | 990 | req-75529 | user-639 | inventory lookup failed
+2026-09-13T00:00:00.341Z | ERROR | NOTIFICATION | 66.221.228.33 | PUT | /login | 400 | 1172 | req-79406 | - | notification sent
+2026-09-13T00:00:00.342Z | INFO | NOTIFICATION | 88.218.164.235 | PATCH | /api/inventory | 201 | 796 | req-29387 | user-8478 | user session created
+2026-09-13T00:00:00.343Z | WARN | DATABASE | 38.177.94.111 | PUT | /logout | 201 | 13 | req-8935 | - | retry scheduled after 2 attempts
+2026-09-13T00:00:00.344Z | INFO | USER | 194.82.119.100 | PATCH | /api/inventory | 204 | 808 | req-45439 | user-6105 | request completed
+2026-09-13T00:00:00.345Z | ERROR | USER | 84.115.226.19 | DELETE | /api/orders | 200 | 862 | req-15871 | user-5306 | user session created
+2026-09-13T00:00:00.346Z | INFO | INVENTORY | 11.8.227.90 | GET | /api/orders/{id} | 200 | 1225 | req-45653 | user-6147 | resource not found
+2026-09-13T00:00:00.347Z | DEBUG | NOTIFICATION | 208.151.174.63 | GET | /health | 204 | 787 | req-58153 | user-8804 | cache miss
+2026-09-13T00:00:00.348Z | WARN | NOTIFICATION | 208.72.202.100 | GET | /health | 201 | 1150 | req-84069 | user-2688 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.349Z | DEBUG | PAYMENT | 62.84.246.57 | PUT | /login | 502 | 436 | req-53982 | - | user session created
+2026-09-13T00:00:00.350Z | DEBUG | PAYMENT | 44.77.21.118 | GET | /api/orders/{id} | 200 | 1191 | req-14432 | user-5893 | user session created
+2026-09-13T00:00:00.351Z | ERROR | AUTH | 33.29.196.254 | GET | /api/orders | 201 | 795 | req-36013 | user-2394 | order processed successfully
+2026-09-13T00:00:00.352Z | ERROR | PAYMENT | 80.23.208.63 | POST | /api/notifications | 201 | 1186 | req-14506 | user-6104 | connection timeout
+2026-09-13T00:00:00.353Z | DEBUG | INVENTORY | 46.19.18.239 | POST | /api/users | 200 | 1050 | req-70332 | user-2375 | user session created
+2026-09-13T00:00:00.354Z | ERROR | AUTH | 172.155.194.53 | GET | /api/inventory | 204 | 246 | req-40843 | user-6189 | order processed successfully
+2026-09-13T00:00:00.355Z | ERROR | AUTH | 82.57.113.144 | PUT | /logout | 204 | 1278 | req-39980 | - | order processed successfully
+2026-09-13T00:00:00.356Z | ERROR | ORDER | 55.116.102.189 | POST | /api/users | 200 | 448 | req-52457 | - | user session created
+2026-09-13T00:00:00.357Z | WARN | API_GATEWAY | 196.143.56.239 | PATCH | /api/orders | 200 | 773 | req-55142 | user-8075 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.358Z | ERROR | INVENTORY | 150.179.124.244 | GET | /api/users | 200 | 1253 | req-80225 | - | order processed successfully
+2026-09-13T00:00:00.359Z | WARN | AUTH | 40.165.172.44 | PUT | /health | 204 | 1114 | req-3616 | - | retry scheduled after 4 attempts
+2026-09-13T00:00:00.360Z | DEBUG | USER | 181.148.47.126 | PATCH | /health | 204 | 167 | req-37014 | - | cache miss
+2026-09-13T00:00:00.361Z | INFO | PAYMENT | 45.117.194.224 | DELETE | /api/orders/{id} | 201 | 53 | req-19829 | - | user session created
+2026-09-13T00:00:00.362Z | INFO | API_GATEWAY | 213.40.19.198 | PUT | /api/inventory | 500 | 416 | req-4768 | user-1882 | request completed
+2026-09-13T00:00:00.363Z | INFO | DATABASE | 76.101.16.221 | POST | /api/users | 204 | 1026 | req-70849 | user-115 | notification sent
+2026-09-13T00:00:00.364Z | ERROR | API_GATEWAY | 123.37.99.108 | POST | /logout | 200 | 377 | req-45365 | user-6652 | connection timeout
+2026-09-13T00:00:00.365Z | ERROR | AUTH | 25.207.15.24 | GET | /api/payments | 204 | 564 | req-60220 | user-5919 | request completed
+2026-09-13T00:00:00.366Z | DEBUG | DATABASE | 124.234.135.142 | GET | /api/notifications | 204 | 981 | req-49523 | user-4885 | order processed successfully
+2026-09-13T00:00:00.367Z | INFO | USER | 143.234.24.151 | POST | /api/payments | 200 | 1477 | req-33876 | user-5675 | resource not found
+2026-09-13T00:00:00.368Z | INFO | AUTH | 17.235.33.158 | PUT | /api/orders | 401 | 1477 | req-21884 | - | order processed successfully
+2026-09-13T00:00:00.369Z | ERROR | DATABASE | 35.214.253.199 | DELETE | /api/notifications | 201 | 276 | req-38080 | user-7214 | payment service unavailable
+2026-09-13T00:00:00.370Z | INFO | DATABASE | 185.62.107.228 | PUT | /logout | 201 | 1414 | req-53624 | user-8273 | resource not found
+2026-09-13T00:00:00.371Z | DEBUG | NOTIFICATION | 24.159.222.24 | PATCH | /api/users | 204 | 159 | req-57559 | user-1436 | cache miss
+2026-09-13T00:00:00.372Z | INFO | USER | 31.187.178.56 | PUT | /api/orders | 400 | 1082 | req-86472 | user-4793 | user session created
+2026-09-13T00:00:00.373Z | ERROR | DATABASE | 72.124.123.92 | DELETE | /api/orders | 201 | 987 | req-54051 | user-3258 | connection timeout
+2026-09-13T00:00:00.374Z | INFO | NOTIFICATION | 168.119.156.99 | POST | /api/payments | 201 | 1154 | req-3819 | user-542 | order processed successfully
+2026-09-13T00:00:00.375Z | ERROR | INVENTORY | 176.101.98.248 | GET | /api/users | 204 | 694 | req-40691 | - | resource not found
+2026-09-13T00:00:00.376Z | INFO | DATABASE | 41.159.138.165 | DELETE | /api/inventory | 204 | 1367 | req-52946 | user-4727 | request completed
+2026-09-13T00:00:00.377Z | DEBUG | DATABASE | 148.134.217.158 | PUT | /health | 201 | 892 | req-89152 | - | request completed
+2026-09-13T00:00:00.378Z | INFO | ORDER | 221.125.55.125 | PUT | /health | 201 | 238 | req-32778 | user-8831 | order processed successfully
+2026-09-13T00:00:00.379Z | ERROR | AUTH | 187.52.205.124 | GET | /health | 201 | 534 | req-31473 | user-4832 | data validation failed
+2026-09-13T00:00:00.380Z | ERROR | NOTIFICATION | 24.234.32.97 | PUT | /api/orders | 204 | 1122 | req-36159 | user-4775 | database connection failed
+2026-09-13T00:00:00.381Z | ERROR | NOTIFICATION | 194.234.69.218 | GET | /api/notifications | 200 | 663 | req-70961 | user-6103 | user session created
+2026-09-13T00:00:00.382Z | ERROR | PAYMENT | 124.33.71.202 | PATCH | /api/inventory | 200 | 1330 | req-65894 | user-6857 | database connection failed
+2026-09-13T00:00:00.383Z | INFO | ORDER | 47.8.179.145 | POST | /login | 204 | 127 | req-52637 | user-4465 | request completed
+2026-09-13T00:00:00.384Z | INFO | AUTH | 28.19.62.70 | DELETE | /api/orders/{id} | 401 | 822 | req-34708 | user-4793 | cache miss
+2026-09-13T00:00:00.385Z | ERROR | INVENTORY | 158.35.207.16 | GET | /api/orders/{id} | 201 | 538 | req-60632 | user-1157 | request completed
+2026-09-13T00:00:00.386Z | WARN | ORDER | 162.236.212.145 | DELETE | /login | 403 | 234 | req-71422 | user-391 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.387Z | ERROR | ORDER | 123.136.49.168 | POST | /login | 201 | 760 | req-34393 | user-2056 | payment service unavailable
+2026-09-13T00:00:00.388Z | DEBUG | INVENTORY | 2.113.8.206 | POST | /api/users | 201 | 493 | req-38321 | user-6338 | resource not found
+2026-09-13T00:00:00.389Z | INFO | INVENTORY | 206.188.87.187 | GET | /logout | 500 | 491 | req-61892 | - | cache miss
+2026-09-13T00:00:00.390Z | ERROR | AUTH | 111.255.0.229 | PATCH | /api/inventory | 502 | 993 | req-46848 | - | data validation failed
+2026-09-13T00:00:00.391Z | DEBUG | NOTIFICATION | 195.98.159.160 | PUT | /api/users | 400 | 739 | req-40084 | user-4300 | user session created
+2026-09-13T00:00:00.392Z | INFO | API_GATEWAY | 143.19.250.229 | POST | /api/notifications | 200 | 896 | req-70391 | user-6217 | data validation failed
+2026-09-13T00:00:00.393Z | ERROR | PAYMENT | 182.91.180.137 | GET | /health | 204 | 532 | req-15274 | - | order processed successfully
+2026-09-13T00:00:00.394Z | WARN | USER | 202.72.44.104 | GET | /api/notifications | 201 | 1192 | req-37559 | - | retry scheduled after 3 attempts
+2026-09-13T00:00:00.395Z | ERROR | INVENTORY | 162.57.184.181 | DELETE | /api/users | 204 | 47 | req-20953 | user-1605 | resource not found
+2026-09-13T00:00:00.396Z | INFO | USER | 210.191.56.140 | GET | /api/orders | 201 | 1372 | req-78898 | - | order processed successfully
+2026-09-13T00:00:00.397Z | INFO | API_GATEWAY | 71.84.154.171 | DELETE | /api/payments | 200 | 1346 | req-31250 | user-3986 | data validation failed
+2026-09-13T00:00:00.398Z | INFO | PAYMENT | 219.22.51.12 | PUT | /api/orders/{id} | 200 | 1237 | req-34274 | - | cache miss
+2026-09-13T00:00:00.399Z | WARN | INVENTORY | 60.200.223.173 | DELETE | /api/orders | 204 | 1472 | req-61193 | user-1748 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.400Z | ERROR | USER | 100.243.192.218 | PATCH | /api/notifications | 500 | 1451 | req-12452 | user-2881 | data validation failed
+2026-09-13T00:00:00.401Z | ERROR | USER | 70.232.139.162 | DELETE | /api/orders/{id} | 204 | 1356 | req-55535 | - | resource not found
+2026-09-13T00:00:00.402Z | INFO | AUTH | 171.157.17.142 | PATCH | /api/users | 401 | 1131 | req-1830 | user-6586 | user session created
+2026-09-13T00:00:00.403Z | ERROR | AUTH | 215.139.87.27 | POST | /api/payments | 401 | 827 | req-51824 | user-8621 | database connection failed
+2026-09-13T00:00:00.404Z | ERROR | INVENTORY | 157.227.255.221 | PUT | /api/inventory | 204 | 1334 | req-51517 | user-8296 | resource not found
+2026-09-13T00:00:00.405Z | ERROR | INVENTORY | 59.55.188.3 | PATCH | /api/inventory | 200 | 650 | req-89548 | user-6836 | inventory lookup failed
+2026-09-13T00:00:00.406Z | DEBUG | DATABASE | 140.19.236.198 | GET | /api/payments | 201 | 747 | req-37868 | user-2445 | user session created
+2026-09-13T00:00:00.407Z | DEBUG | AUTH | 69.107.163.216 | POST | /logout | 201 | 1313 | req-20523 | user-4101 | notification sent
+2026-09-13T00:00:00.408Z | ERROR | NOTIFICATION | 20.197.113.211 | PUT | /api/payments | 401 | 1214 | req-41721 | - | data validation failed
+2026-09-13T00:00:00.409Z | ERROR | AUTH | 57.44.82.197 | POST | /api/payments | 204 | 867 | req-2684 | user-8565 | data validation failed
+2026-09-13T00:00:00.410Z | DEBUG | AUTH | 179.20.189.54 | POST | /api/payments | 401 | 1131 | req-43461 | user-1423 | request completed
+2026-09-13T00:00:00.411Z | INFO | API_GATEWAY | 120.118.208.13 | DELETE | /health | 400 | 728 | req-53556 | user-548 | user session created
+2026-09-13T00:00:00.412Z | ERROR | AUTH | 37.177.246.111 | PATCH | /api/users | 400 | 728 | req-80602 | user-8161 | inventory lookup failed
+2026-09-13T00:00:00.413Z | INFO | PAYMENT | 166.113.18.25 | PUT | /api/payments | 201 | 1049 | req-48476 | user-9063 | request completed
+2026-09-13T00:00:00.414Z | ERROR | NOTIFICATION | 205.80.32.89 | PATCH | /api/notifications | 204 | 625 | req-30527 | - | data validation failed
+2026-09-13T00:00:00.415Z | DEBUG | INVENTORY | 76.234.85.104 | PUT | /api/notifications | 201 | 441 | req-10634 | user-219 | request completed
+2026-09-13T00:00:00.416Z | INFO | INVENTORY | 21.197.44.226 | GET | /api/orders/{id} | 500 | 611 | req-79221 | - | resource not found
+2026-09-13T00:00:00.417Z | INFO | AUTH | 193.34.44.90 | PUT | /api/payments | 401 | 1150 | req-76527 | user-4119 | data validation failed
+2026-09-13T00:00:00.418Z | ERROR | DATABASE | 174.39.220.243 | PATCH | /api/orders/{id} | 204 | 890 | req-45671 | user-8358 | connection timeout
+2026-09-13T00:00:00.419Z | INFO | NOTIFICATION | 97.212.9.60 | DELETE | /api/users | 200 | 1289 | req-1766 | user-6949 | request completed
+2026-09-13T00:00:00.420Z | WARN | ORDER | 173.169.39.220 | POST | /health | 201 | 719 | req-64704 | user-1638 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.421Z | ERROR | DATABASE | 109.224.128.248 | PATCH | /logout | 204 | 1330 | req-20134 | - | notification sent
+2026-09-13T00:00:00.422Z | INFO | PAYMENT | 91.56.230.64 | POST | /health | 502 | 969 | req-30425 | user-6748 | request completed
+2026-09-13T00:00:00.423Z | INFO | PAYMENT | 132.88.46.189 | PATCH | /api/orders | 503 | 855 | req-47562 | user-2210 | order processed successfully
+2026-09-13T00:00:00.424Z | INFO | PAYMENT | 179.156.163.43 | PATCH | /api/payments | 403 | 1438 | req-75281 | user-5226 | cache miss
+2026-09-13T00:00:00.425Z | INFO | PAYMENT | 218.230.43.98 | DELETE | /api/orders | 204 | 795 | req-21744 | user-1448 | cache miss
+2026-09-13T00:00:00.426Z | INFO | DATABASE | 168.133.19.249 | GET | /logout | 204 | 1285 | req-4717 | - | user session created
+2026-09-13T00:00:00.427Z | ERROR | AUTH | 40.252.135.167 | PATCH | /logout | 401 | 1115 | req-2661 | user-7627 | inventory lookup failed
+2026-09-13T00:00:00.428Z | ERROR | PAYMENT | 57.155.190.114 | POST | /api/users | 502 | 1389 | req-2099 | - | authentication failed
+2026-09-13T00:00:00.429Z | ERROR | ORDER | 163.82.132.151 | PATCH | /api/orders | 201 | 592 | req-80699 | user-1722 | notification sent
+2026-09-13T00:00:00.430Z | ERROR | DATABASE | 107.221.195.2 | POST | /api/notifications | 503 | 1177 | req-67959 | user-3676 | request completed
+2026-09-13T00:00:00.431Z | DEBUG | INVENTORY | 34.158.130.193 | DELETE | /api/orders/{id} | 204 | 1319 | req-35844 | user-1582 | user session created
+2026-09-13T00:00:00.432Z | WARN | NOTIFICATION | 92.194.177.79 | PUT | /api/users | 201 | 1037 | req-89007 | user-6507 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.433Z | INFO | PAYMENT | 167.196.249.213 | GET | /api/payments | 204 | 276 | req-77664 | - | cache miss
+2026-09-13T00:00:00.434Z | ERROR | ORDER | 125.60.223.155 | DELETE | /api/orders | 401 | 964 | req-74593 | user-4805 | notification sent
+2026-09-13T00:00:00.435Z | INFO | PAYMENT | 10.111.240.9 | GET | /api/inventory | 401 | 781 | req-71103 | user-657 | request completed
+2026-09-13T00:00:00.436Z | ERROR | API_GATEWAY | 34.108.156.143 | DELETE | /api/users | 500 | 1101 | req-48844 | user-6093 | cache miss
+2026-09-13T00:00:00.437Z | ERROR | DATABASE | 19.229.83.209 | POST | /api/notifications | 204 | 945 | req-83577 | user-5146 | authentication failed
+2026-09-13T00:00:00.438Z | ERROR | USER | 84.133.123.10 | DELETE | /login | 204 | 596 | req-65433 | user-7078 | authentication failed
+2026-09-13T00:00:00.439Z | ERROR | PAYMENT | 212.11.179.59 | GET | /login | 200 | 1382 | req-28530 | - | notification sent
+2026-09-13T00:00:00.440Z | ERROR | API_GATEWAY | 175.209.163.14 | GET | /api/inventory | 201 | 966 | req-79674 | user-8801 | notification sent
+2026-09-13T00:00:00.441Z | INFO | AUTH | 128.9.153.82 | PATCH | /api/users | 401 | 332 | req-20753 | user-1912 | order processed successfully
+2026-09-13T00:00:00.442Z | DEBUG | AUTH | 154.167.162.71 | PATCH | /logout | 200 | 262 | req-29472 | user-3966 | cache miss
+2026-09-13T00:00:00.443Z | ERROR | INVENTORY | 204.78.145.143 | PUT | /api/inventory | 201 | 648 | req-84553 | - | notification sent
+2026-09-13T00:00:00.444Z | ERROR | ORDER | 62.129.54.187 | PATCH | /health | 403 | 159 | req-30333 | user-462 | database connection failed
+2026-09-13T00:00:00.445Z | ERROR | DATABASE | 36.73.51.61 | DELETE | /api/notifications | 404 | 856 | req-86852 | user-9060 | order processed successfully
+2026-09-13T00:00:00.446Z | WARN | ORDER | 132.143.102.212 | PUT | /logout | 204 | 1375 | req-62242 | user-5450 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.447Z | ERROR | NOTIFICATION | 158.178.246.185 | PATCH | /api/orders/{id} | 201 | 1156 | req-81695 | user-1645 | cache miss
+2026-09-13T00:00:00.448Z | ERROR | NOTIFICATION | 58.36.135.243 | PUT | /api/users | 403 | 1101 | req-49954 | user-7544 | database connection failed
+2026-09-13T00:00:00.449Z | INFO | INVENTORY | 103.242.84.160 | GET | /health | 400 | 911 | req-84645 | user-6568 | request completed
+2026-09-13T00:00:00.450Z | ERROR | AUTH | 69.39.161.100 | GET | /api/users | 401 | 535 | req-11571 | user-6365 | resource not found
+2026-09-13T00:00:00.451Z | ERROR | INVENTORY | 100.63.13.198 | POST | /logout | 200 | 866 | req-11661 | - | data validation failed
+2026-09-13T00:00:00.452Z | ERROR | INVENTORY | 42.240.112.141 | POST | /login | 503 | 290 | req-19986 | user-5529 | authentication failed
+2026-09-13T00:00:00.453Z | WARN | AUTH | 213.137.238.126 | PATCH | /health | 401 | 168 | req-44304 | user-872 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.454Z | ERROR | DATABASE | 44.29.187.34 | DELETE | /api/users | 503 | 226 | req-66179 | user-1577 | user session created
+2026-09-13T00:00:00.455Z | ERROR | PAYMENT | 169.237.134.212 | PUT | /api/inventory | 500 | 54 | req-53389 | user-1206 | inventory lookup failed
+2026-09-13T00:00:00.456Z | ERROR | AUTH | 206.101.42.126 | PUT | /health | 201 | 408 | req-51304 | user-1812 | cache miss
+2026-09-13T00:00:00.457Z | WARN | ORDER | 27.201.114.29 | DELETE | /api/inventory | 200 | 660 | req-23835 | - | retry scheduled after 4 attempts
+2026-09-13T00:00:00.458Z | DEBUG | AUTH | 192.82.3.1 | DELETE | /login | 204 | 1063 | req-51324 | user-1434 | data validation failed
+2026-09-13T00:00:00.459Z | ERROR | NOTIFICATION | 172.26.60.126 | DELETE | /api/users | 201 | 664 | req-79982 | - | data validation failed
+2026-09-13T00:00:00.460Z | ERROR | ORDER | 124.97.150.115 | POST | /health | 200 | 598 | req-43574 | user-3202 | user session created
+2026-09-13T00:00:00.461Z | INFO | API_GATEWAY | 143.252.200.213 | GET | /api/orders/{id} | 200 | 847 | req-75958 | user-7291 | order processed successfully
+2026-09-13T00:00:00.462Z | ERROR | DATABASE | 90.36.80.61 | PUT | /api/inventory | 204 | 52 | req-70111 | user-7371 | data validation failed
+2026-09-13T00:00:00.463Z | INFO | INVENTORY | 13.128.107.201 | PATCH | /api/orders | 401 | 1261 | req-49303 | user-8837 | data validation failed
+2026-09-13T00:00:00.464Z | INFO | NOTIFICATION | 174.227.217.40 | GET | /api/orders/{id} | 500 | 996 | req-52552 | - | resource not found
+2026-09-13T00:00:00.465Z | ERROR | ORDER | 11.85.187.47 | PUT | /api/inventory | 401 | 24 | req-8616 | - | cache miss
+2026-09-13T00:00:00.466Z | DEBUG | ORDER | 184.33.3.114 | PUT | /api/orders/{id} | 200 | 884 | req-11807 | user-3141 | user session created
+2026-09-13T00:00:00.467Z | INFO | USER | 57.70.107.151 | POST | /api/users | 401 | 1217 | req-40079 | user-4581 | user session created
+2026-09-13T00:00:00.468Z | DEBUG | USER | 123.13.12.158 | POST | /api/orders | 201 | 1206 | req-25800 | user-388 | request completed
+2026-09-13T00:00:00.469Z | DEBUG | PAYMENT | 50.57.237.66 | PUT | /login | 200 | 719 | req-17303 | - | request completed
+2026-09-13T00:00:00.470Z | WARN | ORDER | 212.212.146.91 | DELETE | /login | 502 | 725 | req-14131 | - | retry scheduled after 3 attempts
+2026-09-13T00:00:00.471Z | ERROR | DATABASE | 21.200.225.135 | GET | /api/payments | 200 | 1445 | req-47403 | user-6383 | request completed
+2026-09-13T00:00:00.472Z | INFO | PAYMENT | 74.195.11.103 | POST | /api/users | 401 | 146 | req-66682 | user-2581 | request completed
+2026-09-13T00:00:00.473Z | DEBUG | ORDER | 180.37.248.181 | POST | /api/inventory | 201 | 137 | req-62638 | user-6809 | order processed successfully
+2026-09-13T00:00:00.474Z | INFO | DATABASE | 167.228.66.123 | DELETE | /login | 201 | 770 | req-80027 | user-4322 | order processed successfully
+2026-09-13T00:00:00.475Z | ERROR | NOTIFICATION | 97.233.116.104 | GET | /login | 403 | 856 | req-29144 | user-1937 | notification sent
+2026-09-13T00:00:00.476Z | ERROR | NOTIFICATION | 92.60.38.210 | GET | /api/orders | 400 | 1400 | req-83478 | user-7814 | database connection failed
+2026-09-13T00:00:00.477Z | DEBUG | DATABASE | 188.33.201.110 | GET | /api/orders | 201 | 1346 | req-4680 | user-8411 | order processed successfully
+2026-09-13T00:00:00.478Z | WARN | USER | 33.249.81.161 | POST | /api/users | 404 | 887 | req-40470 | user-939 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.479Z | WARN | DATABASE | 54.40.223.213 | PATCH | /api/orders/{id} | 204 | 1159 | req-8107 | user-5977 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.480Z | WARN | DATABASE | 203.66.153.204 | GET | /login | 200 | 1323 | req-27880 | user-8771 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.481Z | INFO | PAYMENT | 52.126.56.32 | PUT | /api/orders | 200 | 62 | req-78250 | - | user session created
+2026-09-13T00:00:00.482Z | WARN | PAYMENT | 176.180.230.96 | DELETE | /api/users | 500 | 583 | req-66929 | user-2281 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.483Z | ERROR | USER | 151.66.23.57 | GET | /health | 502 | 766 | req-33473 | user-3676 | request completed
+2026-09-13T00:00:00.484Z | INFO | ORDER | 91.248.254.223 | POST | /api/notifications | 200 | 1356 | req-3023 | user-8714 | resource not found
+2026-09-13T00:00:00.485Z | INFO | INVENTORY | 16.80.95.238 | GET | /health | 200 | 1431 | req-12083 | - | user session created
+2026-09-13T00:00:00.486Z | WARN | AUTH | 180.60.246.127 | PATCH | /logout | 200 | 226 | req-10344 | user-2310 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.487Z | INFO | AUTH | 56.27.229.8 | GET | /health | 401 | 1451 | req-78562 | user-8305 | data validation failed
+2026-09-13T00:00:00.488Z | INFO | API_GATEWAY | 21.196.96.217 | GET | /api/users | 204 | 1066 | req-44116 | user-6463 | notification sent
+2026-09-13T00:00:00.489Z | ERROR | NOTIFICATION | 79.252.55.144 | GET | /api/payments | 201 | 1406 | req-13005 | - | request completed
+2026-09-13T00:00:00.490Z | INFO | ORDER | 202.86.98.169 | PUT | /api/orders/{id} | 404 | 904 | req-50518 | user-6851 | resource not found
+2026-09-13T00:00:00.491Z | INFO | USER | 52.181.173.62 | PUT | /api/payments | 404 | 117 | req-65663 | user-2341 | request completed
+2026-09-13T00:00:00.492Z | ERROR | ORDER | 142.235.167.80 | POST | /api/inventory | 204 | 33 | req-56713 | user-2917 | user session created
+2026-09-13T00:00:00.493Z | ERROR | PAYMENT | 199.117.107.161 | POST | /api/payments | 200 | 86 | req-4527 | user-7646 | data validation failed
+2026-09-13T00:00:00.494Z | INFO | PAYMENT | 188.155.94.254 | GET | /health | 403 | 1300 | req-46645 | - | resource not found
+2026-09-13T00:00:00.495Z | DEBUG | PAYMENT | 20.102.193.44 | GET | /login | 204 | 1465 | req-23920 | - | user session created
+2026-09-13T00:00:00.496Z | DEBUG | API_GATEWAY | 56.71.18.76 | DELETE | /api/notifications | 400 | 916 | req-28089 | user-7072 | request completed
+2026-09-13T00:00:00.497Z | ERROR | ORDER | 23.102.116.76 | GET | /api/payments | 204 | 1256 | req-45470 | user-3626 | notification sent
+2026-09-13T00:00:00.498Z | WARN | NOTIFICATION | 40.232.154.145 | DELETE | /health | 200 | 1172 | req-68695 | - | retry scheduled after 1 attempts
+2026-09-13T00:00:00.499Z | ERROR | NOTIFICATION | 30.153.126.6 | PATCH | /api/notifications | 401 | 673 | req-25657 | user-1800 | database connection failed
+2026-09-13T00:00:00.500Z | INFO | AUTH | 63.181.241.105 | GET | /api/orders/{id} | 401 | 176 | req-4314 | - | data validation failed
+2026-09-13T00:00:00.501Z | ERROR | PAYMENT | 146.3.171.99 | GET | /api/inventory | 201 | 1099 | req-71864 | user-3073 | connection timeout
+2026-09-13T00:00:00.502Z | ERROR | INVENTORY | 215.118.233.131 | POST | /health | 204 | 336 | req-34326 | - | request completed
+2026-09-13T00:00:00.503Z | DEBUG | API_GATEWAY | 203.218.84.192 | DELETE | /logout | 403 | 330 | req-49237 | - | data validation failed
+2026-09-13T00:00:00.504Z | WARN | AUTH | 47.225.97.47 | PUT | /api/inventory | 204 | 142 | req-44663 | user-1404 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.505Z | ERROR | USER | 218.16.233.21 | PUT | /api/orders | 204 | 24 | req-3004 | - | order processed successfully
+2026-09-13T00:00:00.506Z | INFO | DATABASE | 41.39.214.51 | PATCH | /login | 403 | 177 | req-59801 | user-1502 | user session created
+2026-09-13T00:00:00.507Z | INFO | PAYMENT | 25.52.45.87 | PATCH | /api/orders | 200 | 175 | req-14845 | user-7879 | notification sent
+2026-09-13T00:00:00.508Z | DEBUG | NOTIFICATION | 202.42.145.176 | PATCH | /health | 201 | 1484 | req-64648 | user-8003 | notification sent
+2026-09-13T00:00:00.509Z | INFO | DATABASE | 34.150.188.40 | DELETE | /api/payments | 200 | 808 | req-67978 | user-8527 | resource not found
+2026-09-13T00:00:00.510Z | DEBUG | API_GATEWAY | 140.71.184.119 | PUT | /logout | 200 | 1500 | req-80435 | user-3749 | notification sent
+2026-09-13T00:00:00.511Z | WARN | ORDER | 25.57.191.211 | PATCH | /api/orders | 400 | 213 | req-57033 | user-9051 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.512Z | WARN | NOTIFICATION | 97.113.37.217 | DELETE | /api/orders/{id} | 200 | 614 | req-4927 | user-7536 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.513Z | ERROR | DATABASE | 12.91.251.225 | GET | /login | 200 | 1294 | req-87700 | user-1487 | connection timeout
+2026-09-13T00:00:00.514Z | DEBUG | NOTIFICATION | 191.54.196.194 | PATCH | /api/inventory | 503 | 1099 | req-72520 | user-641 | resource not found
+2026-09-13T00:00:00.515Z | ERROR | PAYMENT | 164.27.161.233 | PATCH | /api/orders/{id} | 503 | 1115 | req-66479 | user-8834 | resource not found
+2026-09-13T00:00:00.516Z | ERROR | AUTH | 175.86.192.123 | DELETE | /api/orders | 404 | 1367 | req-56184 | user-7738 | cache miss
+2026-09-13T00:00:00.517Z | ERROR | INVENTORY | 108.23.87.186 | PATCH | /api/payments | 400 | 834 | req-33625 | user-5438 | user session created
+2026-09-13T00:00:00.518Z | INFO | AUTH | 37.114.72.90 | PATCH | /api/payments | 201 | 571 | req-22705 | user-3317 | resource not found
+2026-09-13T00:00:00.519Z | INFO | AUTH | 199.166.237.155 | PATCH | /logout | 401 | 860 | req-59649 | user-2867 | cache miss
+2026-09-13T00:00:00.520Z | ERROR | AUTH | 88.67.20.156 | PATCH | /api/orders | 500 | 914 | req-51873 | user-7063 | request completed
+2026-09-13T00:00:00.521Z | ERROR | API_GATEWAY | 31.7.150.233 | PUT | /login | 204 | 946 | req-54586 | user-5503 | database connection failed
+2026-09-13T00:00:00.522Z | WARN | INVENTORY | 150.201.120.124 | PUT | /api/inventory | 201 | 462 | req-51459 | user-5471 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.523Z | DEBUG | ORDER | 101.139.77.75 | POST | /api/orders | 401 | 1333 | req-35033 | user-2732 | cache miss
+2026-09-13T00:00:00.524Z | ERROR | ORDER | 46.124.30.251 | PATCH | /api/inventory | 204 | 1448 | req-21029 | user-4385 | authentication failed
+2026-09-13T00:00:00.525Z | DEBUG | ORDER | 151.241.150.56 | DELETE | /api/orders/{id} | 503 | 511 | req-12459 | user-2901 | resource not found
+2026-09-13T00:00:00.526Z | WARN | API_GATEWAY | 84.225.214.252 | POST | /api/inventory | 200 | 1307 | req-83158 | user-7429 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.527Z | WARN | NOTIFICATION | 181.92.37.134 | DELETE | /login | 204 | 1419 | req-18090 | user-2810 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.528Z | ERROR | PAYMENT | 47.249.193.244 | PUT | /api/orders | 200 | 732 | req-43850 | user-6233 | order processed successfully
+2026-09-13T00:00:00.529Z | DEBUG | ORDER | 124.64.109.107 | GET | /api/inventory | 200 | 964 | req-1230 | user-6544 | request completed
+2026-09-13T00:00:00.530Z | ERROR | API_GATEWAY | 206.80.80.5 | PUT | /api/orders | 502 | 1325 | req-34457 | - | payment service unavailable
+2026-09-13T00:00:00.531Z | INFO | API_GATEWAY | 9.222.34.21 | PUT | /api/users | 201 | 1332 | req-73774 | user-8769 | notification sent
+2026-09-13T00:00:00.532Z | DEBUG | AUTH | 166.80.84.67 | DELETE | /api/inventory | 401 | 1109 | req-25071 | user-364 | request completed
+2026-09-13T00:00:00.533Z | ERROR | ORDER | 80.41.31.216 | PATCH | /logout | 200 | 839 | req-89484 | user-4563 | payment service unavailable
+2026-09-13T00:00:00.534Z | ERROR | DATABASE | 162.133.214.36 | DELETE | /login | 204 | 1302 | req-83793 | user-8200 | resource not found
+2026-09-13T00:00:00.535Z | ERROR | INVENTORY | 222.137.99.125 | PATCH | /api/users | 401 | 829 | req-26326 | user-757 | authentication failed
+2026-09-13T00:00:00.536Z | INFO | INVENTORY | 50.75.154.162 | POST | /api/users | 500 | 375 | req-18386 | user-2294 | data validation failed
+2026-09-13T00:00:00.537Z | DEBUG | AUTH | 6.20.176.106 | DELETE | /api/payments | 401 | 941 | req-87757 | - | cache miss
+2026-09-13T00:00:00.538Z | WARN | API_GATEWAY | 196.49.82.235 | PATCH | /api/notifications | 201 | 360 | req-4179 | user-4432 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.539Z | ERROR | DATABASE | 24.247.220.8 | PUT | /api/payments | 204 | 263 | req-79186 | user-3340 | payment service unavailable
+2026-09-13T00:00:00.540Z | INFO | API_GATEWAY | 202.139.213.218 | DELETE | /api/orders | 204 | 349 | req-84436 | - | resource not found
+2026-09-13T00:00:00.541Z | WARN | ORDER | 25.96.11.183 | DELETE | /api/payments | 204 | 882 | req-71750 | user-7887 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.542Z | INFO | AUTH | 72.232.173.24 | PATCH | /api/orders/{id} | 200 | 1427 | req-31353 | - | data validation failed
+2026-09-13T00:00:00.543Z | ERROR | NOTIFICATION | 87.25.131.96 | DELETE | /api/orders | 204 | 111 | req-58196 | user-2886 | resource not found
+2026-09-13T00:00:00.544Z | INFO | INVENTORY | 128.87.232.61 | GET | /logout | 200 | 157 | req-65727 | user-1275 | notification sent
+2026-09-13T00:00:00.545Z | ERROR | API_GATEWAY | 179.112.46.159 | GET | /api/orders | 201 | 616 | req-53362 | user-2391 | data validation failed
+2026-09-13T00:00:00.546Z | INFO | DATABASE | 12.67.126.226 | GET | /api/users | 201 | 179 | req-60568 | user-110 | user session created
+2026-09-13T00:00:00.547Z | INFO | PAYMENT | 52.100.194.82 | GET | /api/orders | 400 | 157 | req-67381 | user-8787 | cache miss
+2026-09-13T00:00:00.548Z | INFO | ORDER | 113.155.151.166 | GET | /api/orders | 403 | 802 | req-20358 | user-2047 | user session created
+2026-09-13T00:00:00.549Z | INFO | INVENTORY | 216.222.245.30 | DELETE | /health | 201 | 1320 | req-33154 | user-2733 | data validation failed
+2026-09-13T00:00:00.550Z | DEBUG | USER | 137.36.73.165 | POST | /api/users | 200 | 1004 | req-42551 | user-852 | data validation failed
+2026-09-13T00:00:00.551Z | ERROR | DATABASE | 222.53.20.253 | DELETE | /login | 404 | 934 | req-17721 | - | data validation failed
+2026-09-13T00:00:00.552Z | INFO | PAYMENT | 92.55.49.109 | POST | /logout | 201 | 1249 | req-27723 | user-8353 | resource not found
+2026-09-13T00:00:00.553Z | DEBUG | AUTH | 197.144.84.189 | PUT | /api/users | 201 | 346 | req-33844 | user-7736 | user session created
+2026-09-13T00:00:00.554Z | DEBUG | ORDER | 166.192.81.233 | GET | /logout | 200 | 258 | req-5490 | user-1111 | cache miss
+2026-09-13T00:00:00.555Z | DEBUG | DATABASE | 98.92.79.44 | DELETE | /api/orders | 200 | 911 | req-50247 | user-4437 | notification sent
+2026-09-13T00:00:00.556Z | INFO | NOTIFICATION | 19.193.130.7 | PUT | /api/orders/{id} | 201 | 1487 | req-62501 | user-1754 | order processed successfully
+2026-09-13T00:00:00.557Z | WARN | USER | 172.86.128.199 | PUT | /login | 403 | 1126 | req-16425 | user-7597 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.558Z | ERROR | DATABASE | 60.55.48.50 | GET | /api/notifications | 403 | 234 | req-80469 | - | resource not found
+2026-09-13T00:00:00.559Z | DEBUG | DATABASE | 209.4.215.4 | GET | /api/orders | 503 | 331 | req-56789 | user-728 | resource not found
+2026-09-13T00:00:00.560Z | ERROR | USER | 35.28.12.63 | PUT | /health | 403 | 533 | req-71707 | - | cache miss
+2026-09-13T00:00:00.561Z | ERROR | PAYMENT | 111.213.124.140 | PUT | /api/orders/{id} | 200 | 987 | req-59282 | user-7372 | payment service unavailable
+2026-09-13T00:00:00.562Z | ERROR | ORDER | 27.83.148.215 | PATCH | /health | 502 | 365 | req-55438 | user-3382 | order processed successfully
+2026-09-13T00:00:00.563Z | DEBUG | DATABASE | 172.153.40.242 | PUT | /api/payments | 201 | 1174 | req-42139 | user-7323 | request completed
+2026-09-13T00:00:00.564Z | DEBUG | PAYMENT | 148.150.202.33 | DELETE | /health | 200 | 798 | req-74016 | user-3418 | cache miss
+2026-09-13T00:00:00.565Z | DEBUG | PAYMENT | 74.8.17.139 | GET | /api/orders/{id} | 201 | 187 | req-10579 | user-3341 | resource not found
+2026-09-13T00:00:00.566Z | ERROR | API_GATEWAY | 62.243.0.240 | PUT | /health | 201 | 748 | req-87892 | user-3747 | resource not found
+2026-09-13T00:00:00.567Z | ERROR | DATABASE | 88.157.85.231 | POST | /api/notifications | 201 | 280 | req-70547 | user-5571 | data validation failed
+2026-09-13T00:00:00.568Z | ERROR | INVENTORY | 136.92.65.32 | DELETE | /logout | 201 | 327 | req-20984 | user-8387 | data validation failed
+2026-09-13T00:00:00.569Z | INFO | USER | 24.176.129.223 | PUT | /health | 200 | 1383 | req-42574 | user-2729 | request completed
+2026-09-13T00:00:00.570Z | ERROR | AUTH | 185.44.46.132 | PATCH | /api/payments | 200 | 464 | req-28474 | - | database connection failed
+2026-09-13T00:00:00.571Z | WARN | DATABASE | 109.200.145.138 | POST | /api/orders | 500 | 834 | req-14457 | user-810 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.572Z | ERROR | PAYMENT | 157.168.28.90 | DELETE | /logout | 500 | 1461 | req-3491 | user-1659 | connection timeout
+2026-09-13T00:00:00.573Z | INFO | PAYMENT | 159.205.119.126 | DELETE | /logout | 204 | 833 | req-83806 | user-6315 | user session created
+2026-09-13T00:00:00.574Z | INFO | USER | 41.216.245.26 | DELETE | /api/inventory | 200 | 727 | req-65625 | user-1342 | user session created
+2026-09-13T00:00:00.575Z | ERROR | PAYMENT | 29.170.46.111 | GET | /logout | 200 | 891 | req-14601 | user-2071 | data validation failed
+2026-09-13T00:00:00.576Z | WARN | USER | 130.69.7.163 | GET | /api/orders | 201 | 605 | req-34473 | user-6627 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.577Z | WARN | ORDER | 68.41.104.40 | DELETE | /health | 403 | 1411 | req-10501 | user-1785 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.578Z | ERROR | API_GATEWAY | 1.252.5.221 | PATCH | /logout | 201 | 191 | req-19512 | - | inventory lookup failed
+2026-09-13T00:00:00.579Z | INFO | USER | 4.159.180.42 | POST | /login | 503 | 1176 | req-69495 | - | cache miss
+2026-09-13T00:00:00.580Z | DEBUG | USER | 40.235.11.158 | POST | /api/orders | 500 | 118 | req-35731 | - | request completed
+2026-09-13T00:00:00.581Z | INFO | DATABASE | 185.82.32.8 | POST | /api/orders | 200 | 379 | req-31023 | user-799 | order processed successfully
+2026-09-13T00:00:00.582Z | ERROR | DATABASE | 78.2.182.248 | POST | /login | 403 | 753 | req-27840 | user-2187 | connection timeout
+2026-09-13T00:00:00.583Z | INFO | USER | 64.136.186.96 | PUT | /login | 201 | 1056 | req-84315 | user-742 | user session created
+2026-09-13T00:00:00.584Z | ERROR | API_GATEWAY | 43.13.171.130 | PATCH | /api/users | 200 | 519 | req-62067 | user-4307 | authentication failed
+2026-09-13T00:00:00.585Z | INFO | ORDER | 171.28.121.227 | DELETE | /logout | 201 | 795 | req-8058 | user-2446 | data validation failed
+2026-09-13T00:00:00.586Z | ERROR | AUTH | 213.6.58.238 | GET | /api/orders/{id} | 401 | 897 | req-30758 | user-7272 | authentication failed
+2026-09-13T00:00:00.587Z | INFO | API_GATEWAY | 196.227.153.217 | DELETE | /api/users | 201 | 1471 | req-48147 | user-8121 | resource not found
+2026-09-13T00:00:00.588Z | ERROR | INVENTORY | 88.140.84.83 | POST | /logout | 204 | 680 | req-38735 | user-415 | user session created
+2026-09-13T00:00:00.589Z | DEBUG | DATABASE | 187.151.250.104 | PATCH | /api/users | 200 | 1305 | req-58718 | user-8201 | cache miss
+2026-09-13T00:00:00.590Z | INFO | ORDER | 60.171.153.245 | POST | /api/orders/{id} | 200 | 175 | req-42292 | user-4045 | notification sent
+2026-09-13T00:00:00.591Z | ERROR | USER | 183.8.185.179 | DELETE | /api/notifications | 201 | 216 | req-46354 | user-6821 | connection timeout
+2026-09-13T00:00:00.592Z | INFO | INVENTORY | 17.98.16.121 | PUT | /api/notifications | 201 | 22 | req-2791 | user-6651 | notification sent
+2026-09-13T00:00:00.593Z | ERROR | ORDER | 186.21.136.114 | PATCH | /login | 200 | 999 | req-37130 | user-1745 | cache miss
+2026-09-13T00:00:00.594Z | INFO | ORDER | 90.175.243.231 | POST | /api/users | 200 | 109 | req-53841 | user-3624 | data validation failed
+2026-09-13T00:00:00.595Z | DEBUG | PAYMENT | 11.159.5.241 | POST | /api/orders | 200 | 1368 | req-31571 | user-4722 | user session created
+2026-09-13T00:00:00.596Z | INFO | INVENTORY | 1.118.43.162 | PATCH | /api/orders/{id} | 201 | 1126 | req-74730 | user-1014 | user session created
+2026-09-13T00:00:00.597Z | ERROR | PAYMENT | 11.222.19.137 | PUT | /logout | 200 | 219 | req-72319 | user-2499 | notification sent
+2026-09-13T00:00:00.598Z | ERROR | AUTH | 89.234.116.129 | PUT | /api/payments | 401 | 1248 | req-44292 | user-5394 | request completed
+2026-09-13T00:00:00.599Z | ERROR | INVENTORY | 5.142.42.154 | PATCH | /api/inventory | 204 | 596 | req-66572 | user-7886 | authentication failed
+2026-09-13T00:00:00.600Z | ERROR | USER | 107.109.81.143 | GET | /api/notifications | 201 | 11 | req-21070 | - | order processed successfully
+2026-09-13T00:00:00.601Z | INFO | INVENTORY | 97.96.247.156 | POST | /api/notifications | 200 | 1125 | req-17914 | user-4618 | resource not found
+2026-09-13T00:00:00.602Z | INFO | INVENTORY | 120.221.246.63 | GET | /api/inventory | 201 | 501 | req-72669 | - | resource not found
+2026-09-13T00:00:00.603Z | INFO | DATABASE | 70.28.59.222 | POST | /api/inventory | 201 | 221 | req-86788 | user-2855 | cache miss
+2026-09-13T00:00:00.604Z | DEBUG | DATABASE | 137.166.57.21 | PATCH | /api/payments | 201 | 523 | req-37917 | - | user session created
+2026-09-13T00:00:00.605Z | ERROR | PAYMENT | 209.195.76.96 | PUT | /api/orders/{id} | 200 | 1016 | req-26469 | user-4613 | notification sent
+2026-09-13T00:00:00.606Z | ERROR | AUTH | 39.202.135.64 | PUT | /api/notifications | 401 | 827 | req-38453 | user-8252 | database connection failed
+2026-09-13T00:00:00.607Z | ERROR | USER | 163.14.246.84 | PATCH | /login | 400 | 256 | req-5657 | user-3988 | data validation failed
+2026-09-13T00:00:00.608Z | INFO | NOTIFICATION | 1.101.157.74 | GET | /api/orders/{id} | 404 | 804 | req-59320 | user-4982 | order processed successfully
+2026-09-13T00:00:00.609Z | ERROR | AUTH | 110.158.93.97 | PUT | /login | 204 | 966 | req-31943 | user-8522 | order processed successfully
+2026-09-13T00:00:00.610Z | ERROR | API_GATEWAY | 176.141.154.51 | DELETE | /health | 201 | 100 | req-19978 | user-2097 | order processed successfully
+2026-09-13T00:00:00.611Z | ERROR | USER | 126.69.22.213 | GET | /api/inventory | 204 | 1128 | req-29603 | - | database connection failed
+2026-09-13T00:00:00.612Z | INFO | INVENTORY | 142.53.58.125 | GET | /login | 500 | 1269 | req-67728 | user-9005 | notification sent
+2026-09-13T00:00:00.613Z | DEBUG | USER | 90.79.78.144 | GET | /api/orders | 403 | 579 | req-38940 | user-6184 | data validation failed
+2026-09-13T00:00:00.614Z | INFO | AUTH | 148.197.92.66 | GET | /api/orders | 500 | 141 | req-38753 | user-8030 | notification sent
+2026-09-13T00:00:00.615Z | ERROR | PAYMENT | 167.50.72.144 | DELETE | /api/users | 404 | 1228 | req-89441 | user-7546 | cache miss
+2026-09-13T00:00:00.616Z | DEBUG | PAYMENT | 145.108.165.147 | GET | /logout | 200 | 460 | req-23764 | user-4198 | cache miss
+2026-09-13T00:00:00.617Z | DEBUG | INVENTORY | 76.153.177.85 | GET | /health | 201 | 1477 | req-20087 | user-5418 | request completed
+2026-09-13T00:00:00.618Z | INFO | DATABASE | 145.47.36.193 | PUT | /api/users | 400 | 1301 | req-3141 | user-1347 | user session created
+2026-09-13T00:00:00.619Z | INFO | USER | 63.212.208.7 | GET | /api/inventory | 200 | 836 | req-42051 | - | request completed
+2026-09-13T00:00:00.620Z | DEBUG | USER | 120.4.184.210 | PATCH | /login | 204 | 516 | req-34743 | user-1850 | order processed successfully
+2026-09-13T00:00:00.621Z | ERROR | API_GATEWAY | 45.195.81.182 | POST | /api/inventory | 201 | 586 | req-5436 | user-5215 | cache miss
+2026-09-13T00:00:00.622Z | ERROR | API_GATEWAY | 116.237.76.123 | PATCH | /api/inventory | 502 | 328 | req-73719 | user-6629 | data validation failed
+2026-09-13T00:00:00.623Z | WARN | API_GATEWAY | 214.80.73.164 | PUT | /health | 401 | 930 | req-56908 | user-1422 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.624Z | ERROR | USER | 190.16.77.67 | PUT | /login | 204 | 1264 | req-30655 | user-1475 | data validation failed
+2026-09-13T00:00:00.625Z | DEBUG | PAYMENT | 21.163.47.137 | DELETE | /api/orders/{id} | 401 | 1454 | req-54039 | user-8442 | resource not found
+2026-09-13T00:00:00.626Z | DEBUG | DATABASE | 213.30.202.28 | GET | /api/notifications | 502 | 98 | req-82172 | user-7943 | request completed
+2026-09-13T00:00:00.627Z | ERROR | PAYMENT | 66.125.99.98 | PUT | /api/notifications | 201 | 148 | req-28432 | user-3633 | request completed
+2026-09-13T00:00:00.628Z | INFO | DATABASE | 43.134.246.202 | PATCH | /api/orders/{id} | 200 | 763 | req-7066 | user-410 | cache miss
+2026-09-13T00:00:00.629Z | INFO | NOTIFICATION | 122.5.228.180 | POST | /login | 204 | 259 | req-32369 | user-6777 | user session created
+2026-09-13T00:00:00.630Z | INFO | USER | 81.63.209.7 | PATCH | /api/orders/{id} | 200 | 210 | req-59279 | user-5845 | cache miss
+2026-09-13T00:00:00.631Z | WARN | API_GATEWAY | 171.101.13.30 | DELETE | /health | 204 | 728 | req-26680 | user-840 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.632Z | ERROR | API_GATEWAY | 102.206.247.15 | PUT | /api/users | 200 | 1114 | req-78839 | user-6657 | connection timeout
+2026-09-13T00:00:00.633Z | ERROR | AUTH | 153.179.2.198 | PATCH | /api/notifications | 401 | 316 | req-79956 | user-3113 | notification sent
+2026-09-13T00:00:00.634Z | WARN | PAYMENT | 29.57.58.48 | POST | /health | 201 | 487 | req-54745 | user-8318 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.635Z | DEBUG | ORDER | 118.203.231.141 | POST | /api/payments | 201 | 784 | req-2322 | - | notification sent
+2026-09-13T00:00:00.636Z | DEBUG | PAYMENT | 176.48.83.43 | GET | /api/notifications | 503 | 1161 | req-86714 | user-8262 | request completed
+2026-09-13T00:00:00.637Z | INFO | NOTIFICATION | 83.180.103.246 | DELETE | /api/orders | 204 | 1212 | req-47857 | user-2312 | order processed successfully
+2026-09-13T00:00:00.638Z | ERROR | AUTH | 186.211.86.252 | PATCH | /api/users | 200 | 740 | req-23768 | - | request completed
+2026-09-13T00:00:00.639Z | INFO | ORDER | 98.194.218.230 | POST | /login | 200 | 386 | req-5247 | user-7977 | order processed successfully
+2026-09-13T00:00:00.640Z | ERROR | USER | 194.216.202.72 | PUT | /api/orders | 200 | 568 | req-62544 | user-5289 | payment service unavailable
+2026-09-13T00:00:00.641Z | DEBUG | USER | 4.226.247.103 | DELETE | /api/orders/{id} | 201 | 1016 | req-41764 | user-8864 | cache miss
+2026-09-13T00:00:00.642Z | ERROR | AUTH | 28.123.123.83 | PATCH | /api/users | 401 | 256 | req-80698 | - | connection timeout
+2026-09-13T00:00:00.643Z | INFO | API_GATEWAY | 144.253.68.243 | POST | /api/orders/{id} | 503 | 864 | req-18668 | - | resource not found
+2026-09-13T00:00:00.644Z | ERROR | INVENTORY | 193.249.9.191 | DELETE | /api/notifications | 201 | 1348 | req-32682 | user-336 | notification sent
+2026-09-13T00:00:00.645Z | ERROR | INVENTORY | 18.203.166.47 | PUT | /api/inventory | 204 | 810 | req-16469 | user-4530 | notification sent
+2026-09-13T00:00:00.646Z | ERROR | DATABASE | 190.8.193.210 | POST | /api/payments | 204 | 963 | req-59666 | user-3848 | data validation failed
+2026-09-13T00:00:00.647Z | INFO | API_GATEWAY | 141.87.247.36 | PUT | /api/payments | 204 | 788 | req-63304 | user-3530 | order processed successfully
+2026-09-13T00:00:00.648Z | WARN | USER | 30.114.0.19 | GET | /api/users | 503 | 39 | req-39652 | user-2580 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.649Z | DEBUG | AUTH | 87.203.160.46 | PUT | /api/notifications | 401 | 420 | req-32386 | user-8597 | notification sent
+2026-09-13T00:00:00.650Z | DEBUG | INVENTORY | 86.78.222.188 | GET | /health | 204 | 959 | req-77981 | user-880 | order processed successfully
+2026-09-13T00:00:00.651Z | INFO | ORDER | 190.104.242.109 | PUT | /api/users | 502 | 614 | req-55809 | user-7738 | resource not found
+2026-09-13T00:00:00.652Z | WARN | DATABASE | 160.86.200.70 | PUT | /api/orders/{id} | 404 | 1213 | req-37488 | user-5570 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.653Z | ERROR | AUTH | 42.122.193.210 | POST | /api/notifications | 200 | 224 | req-55205 | - | payment service unavailable
+2026-09-13T00:00:00.654Z | DEBUG | NOTIFICATION | 124.61.106.6 | DELETE | /logout | 204 | 388 | req-1133 | user-4361 | resource not found
+2026-09-13T00:00:00.655Z | ERROR | NOTIFICATION | 52.48.202.215 | PUT | /api/notifications | 401 | 458 | req-25048 | user-7932 | connection timeout
+2026-09-13T00:00:00.656Z | DEBUG | USER | 83.75.104.25 | GET | /api/orders | 401 | 974 | req-45714 | user-145 | request completed
+2026-09-13T00:00:00.657Z | INFO | ORDER | 212.164.253.150 | PATCH | /api/orders/{id} | 201 | 691 | req-83914 | user-2615 | request completed
+2026-09-13T00:00:00.658Z | WARN | NOTIFICATION | 181.171.150.173 | PATCH | /api/inventory | 404 | 674 | req-81938 | user-8875 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.659Z | INFO | DATABASE | 98.39.229.252 | PUT | /health | 201 | 226 | req-64484 | user-1373 | request completed
+2026-09-13T00:00:00.660Z | DEBUG | INVENTORY | 179.137.190.207 | DELETE | /api/users | 200 | 1240 | req-32810 | user-8273 | resource not found
+2026-09-13T00:00:00.661Z | ERROR | PAYMENT | 28.200.186.18 | PATCH | /login | 204 | 510 | req-42653 | - | data validation failed
+2026-09-13T00:00:00.662Z | INFO | NOTIFICATION | 50.121.245.48 | PATCH | /api/inventory | 204 | 336 | req-23646 | user-7515 | cache miss
+2026-09-13T00:00:00.663Z | DEBUG | ORDER | 105.167.43.26 | PUT | /api/users | 204 | 608 | req-40480 | user-5304 | resource not found
+2026-09-13T00:00:00.664Z | INFO | DATABASE | 166.215.223.117 | DELETE | /logout | 200 | 1324 | req-2390 | - | data validation failed
+2026-09-13T00:00:00.665Z | DEBUG | API_GATEWAY | 65.205.203.49 | PUT | /api/inventory | 200 | 956 | req-47229 | user-1607 | resource not found
+2026-09-13T00:00:00.666Z | INFO | NOTIFICATION | 23.63.130.155 | PATCH | /api/orders/{id} | 200 | 1140 | req-73669 | user-2452 | cache miss
+2026-09-13T00:00:00.667Z | DEBUG | NOTIFICATION | 208.238.225.46 | PATCH | /api/notifications | 403 | 1463 | req-89923 | - | request completed
+2026-09-13T00:00:00.668Z | INFO | DATABASE | 32.108.233.127 | DELETE | /api/users | 500 | 1135 | req-54748 | user-100 | resource not found
+2026-09-13T00:00:00.669Z | INFO | INVENTORY | 221.246.162.4 | DELETE | /health | 204 | 434 | req-71477 | user-1694 | user session created
+2026-09-13T00:00:00.670Z | INFO | AUTH | 208.111.252.39 | POST | /logout | 401 | 740 | req-15816 | user-339 | request completed
+2026-09-13T00:00:00.671Z | INFO | INVENTORY | 79.7.190.50 | PATCH | /logout | 204 | 291 | req-22780 | user-6860 | request completed
+2026-09-13T00:00:00.672Z | ERROR | DATABASE | 16.172.212.61 | PUT | /api/inventory | 201 | 933 | req-1758 | user-5010 | inventory lookup failed
+2026-09-13T00:00:00.673Z | DEBUG | NOTIFICATION | 218.198.177.185 | GET | /api/notifications | 201 | 939 | req-66719 | user-2389 | notification sent
+2026-09-13T00:00:00.674Z | WARN | AUTH | 169.231.16.132 | PUT | /login | 204 | 930 | req-13359 | - | retry scheduled after 1 attempts
+2026-09-13T00:00:00.675Z | WARN | DATABASE | 110.147.57.227 | POST | /api/orders/{id} | 204 | 222 | req-85496 | user-2180 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.676Z | DEBUG | PAYMENT | 75.255.235.108 | POST | /api/payments | 204 | 1494 | req-61939 | user-4344 | resource not found
+2026-09-13T00:00:00.677Z | DEBUG | API_GATEWAY | 222.176.32.200 | DELETE | /api/payments | 403 | 1287 | req-19871 | user-6012 | notification sent
+2026-09-13T00:00:00.678Z | INFO | NOTIFICATION | 177.114.66.111 | PATCH | /logout | 201 | 382 | req-44067 | user-5232 | data validation failed
+2026-09-13T00:00:00.679Z | INFO | PAYMENT | 66.84.211.173 | PUT | /api/inventory | 200 | 48 | req-22638 | user-5727 | cache miss
+2026-09-13T00:00:00.680Z | ERROR | API_GATEWAY | 79.160.35.4 | POST | /api/users | 204 | 838 | req-77466 | user-2425 | authentication failed
+2026-09-13T00:00:00.681Z | ERROR | PAYMENT | 14.254.88.225 | PATCH | /api/orders/{id} | 500 | 68 | req-58953 | - | user session created
+2026-09-13T00:00:00.682Z | INFO | USER | 13.199.227.148 | PATCH | /api/notifications | 201 | 694 | req-52621 | user-3826 | user session created
+2026-09-13T00:00:00.683Z | INFO | ORDER | 59.153.28.55 | POST | /logout | 500 | 1441 | req-46674 | - | order processed successfully
+2026-09-13T00:00:00.684Z | ERROR | PAYMENT | 86.88.78.66 | PATCH | /api/payments | 200 | 598 | req-29061 | user-8233 | authentication failed
+2026-09-13T00:00:00.685Z | INFO | USER | 169.106.254.204 | POST | /api/orders | 201 | 952 | req-16227 | user-1785 | order processed successfully
+2026-09-13T00:00:00.686Z | ERROR | DATABASE | 72.209.32.251 | PATCH | /api/notifications | 200 | 417 | req-53933 | user-1385 | notification sent
+2026-09-13T00:00:00.687Z | WARN | DATABASE | 51.55.176.227 | GET | /api/orders/{id} | 204 | 703 | req-65249 | user-7158 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.688Z | ERROR | DATABASE | 19.21.112.36 | GET | /api/payments | 200 | 228 | req-82435 | user-2799 | cache miss
+2026-09-13T00:00:00.689Z | WARN | DATABASE | 40.149.237.87 | GET | /health | 503 | 656 | req-25984 | user-6886 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.690Z | ERROR | PAYMENT | 13.208.194.26 | PUT | /api/orders | 201 | 909 | req-86690 | - | database connection failed
+2026-09-13T00:00:00.691Z | DEBUG | INVENTORY | 42.215.46.14 | PUT | /api/inventory | 200 | 277 | req-46919 | user-7602 | user session created
+2026-09-13T00:00:00.692Z | DEBUG | PAYMENT | 113.38.74.178 | POST | /api/orders/{id} | 200 | 998 | req-53175 | user-6761 | notification sent
+2026-09-13T00:00:00.693Z | INFO | PAYMENT | 205.107.138.166 | DELETE | /api/inventory | 500 | 299 | req-75341 | user-3874 | order processed successfully
+2026-09-13T00:00:00.694Z | ERROR | INVENTORY | 220.63.157.158 | GET | /logout | 201 | 132 | req-18543 | user-7447 | inventory lookup failed
+2026-09-13T00:00:00.695Z | INFO | ORDER | 219.170.107.226 | DELETE | /logout | 201 | 104 | req-34300 | - | resource not found
+2026-09-13T00:00:00.696Z | INFO | NOTIFICATION | 130.239.163.214 | PUT | /api/inventory | 200 | 853 | req-33109 | user-8860 | user session created
+2026-09-13T00:00:00.697Z | ERROR | ORDER | 169.147.187.252 | POST | /api/orders/{id} | 201 | 1254 | req-31495 | user-1533 | order processed successfully
+2026-09-13T00:00:00.698Z | INFO | INVENTORY | 1.81.228.215 | PATCH | /api/inventory | 200 | 594 | req-25492 | user-8039 | data validation failed
+2026-09-13T00:00:00.699Z | INFO | AUTH | 119.190.79.232 | PATCH | /health | 204 | 1385 | req-57771 | user-3293 | request completed
+2026-09-13T00:00:00.700Z | ERROR | AUTH | 134.86.122.44 | PATCH | /logout | 204 | 591 | req-22809 | user-6128 | notification sent
+2026-09-13T00:00:00.701Z | INFO | NOTIFICATION | 110.173.160.128 | PUT | /api/notifications | 404 | 230 | req-63627 | user-608 | data validation failed
+2026-09-13T00:00:00.702Z | INFO | API_GATEWAY | 222.31.190.237 | GET | /api/notifications | 200 | 1456 | req-50184 | user-2527 | order processed successfully
+2026-09-13T00:00:00.703Z | INFO | DATABASE | 1.158.129.195 | DELETE | /login | 201 | 1057 | req-54031 | user-5969 | order processed successfully
+2026-09-13T00:00:00.704Z | ERROR | DATABASE | 207.138.126.103 | DELETE | /logout | 200 | 340 | req-74579 | user-4601 | request completed
+2026-09-13T00:00:00.705Z | DEBUG | API_GATEWAY | 16.46.213.41 | PUT | /api/users | 200 | 1464 | req-75561 | user-7766 | request completed
+2026-09-13T00:00:00.706Z | DEBUG | NOTIFICATION | 152.231.61.33 | PUT | /api/orders/{id} | 201 | 713 | req-27759 | user-3967 | cache miss
+2026-09-13T00:00:00.707Z | ERROR | USER | 49.5.225.142 | PUT | /api/payments | 201 | 205 | req-33376 | user-4094 | authentication failed
+2026-09-13T00:00:00.708Z | ERROR | PAYMENT | 190.182.61.56 | PATCH | /login | 200 | 175 | req-21496 | user-6840 | resource not found
+2026-09-13T00:00:00.709Z | DEBUG | ORDER | 47.222.250.238 | PATCH | /api/orders | 502 | 735 | req-7390 | user-840 | resource not found
+2026-09-13T00:00:00.710Z | ERROR | PAYMENT | 107.126.99.140 | DELETE | /api/users | 200 | 1442 | req-57279 | user-2953 | data validation failed
+2026-09-13T00:00:00.711Z | ERROR | PAYMENT | 174.197.81.16 | DELETE | /health | 204 | 143 | req-72542 | user-3773 | cache miss
+2026-09-13T00:00:00.712Z | WARN | DATABASE | 206.191.62.65 | PATCH | /api/payments | 200 | 438 | req-30192 | user-8266 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.713Z | INFO | NOTIFICATION | 46.224.167.127 | PATCH | /api/notifications | 500 | 497 | req-22354 | user-3809 | resource not found
+2026-09-13T00:00:00.714Z | ERROR | DATABASE | 95.53.218.166 | GET | /health | 200 | 1134 | req-9718 | - | database connection failed
+2026-09-13T00:00:00.715Z | ERROR | INVENTORY | 75.122.254.76 | PUT | /health | 404 | 982 | req-61837 | user-1615 | notification sent
+2026-09-13T00:00:00.716Z | ERROR | NOTIFICATION | 102.18.9.206 | POST | /api/payments | 200 | 43 | req-46630 | user-8618 | database connection failed
+2026-09-13T00:00:00.717Z | ERROR | USER | 83.7.161.148 | GET | /health | 401 | 887 | req-13554 | user-6531 | user session created
+2026-09-13T00:00:00.718Z | DEBUG | INVENTORY | 191.12.10.91 | DELETE | /health | 204 | 1461 | req-56445 | user-1819 | data validation failed
+2026-09-13T00:00:00.719Z | INFO | ORDER | 96.37.99.189 | DELETE | /api/orders | 200 | 16 | req-73717 | user-2967 | cache miss
+2026-09-13T00:00:00.720Z | ERROR | USER | 21.250.14.147 | GET | /api/users | 200 | 748 | req-39755 | user-8337 | order processed successfully
+2026-09-13T00:00:00.721Z | DEBUG | PAYMENT | 97.125.196.130 | POST | /login | 200 | 150 | req-26356 | user-1913 | user session created
+2026-09-13T00:00:00.722Z | ERROR | AUTH | 149.29.123.225 | DELETE | /api/orders | 204 | 190 | req-56604 | user-7423 | cache miss
+2026-09-13T00:00:00.723Z | DEBUG | ORDER | 69.8.98.247 | PUT | /api/notifications | 201 | 300 | req-72607 | user-1755 | order processed successfully
+2026-09-13T00:00:00.724Z | ERROR | NOTIFICATION | 196.87.255.192 | DELETE | /login | 200 | 1394 | req-74440 | user-6260 | order processed successfully
+2026-09-13T00:00:00.725Z | INFO | API_GATEWAY | 13.122.55.242 | DELETE | /health | 403 | 819 | req-71536 | user-5189 | request completed
+2026-09-13T00:00:00.726Z | DEBUG | DATABASE | 53.177.214.147 | POST | /logout | 204 | 503 | req-55312 | user-1871 | notification sent
+2026-09-13T00:00:00.727Z | WARN | DATABASE | 28.96.55.80 | GET | /login | 403 | 1467 | req-42574 | - | retry scheduled after 3 attempts
+2026-09-13T00:00:00.728Z | ERROR | ORDER | 25.153.67.194 | GET | /api/inventory | 404 | 1348 | req-77518 | - | data validation failed
+2026-09-13T00:00:00.729Z | DEBUG | DATABASE | 150.60.219.64 | DELETE | /health | 201 | 1118 | req-47986 | user-6684 | resource not found
+2026-09-13T00:00:00.730Z | DEBUG | USER | 40.2.225.134 | PUT | /api/notifications | 204 | 1100 | req-3952 | user-3044 | notification sent
+2026-09-13T00:00:00.731Z | INFO | INVENTORY | 14.252.147.214 | GET | /health | 201 | 1405 | req-11600 | user-2150 | resource not found
+2026-09-13T00:00:00.732Z | ERROR | AUTH | 13.160.11.225 | GET | /health | 201 | 1028 | req-52128 | user-4179 | request completed
+2026-09-13T00:00:00.733Z | DEBUG | DATABASE | 59.239.205.2 | PATCH | /logout | 200 | 228 | req-38371 | user-4523 | user session created
+2026-09-13T00:00:00.734Z | ERROR | USER | 21.98.154.204 | PUT | /api/notifications | 404 | 152 | req-11000 | user-2070 | database connection failed
+2026-09-13T00:00:00.735Z | INFO | NOTIFICATION | 177.164.180.214 | POST | /api/notifications | 201 | 148 | req-11947 | - | cache miss
+2026-09-13T00:00:00.736Z | WARN | NOTIFICATION | 123.248.101.55 | POST | /api/orders/{id} | 204 | 155 | req-53786 | - | retry scheduled after 1 attempts
+2026-09-13T00:00:00.737Z | ERROR | USER | 203.231.138.52 | POST | /login | 201 | 331 | req-29422 | user-6485 | authentication failed
+2026-09-13T00:00:00.738Z | DEBUG | DATABASE | 3.100.197.180 | DELETE | /api/orders | 204 | 1145 | req-83993 | user-457 | resource not found
+2026-09-13T00:00:00.739Z | INFO | AUTH | 149.241.80.164 | POST | /login | 401 | 1261 | req-47660 | user-473 | order processed successfully
+2026-09-13T00:00:00.740Z | ERROR | NOTIFICATION | 8.205.77.58 | PUT | /logout | 201 | 1273 | req-88788 | user-4202 | payment service unavailable
+2026-09-13T00:00:00.741Z | DEBUG | INVENTORY | 80.216.206.225 | PATCH | /api/payments | 204 | 195 | req-45624 | user-562 | cache miss
+2026-09-13T00:00:00.742Z | DEBUG | ORDER | 3.20.132.126 | POST | /api/notifications | 204 | 151 | req-55717 | user-8435 | notification sent
+2026-09-13T00:00:00.743Z | INFO | NOTIFICATION | 4.226.67.173 | DELETE | /logout | 201 | 745 | req-74469 | - | data validation failed
+2026-09-13T00:00:00.744Z | ERROR | NOTIFICATION | 121.66.220.171 | PATCH | /logout | 201 | 394 | req-7347 | user-7664 | cache miss
+2026-09-13T00:00:00.745Z | ERROR | DATABASE | 177.121.89.3 | PUT | /health | 204 | 532 | req-60968 | - | order processed successfully
+2026-09-13T00:00:00.746Z | ERROR | API_GATEWAY | 123.127.134.84 | PATCH | /api/orders | 201 | 621 | req-42261 | user-1907 | inventory lookup failed
+2026-09-13T00:00:00.747Z | DEBUG | INVENTORY | 180.120.171.109 | PUT | /api/orders/{id} | 200 | 148 | req-29963 | user-3497 | user session created
+2026-09-13T00:00:00.748Z | INFO | AUTH | 217.94.24.98 | PUT | /api/users | 201 | 1047 | req-69752 | user-7368 | notification sent
+2026-09-13T00:00:00.749Z | ERROR | USER | 105.106.106.165 | PATCH | /api/orders | 204 | 430 | req-17256 | user-1252 | data validation failed
+2026-09-13T00:00:00.750Z | ERROR | ORDER | 185.97.73.7 | PATCH | /api/notifications | 403 | 1131 | req-79144 | user-5742 | notification sent
+2026-09-13T00:00:00.751Z | INFO | DATABASE | 128.107.191.34 | PATCH | /api/inventory | 500 | 911 | req-86279 | user-5497 | data validation failed
+2026-09-13T00:00:00.752Z | ERROR | NOTIFICATION | 199.147.55.170 | PATCH | /logout | 200 | 395 | req-69531 | user-4659 | payment service unavailable
+2026-09-13T00:00:00.753Z | ERROR | PAYMENT | 190.73.141.2 | GET | /logout | 204 | 1091 | req-60404 | user-5324 | user session created
+2026-09-13T00:00:00.754Z | INFO | AUTH | 54.35.101.91 | PATCH | /api/orders | 204 | 715 | req-50143 | user-5706 | request completed
+2026-09-13T00:00:00.755Z | ERROR | DATABASE | 35.12.232.116 | PUT | /login | 204 | 1375 | req-3014 | user-6635 | request completed
+2026-09-13T00:00:00.756Z | ERROR | INVENTORY | 81.85.98.153 | POST | /logout | 502 | 644 | req-13816 | user-6665 | data validation failed
+2026-09-13T00:00:00.757Z | INFO | NOTIFICATION | 182.2.54.92 | PATCH | /api/notifications | 204 | 1277 | req-65377 | user-6048 | user session created
+2026-09-13T00:00:00.758Z | WARN | NOTIFICATION | 175.187.226.190 | PATCH | /api/inventory | 201 | 408 | req-79147 | user-2072 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.759Z | DEBUG | PAYMENT | 186.144.12.37 | POST | /login | 200 | 897 | req-34268 | - | data validation failed
+2026-09-13T00:00:00.760Z | INFO | ORDER | 16.89.220.8 | PUT | /api/inventory | 204 | 769 | req-43890 | user-2403 | cache miss
+2026-09-13T00:00:00.761Z | ERROR | INVENTORY | 53.139.55.27 | DELETE | /api/notifications | 200 | 873 | req-5460 | user-3671 | order processed successfully
+2026-09-13T00:00:00.762Z | WARN | AUTH | 101.93.17.170 | PATCH | /logout | 401 | 35 | req-87161 | user-1090 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.763Z | ERROR | INVENTORY | 35.70.182.238 | GET | /logout | 201 | 1139 | req-59432 | user-4932 | cache miss
+2026-09-13T00:00:00.764Z | INFO | ORDER | 96.119.22.224 | GET | /logout | 200 | 1409 | req-31785 | user-8751 | notification sent
+2026-09-13T00:00:00.765Z | WARN | AUTH | 138.202.11.126 | POST | /api/orders | 401 | 420 | req-80919 | user-5399 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.766Z | INFO | ORDER | 206.214.27.5 | POST | /api/orders | 204 | 137 | req-28206 | user-1983 | request completed
+2026-09-13T00:00:00.767Z | ERROR | PAYMENT | 211.114.33.158 | PUT | /api/orders | 200 | 102 | req-22255 | user-3359 | resource not found
+2026-09-13T00:00:00.768Z | DEBUG | PAYMENT | 192.31.11.205 | DELETE | /logout | 204 | 1021 | req-5783 | user-5396 | order processed successfully
+2026-09-13T00:00:00.769Z | ERROR | ORDER | 160.171.157.107 | PUT | /api/inventory | 204 | 553 | req-27710 | user-2099 | request completed
+2026-09-13T00:00:00.770Z | DEBUG | API_GATEWAY | 72.86.181.175 | DELETE | /api/orders/{id} | 201 | 512 | req-79714 | user-3042 | data validation failed
+2026-09-13T00:00:00.771Z | WARN | NOTIFICATION | 73.211.53.49 | PUT | /api/users | 201 | 868 | req-60514 | - | retry scheduled after 5 attempts
+2026-09-13T00:00:00.772Z | ERROR | USER | 12.200.144.218 | GET | /api/orders/{id} | 500 | 913 | req-37508 | user-4854 | resource not found
+2026-09-13T00:00:00.773Z | ERROR | NOTIFICATION | 32.214.243.22 | PATCH | /api/orders/{id} | 200 | 1195 | req-75848 | user-7762 | database connection failed
+2026-09-13T00:00:00.774Z | INFO | USER | 116.13.252.70 | GET | /api/users | 204 | 433 | req-7560 | user-4185 | request completed
+2026-09-13T00:00:00.775Z | ERROR | INVENTORY | 39.53.104.235 | GET | /api/inventory | 200 | 1130 | req-50308 | user-9052 | resource not found
+2026-09-13T00:00:00.776Z | INFO | DATABASE | 140.36.114.170 | GET | /api/inventory | 200 | 226 | req-31684 | user-6316 | request completed
+2026-09-13T00:00:00.777Z | DEBUG | AUTH | 194.224.239.86 | GET | /api/orders/{id} | 401 | 903 | req-78274 | - | data validation failed
+2026-09-13T00:00:00.778Z | DEBUG | API_GATEWAY | 205.107.143.3 | GET | /api/orders | 200 | 80 | req-78500 | - | notification sent
+2026-09-13T00:00:00.779Z | INFO | AUTH | 39.203.153.154 | POST | /api/payments | 401 | 803 | req-58468 | user-8760 | order processed successfully
+2026-09-13T00:00:00.780Z | WARN | PAYMENT | 5.4.170.172 | POST | /api/inventory | 200 | 624 | req-8584 | - | retry scheduled after 3 attempts
+2026-09-13T00:00:00.781Z | ERROR | ORDER | 75.221.130.76 | POST | /health | 502 | 870 | req-53802 | user-8954 | resource not found
+2026-09-13T00:00:00.782Z | ERROR | INVENTORY | 17.146.158.209 | GET | /login | 201 | 1475 | req-10114 | user-4787 | resource not found
+2026-09-13T00:00:00.783Z | INFO | API_GATEWAY | 75.33.20.153 | DELETE | /login | 200 | 798 | req-26440 | user-4161 | user session created
+2026-09-13T00:00:00.784Z | INFO | AUTH | 188.237.17.1 | PATCH | /health | 201 | 1090 | req-36468 | user-4328 | request completed
+2026-09-13T00:00:00.785Z | ERROR | INVENTORY | 182.161.194.187 | GET | /api/users | 204 | 1069 | req-85864 | - | order processed successfully
+2026-09-13T00:00:00.786Z | ERROR | API_GATEWAY | 96.78.206.53 | DELETE | /logout | 204 | 1314 | req-76794 | user-4342 | payment service unavailable
+2026-09-13T00:00:00.787Z | ERROR | ORDER | 87.121.125.149 | POST | /health | 204 | 1368 | req-64704 | user-1712 | resource not found
+2026-09-13T00:00:00.788Z | ERROR | DATABASE | 100.133.64.74 | GET | /api/orders | 200 | 831 | req-43805 | user-945 | payment service unavailable
+2026-09-13T00:00:00.789Z | INFO | ORDER | 18.156.40.199 | PUT | /api/inventory | 201 | 293 | req-62566 | user-8810 | data validation failed
+2026-09-13T00:00:00.790Z | INFO | ORDER | 37.134.84.89 | DELETE | /api/orders | 201 | 1086 | req-41311 | user-6160 | request completed
+2026-09-13T00:00:00.791Z | ERROR | NOTIFICATION | 62.81.80.183 | DELETE | /api/payments | 201 | 662 | req-68719 | user-2794 | authentication failed
+2026-09-13T00:00:00.792Z | ERROR | DATABASE | 140.106.133.201 | POST | /api/orders | 201 | 133 | req-50878 | user-115 | user session created
+2026-09-13T00:00:00.793Z | DEBUG | PAYMENT | 121.222.114.33 | POST | /api/orders/{id} | 403 | 1288 | req-37023 | - | order processed successfully
+2026-09-13T00:00:00.794Z | INFO | PAYMENT | 83.33.201.182 | PUT | /logout | 200 | 297 | req-25759 | user-1241 | user session created
+2026-09-13T00:00:00.795Z | INFO | PAYMENT | 171.142.201.3 | GET | /api/notifications | 201 | 90 | req-89565 | user-3421 | cache miss
+2026-09-13T00:00:00.796Z | ERROR | NOTIFICATION | 200.143.140.77 | GET | /api/users | 200 | 1427 | req-83261 | user-1916 | cache miss
+2026-09-13T00:00:00.797Z | ERROR | AUTH | 218.98.99.101 | PUT | /api/users | 401 | 254 | req-32677 | user-3403 | user session created
+2026-09-13T00:00:00.798Z | DEBUG | USER | 11.27.105.69 | PATCH | /api/inventory | 500 | 936 | req-38581 | user-2357 | order processed successfully
+2026-09-13T00:00:00.799Z | WARN | API_GATEWAY | 87.68.162.19 | POST | /login | 503 | 557 | req-38429 | user-3765 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.800Z | INFO | NOTIFICATION | 83.135.90.78 | PATCH | /api/users | 201 | 822 | req-2832 | user-4248 | user session created
+2026-09-13T00:00:00.801Z | DEBUG | USER | 34.100.204.165 | POST | /api/orders | 503 | 1185 | req-1141 | user-8510 | order processed successfully
+2026-09-13T00:00:00.802Z | ERROR | AUTH | 104.169.50.212 | PATCH | /api/orders | 401 | 160 | req-87062 | user-8674 | cache miss
+2026-09-13T00:00:00.803Z | DEBUG | USER | 189.175.67.162 | PATCH | /api/orders | 201 | 1174 | req-21115 | user-8781 | notification sent
+2026-09-13T00:00:00.804Z | INFO | API_GATEWAY | 87.62.110.182 | PATCH | /login | 200 | 1373 | req-33931 | user-1365 | request completed
+2026-09-13T00:00:00.805Z | DEBUG | PAYMENT | 154.69.84.112 | PUT | /logout | 201 | 148 | req-16640 | user-1708 | resource not found
+2026-09-13T00:00:00.806Z | ERROR | ORDER | 58.163.252.193 | POST | /api/orders/{id} | 201 | 886 | req-65142 | user-3966 | payment service unavailable
+2026-09-13T00:00:00.807Z | ERROR | USER | 120.237.107.141 | PUT | /logout | 204 | 892 | req-6116 | - | data validation failed
+2026-09-13T00:00:00.808Z | ERROR | PAYMENT | 39.16.117.7 | PUT | /api/payments | 500 | 347 | req-72486 | - | authentication failed
+2026-09-13T00:00:00.809Z | INFO | DATABASE | 85.54.242.45 | POST | /api/orders/{id} | 204 | 128 | req-78526 | user-8881 | cache miss
+2026-09-13T00:00:00.810Z | ERROR | API_GATEWAY | 187.169.43.196 | PATCH | /api/orders | 401 | 538 | req-58344 | user-2275 | data validation failed
+2026-09-13T00:00:00.811Z | ERROR | API_GATEWAY | 176.12.252.147 | POST | /api/users | 503 | 460 | req-56688 | user-7153 | payment service unavailable
+2026-09-13T00:00:00.812Z | WARN | AUTH | 186.184.217.152 | POST | /api/inventory | 201 | 906 | req-25364 | - | retry scheduled after 2 attempts
+2026-09-13T00:00:00.813Z | WARN | API_GATEWAY | 159.26.55.180 | PUT | /api/users | 200 | 1248 | req-47282 | - | retry scheduled after 4 attempts
+2026-09-13T00:00:00.814Z | INFO | AUTH | 19.210.14.145 | POST | /api/inventory | 401 | 315 | req-47201 | user-6940 | resource not found
+2026-09-13T00:00:00.815Z | ERROR | API_GATEWAY | 42.1.233.181 | PUT | /api/inventory | 200 | 425 | req-24638 | user-4139 | user session created
+2026-09-13T00:00:00.816Z | ERROR | AUTH | 187.153.11.176 | PUT | /logout | 401 | 730 | req-66825 | user-663 | data validation failed
+2026-09-13T00:00:00.817Z | ERROR | DATABASE | 205.40.61.180 | PATCH | /api/notifications | 204 | 352 | req-14124 | user-8213 | data validation failed
+2026-09-13T00:00:00.818Z | ERROR | USER | 1.226.82.181 | PUT | /logout | 201 | 763 | req-78968 | user-289 | connection timeout
+2026-09-13T00:00:00.819Z | DEBUG | DATABASE | 130.254.192.9 | POST | /api/users | 204 | 1433 | req-25906 | user-4061 | order processed successfully
+2026-09-13T00:00:00.820Z | INFO | API_GATEWAY | 152.230.217.97 | DELETE | /api/inventory | 200 | 217 | req-26440 | user-5430 | cache miss
+2026-09-13T00:00:00.821Z | WARN | AUTH | 197.110.4.47 | PATCH | /api/payments | 401 | 1405 | req-88280 | user-1272 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.822Z | DEBUG | ORDER | 97.134.217.137 | PATCH | /api/payments | 204 | 542 | req-56763 | user-4097 | notification sent
+2026-09-13T00:00:00.823Z | ERROR | DATABASE | 1.212.146.214 | PUT | /login | 204 | 359 | req-10444 | user-3557 | user session created
+2026-09-13T00:00:00.824Z | INFO | PAYMENT | 91.65.87.165 | DELETE | /health | 200 | 323 | req-62671 | user-6531 | data validation failed
+2026-09-13T00:00:00.825Z | DEBUG | AUTH | 65.33.168.139 | PATCH | /api/notifications | 401 | 607 | req-80776 | user-8519 | resource not found
+2026-09-13T00:00:00.826Z | INFO | DATABASE | 24.89.218.5 | POST | /api/notifications | 201 | 294 | req-17141 | user-1558 | request completed
+2026-09-13T00:00:00.827Z | ERROR | ORDER | 80.217.128.188 | PUT | /health | 204 | 1427 | req-78326 | user-6271 | inventory lookup failed
+2026-09-13T00:00:00.828Z | INFO | PAYMENT | 194.127.27.28 | PATCH | /api/orders | 404 | 665 | req-8808 | user-8886 | order processed successfully
+2026-09-13T00:00:00.829Z | WARN | DATABASE | 150.129.82.204 | PATCH | /api/orders | 201 | 389 | req-13941 | - | retry scheduled after 5 attempts
+2026-09-13T00:00:00.830Z | INFO | ORDER | 22.124.219.158 | PATCH | /health | 400 | 979 | req-80292 | user-5149 | resource not found
+2026-09-13T00:00:00.831Z | ERROR | USER | 29.37.8.157 | PATCH | /api/payments | 204 | 448 | req-35215 | - | cache miss
+2026-09-13T00:00:00.832Z | ERROR | INVENTORY | 65.63.60.29 | GET | /login | 201 | 932 | req-68381 | user-5679 | payment service unavailable
+2026-09-13T00:00:00.833Z | ERROR | PAYMENT | 21.122.195.193 | POST | /api/notifications | 201 | 834 | req-8075 | user-7984 | user session created
+2026-09-13T00:00:00.834Z | ERROR | USER | 129.195.138.92 | PATCH | /api/notifications | 204 | 348 | req-39719 | - | connection timeout
+2026-09-13T00:00:00.835Z | WARN | USER | 207.81.117.155 | DELETE | /api/orders/{id} | 204 | 719 | req-86915 | user-466 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.836Z | ERROR | API_GATEWAY | 27.178.169.96 | PATCH | /api/orders | 201 | 1319 | req-45630 | user-3369 | database connection failed
+2026-09-13T00:00:00.837Z | INFO | API_GATEWAY | 63.27.45.72 | GET | /api/users | 204 | 772 | req-15015 | user-836 | data validation failed
+2026-09-13T00:00:00.838Z | INFO | DATABASE | 141.23.222.40 | PUT | /api/payments | 204 | 863 | req-12680 | user-3315 | cache miss
+2026-09-13T00:00:00.839Z | ERROR | PAYMENT | 27.80.49.68 | GET | /api/notifications | 404 | 1265 | req-76721 | user-2888 | inventory lookup failed
+2026-09-13T00:00:00.840Z | INFO | INVENTORY | 171.71.179.90 | GET | /logout | 401 | 136 | req-57121 | user-1140 | user session created
+2026-09-13T00:00:00.841Z | ERROR | AUTH | 141.7.12.29 | PATCH | /health | 401 | 1321 | req-59979 | user-7593 | notification sent
+2026-09-13T00:00:00.842Z | ERROR | AUTH | 10.27.109.102 | GET | /api/orders/{id} | 401 | 312 | req-54418 | user-1338 | payment service unavailable
+2026-09-13T00:00:00.843Z | ERROR | USER | 172.152.57.20 | POST | /api/inventory | 201 | 1199 | req-50343 | user-8196 | cache miss
+2026-09-13T00:00:00.844Z | INFO | AUTH | 132.253.125.177 | PATCH | /login | 401 | 561 | req-5937 | - | order processed successfully
+2026-09-13T00:00:00.845Z | INFO | API_GATEWAY | 172.126.178.225 | PUT | /api/payments | 201 | 1430 | req-2351 | - | user session created
+2026-09-13T00:00:00.846Z | INFO | ORDER | 166.98.239.3 | PUT | /api/inventory | 200 | 1160 | req-86567 | - | data validation failed
+2026-09-13T00:00:00.847Z | DEBUG | PAYMENT | 89.136.111.101 | GET | /api/orders/{id} | 403 | 221 | req-57249 | user-6042 | data validation failed
+2026-09-13T00:00:00.848Z | INFO | AUTH | 183.124.252.5 | PUT | /api/orders/{id} | 401 | 755 | req-55015 | user-621 | request completed
+2026-09-13T00:00:00.849Z | INFO | INVENTORY | 46.223.233.220 | GET | /logout | 200 | 849 | req-2317 | user-3416 | user session created
+2026-09-13T00:00:00.850Z | INFO | INVENTORY | 64.45.15.168 | GET | /api/notifications | 400 | 340 | req-42508 | user-611 | data validation failed
+2026-09-13T00:00:00.851Z | ERROR | NOTIFICATION | 112.112.159.147 | GET | /login | 201 | 1091 | req-81031 | user-428 | data validation failed
+2026-09-13T00:00:00.852Z | INFO | INVENTORY | 91.27.73.193 | DELETE | /logout | 200 | 985 | req-84567 | user-2692 | data validation failed
+2026-09-13T00:00:00.853Z | DEBUG | PAYMENT | 88.211.201.190 | DELETE | /api/orders/{id} | 502 | 1060 | req-28950 | user-4405 | request completed
+2026-09-13T00:00:00.854Z | DEBUG | API_GATEWAY | 29.170.66.126 | PUT | /api/users | 200 | 1411 | req-80677 | user-8855 | resource not found
+2026-09-13T00:00:00.855Z | INFO | INVENTORY | 199.99.89.13 | PUT | /api/orders | 201 | 94 | req-11319 | user-6119 | resource not found
+2026-09-13T00:00:00.856Z | ERROR | DATABASE | 191.235.199.3 | PATCH | /api/notifications | 200 | 436 | req-24191 | user-1141 | authentication failed
+2026-09-13T00:00:00.857Z | INFO | USER | 187.114.93.45 | PUT | /api/payments | 204 | 686 | req-53238 | user-6773 | user session created
+2026-09-13T00:00:00.858Z | DEBUG | PAYMENT | 33.41.46.74 | GET | /api/orders | 201 | 771 | req-88703 | - | user session created
+2026-09-13T00:00:00.859Z | DEBUG | ORDER | 167.14.223.211 | GET | /api/users | 200 | 1256 | req-7674 | user-6141 | resource not found
+2026-09-13T00:00:00.860Z | INFO | USER | 25.61.201.85 | PATCH | /api/payments | 204 | 53 | req-47364 | - | order processed successfully
+2026-09-13T00:00:00.861Z | INFO | DATABASE | 95.97.83.180 | POST | /api/orders/{id} | 201 | 1212 | req-12911 | user-1016 | cache miss
+2026-09-13T00:00:00.862Z | WARN | PAYMENT | 104.59.118.197 | POST | /api/inventory | 201 | 207 | req-30671 | user-5411 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.863Z | INFO | DATABASE | 39.144.91.180 | PUT | /api/payments | 204 | 1411 | req-25981 | - | request completed
+2026-09-13T00:00:00.864Z | DEBUG | NOTIFICATION | 183.173.110.123 | GET | /api/orders | 500 | 249 | req-45519 | - | request completed
+2026-09-13T00:00:00.865Z | ERROR | NOTIFICATION | 21.37.226.113 | DELETE | /logout | 201 | 563 | req-62274 | user-6210 | data validation failed
+2026-09-13T00:00:00.866Z | ERROR | AUTH | 108.44.75.45 | PATCH | /api/users | 200 | 813 | req-39203 | user-1405 | authentication failed
+2026-09-13T00:00:00.867Z | ERROR | API_GATEWAY | 84.30.112.36 | DELETE | /health | 500 | 1140 | req-52397 | user-4793 | data validation failed
+2026-09-13T00:00:00.868Z | WARN | PAYMENT | 117.181.79.156 | PATCH | /api/orders | 201 | 847 | req-42493 | user-2087 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.869Z | ERROR | NOTIFICATION | 105.108.138.222 | DELETE | /api/orders/{id} | 201 | 543 | req-28779 | - | request completed
+2026-09-13T00:00:00.870Z | ERROR | ORDER | 100.47.22.80 | DELETE | /logout | 200 | 941 | req-37709 | user-7298 | request completed
+2026-09-13T00:00:00.871Z | ERROR | INVENTORY | 27.9.37.73 | GET | /health | 400 | 1449 | req-43328 | user-1128 | inventory lookup failed
+2026-09-13T00:00:00.872Z | INFO | USER | 191.63.104.54 | DELETE | /api/inventory | 200 | 204 | req-47452 | user-8850 | request completed
+2026-09-13T00:00:00.873Z | WARN | PAYMENT | 128.34.172.74 | GET | /api/orders/{id} | 200 | 611 | req-34520 | user-5126 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.874Z | INFO | PAYMENT | 153.139.164.192 | DELETE | /api/inventory | 201 | 930 | req-35824 | user-2396 | data validation failed
+2026-09-13T00:00:00.875Z | WARN | INVENTORY | 52.244.86.147 | PUT | /api/orders | 200 | 84 | req-81787 | user-4517 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.876Z | ERROR | AUTH | 65.145.226.113 | PATCH | /api/orders/{id} | 401 | 339 | req-27883 | - | payment service unavailable
+2026-09-13T00:00:00.877Z | INFO | ORDER | 38.11.164.187 | POST | /health | 200 | 220 | req-75272 | - | request completed
+2026-09-13T00:00:00.878Z | WARN | INVENTORY | 208.43.49.107 | POST | /api/payments | 201 | 169 | req-43946 | user-1588 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.879Z | DEBUG | PAYMENT | 30.178.227.55 | GET | /api/inventory | 200 | 329 | req-73516 | user-2749 | data validation failed
+2026-09-13T00:00:00.880Z | ERROR | AUTH | 206.160.69.204 | PUT | /api/notifications | 401 | 350 | req-29491 | user-9066 | request completed
+2026-09-13T00:00:00.881Z | INFO | USER | 28.105.63.127 | POST | /health | 500 | 79 | req-52364 | user-8481 | order processed successfully
+2026-09-13T00:00:00.882Z | ERROR | INVENTORY | 175.2.206.206 | PATCH | /api/orders/{id} | 503 | 1396 | req-31527 | - | resource not found
+2026-09-13T00:00:00.883Z | INFO | ORDER | 164.21.14.130 | DELETE | /api/notifications | 201 | 670 | req-13024 | - | user session created
+2026-09-13T00:00:00.884Z | ERROR | AUTH | 23.10.241.239 | PUT | /api/orders | 204 | 1498 | req-39298 | user-5505 | order processed successfully
+2026-09-13T00:00:00.885Z | ERROR | NOTIFICATION | 9.169.63.232 | DELETE | /api/notifications | 401 | 744 | req-89663 | user-8675 | data validation failed
+2026-09-13T00:00:00.886Z | INFO | INVENTORY | 190.107.229.49 | DELETE | /api/orders/{id} | 401 | 824 | req-23338 | user-1323 | order processed successfully
+2026-09-13T00:00:00.887Z | DEBUG | NOTIFICATION | 117.135.117.98 | PATCH | /api/orders | 403 | 809 | req-67210 | user-3184 | user session created
+2026-09-13T00:00:00.888Z | WARN | NOTIFICATION | 8.41.60.199 | GET | /api/notifications | 401 | 432 | req-44321 | user-3776 | retry scheduled after 4 attempts
+2026-09-13T00:00:00.889Z | ERROR | AUTH | 121.233.36.91 | POST | /api/orders | 201 | 332 | req-61248 | user-7726 | request completed
+2026-09-13T00:00:00.890Z | ERROR | NOTIFICATION | 38.73.174.110 | GET | /api/inventory | 401 | 790 | req-74976 | - | authentication failed
+2026-09-13T00:00:00.891Z | ERROR | PAYMENT | 46.191.18.163 | GET | /api/notifications | 400 | 1314 | req-32241 | user-7305 | connection timeout
+2026-09-13T00:00:00.892Z | ERROR | API_GATEWAY | 177.219.18.80 | PUT | /api/inventory | 200 | 895 | req-15177 | user-2176 | notification sent
+2026-09-13T00:00:00.893Z | ERROR | USER | 158.177.161.37 | GET | /api/orders | 201 | 1330 | req-24603 | user-7941 | resource not found
+2026-09-13T00:00:00.894Z | INFO | ORDER | 125.82.163.71 | DELETE | /login | 200 | 1175 | req-66200 | user-7589 | user session created
+2026-09-13T00:00:00.895Z | INFO | AUTH | 163.99.210.48 | PUT | /api/users | 201 | 43 | req-82291 | user-4088 | user session created
+2026-09-13T00:00:00.896Z | DEBUG | INVENTORY | 205.176.154.20 | PATCH | /api/inventory | 201 | 1198 | req-70531 | - | user session created
+2026-09-13T00:00:00.897Z | ERROR | API_GATEWAY | 197.181.20.237 | PUT | /api/orders/{id} | 204 | 1214 | req-62585 | - | resource not found
+2026-09-13T00:00:00.898Z | DEBUG | AUTH | 76.109.140.136 | POST | /api/inventory | 401 | 783 | req-70408 | user-2571 | resource not found
+2026-09-13T00:00:00.899Z | ERROR | INVENTORY | 8.253.0.46 | DELETE | /api/orders/{id} | 200 | 160 | req-23085 | user-1925 | order processed successfully
+2026-09-13T00:00:00.900Z | ERROR | USER | 13.187.60.128 | POST | /api/payments | 201 | 237 | req-48110 | user-5998 | inventory lookup failed
+2026-09-13T00:00:00.901Z | INFO | DATABASE | 136.169.24.80 | PATCH | /api/payments | 201 | 983 | req-86925 | user-5965 | notification sent
+2026-09-13T00:00:00.902Z | DEBUG | USER | 3.168.85.229 | PATCH | /api/payments | 204 | 259 | req-48602 | - | user session created
+2026-09-13T00:00:00.903Z | ERROR | DATABASE | 129.164.145.28 | GET | /api/orders | 204 | 1128 | req-84234 | - | data validation failed
+2026-09-13T00:00:00.904Z | DEBUG | INVENTORY | 183.236.225.110 | DELETE | /logout | 404 | 912 | req-79848 | - | data validation failed
+2026-09-13T00:00:00.905Z | ERROR | API_GATEWAY | 121.32.57.151 | POST | /login | 404 | 340 | req-33550 | user-4578 | inventory lookup failed
+2026-09-13T00:00:00.906Z | ERROR | AUTH | 66.99.85.163 | PATCH | /api/notifications | 401 | 932 | req-45223 | - | data validation failed
+2026-09-13T00:00:00.907Z | ERROR | NOTIFICATION | 87.108.30.7 | DELETE | /api/users | 201 | 1056 | req-64027 | user-162 | connection timeout
+2026-09-13T00:00:00.908Z | DEBUG | INVENTORY | 193.43.185.193 | GET | /api/orders/{id} | 401 | 1080 | req-20773 | - | data validation failed
+2026-09-13T00:00:00.909Z | ERROR | USER | 2.204.29.110 | GET | /api/users | 400 | 414 | req-77383 | user-3065 | request completed
+2026-09-13T00:00:00.910Z | INFO | ORDER | 162.255.125.144 | PATCH | /logout | 502 | 89 | req-63245 | user-825 | cache miss
+2026-09-13T00:00:00.911Z | INFO | PAYMENT | 223.163.35.111 | DELETE | /api/payments | 201 | 65 | req-57481 | user-2103 | request completed
+2026-09-13T00:00:00.912Z | WARN | USER | 144.38.232.144 | DELETE | /api/payments | 200 | 1206 | req-30496 | user-3464 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.913Z | ERROR | API_GATEWAY | 120.241.1.199 | PUT | /api/notifications | 502 | 758 | req-53243 | - | notification sent
+2026-09-13T00:00:00.914Z | INFO | DATABASE | 150.65.178.167 | PUT | /api/users | 200 | 1259 | req-31330 | user-3226 | cache miss
+2026-09-13T00:00:00.915Z | ERROR | ORDER | 72.72.193.135 | DELETE | /api/payments | 201 | 947 | req-63276 | user-8037 | notification sent
+2026-09-13T00:00:00.916Z | INFO | DATABASE | 213.227.222.216 | PATCH | /api/payments | 500 | 292 | req-56611 | user-4258 | user session created
+2026-09-13T00:00:00.917Z | ERROR | API_GATEWAY | 169.173.249.179 | PATCH | /api/payments | 200 | 789 | req-46162 | user-1745 | data validation failed
+2026-09-13T00:00:00.918Z | ERROR | AUTH | 30.205.36.36 | PATCH | /api/orders | 401 | 1494 | req-30418 | user-8975 | connection timeout
+2026-09-13T00:00:00.919Z | ERROR | AUTH | 25.65.228.55 | DELETE | /health | 401 | 799 | req-42098 | - | cache miss
+2026-09-13T00:00:00.920Z | ERROR | DATABASE | 45.137.221.99 | GET | /login | 200 | 1254 | req-56794 | user-6700 | cache miss
+2026-09-13T00:00:00.921Z | ERROR | DATABASE | 120.98.232.41 | PATCH | /api/notifications | 201 | 865 | req-68740 | user-4731 | order processed successfully
+2026-09-13T00:00:00.922Z | ERROR | DATABASE | 44.254.19.40 | PUT | /api/orders/{id} | 200 | 337 | req-77791 | user-2245 | user session created
+2026-09-13T00:00:00.923Z | ERROR | ORDER | 107.61.94.232 | DELETE | /login | 201 | 363 | req-90422 | user-4187 | payment service unavailable
+2026-09-13T00:00:00.924Z | ERROR | AUTH | 45.230.158.139 | DELETE | /health | 401 | 1495 | req-4375 | user-3049 | order processed successfully
+2026-09-13T00:00:00.925Z | INFO | NOTIFICATION | 21.79.3.75 | GET | /api/inventory | 200 | 1269 | req-38430 | user-8305 | resource not found
+2026-09-13T00:00:00.926Z | DEBUG | DATABASE | 170.88.128.213 | DELETE | /api/orders/{id} | 200 | 383 | req-55187 | user-6457 | order processed successfully
+2026-09-13T00:00:00.927Z | INFO | INVENTORY | 67.26.56.221 | POST | /api/payments | 201 | 1202 | req-3375 | user-3667 | request completed
+2026-09-13T00:00:00.928Z | WARN | INVENTORY | 160.44.29.38 | DELETE | /api/orders/{id} | 200 | 701 | req-55262 | user-2300 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.929Z | ERROR | INVENTORY | 189.62.30.73 | GET | /api/inventory | 201 | 1277 | req-85955 | user-8804 | user session created
+2026-09-13T00:00:00.930Z | ERROR | ORDER | 211.45.196.58 | PUT | /api/inventory | 404 | 275 | req-85274 | - | data validation failed
+2026-09-13T00:00:00.931Z | ERROR | API_GATEWAY | 11.249.182.150 | DELETE | /logout | 201 | 674 | req-68245 | user-3155 | request completed
+2026-09-13T00:00:00.932Z | DEBUG | API_GATEWAY | 215.38.73.78 | GET | /login | 204 | 862 | req-40388 | user-5174 | order processed successfully
+2026-09-13T00:00:00.933Z | ERROR | DATABASE | 34.215.99.41 | PATCH | /api/inventory | 500 | 1187 | req-11263 | user-6301 | user session created
+2026-09-13T00:00:00.934Z | DEBUG | ORDER | 137.65.234.8 | GET | /logout | 401 | 417 | req-50948 | - | notification sent
+2026-09-13T00:00:00.935Z | ERROR | USER | 95.34.122.83 | DELETE | /api/orders/{id} | 201 | 216 | req-63590 | user-8061 | data validation failed
+2026-09-13T00:00:00.936Z | INFO | NOTIFICATION | 154.186.13.118 | GET | /api/inventory | 201 | 28 | req-17509 | user-4112 | request completed
+2026-09-13T00:00:00.937Z | INFO | PAYMENT | 21.237.151.68 | PATCH | /api/orders | 201 | 98 | req-65933 | user-6375 | request completed
+2026-09-13T00:00:00.938Z | INFO | API_GATEWAY | 139.182.208.225 | POST | /api/orders/{id} | 403 | 319 | req-34949 | user-4614 | resource not found
+2026-09-13T00:00:00.939Z | INFO | DATABASE | 26.54.208.104 | PUT | /api/users | 200 | 1187 | req-63239 | user-4479 | resource not found
+2026-09-13T00:00:00.940Z | DEBUG | INVENTORY | 142.149.184.20 | GET | /login | 401 | 1203 | req-65238 | user-1197 | cache miss
+2026-09-13T00:00:00.941Z | ERROR | AUTH | 121.78.82.114 | PATCH | /api/orders | 200 | 934 | req-86373 | user-592 | inventory lookup failed
+2026-09-13T00:00:00.942Z | WARN | INVENTORY | 41.126.38.163 | GET | /logout | 201 | 7 | req-72804 | user-8617 | retry scheduled after 3 attempts
+2026-09-13T00:00:00.943Z | INFO | PAYMENT | 185.101.182.136 | PUT | /health | 204 | 1048 | req-49353 | user-4930 | data validation failed
+2026-09-13T00:00:00.944Z | DEBUG | API_GATEWAY | 204.20.103.239 | PATCH | /api/payments | 204 | 885 | req-36778 | user-4999 | data validation failed
+2026-09-13T00:00:00.945Z | INFO | DATABASE | 95.131.200.230 | POST | /api/inventory | 204 | 1259 | req-84234 | user-6474 | order processed successfully
+2026-09-13T00:00:00.946Z | INFO | AUTH | 12.228.147.2 | PATCH | /api/orders | 401 | 898 | req-71683 | user-1062 | data validation failed
+2026-09-13T00:00:00.947Z | WARN | API_GATEWAY | 84.145.36.50 | PATCH | /health | 204 | 1374 | req-56023 | user-7205 | retry scheduled after 2 attempts
+2026-09-13T00:00:00.948Z | ERROR | INVENTORY | 172.249.35.203 | DELETE | /logout | 204 | 1109 | req-5623 | user-4887 | request completed
+2026-09-13T00:00:00.949Z | ERROR | ORDER | 196.36.38.195 | DELETE | /login | 401 | 1344 | req-80659 | - | cache miss
+2026-09-13T00:00:00.950Z | ERROR | DATABASE | 8.20.187.219 | POST | /api/notifications | 200 | 351 | req-73995 | user-722 | authentication failed
+2026-09-13T00:00:00.951Z | ERROR | DATABASE | 160.249.16.92 | DELETE | /api/payments | 204 | 581 | req-13075 | user-6677 | user session created
+2026-09-13T00:00:00.952Z | INFO | API_GATEWAY | 209.180.178.74 | DELETE | /logout | 500 | 1314 | req-4250 | user-2810 | order processed successfully
+2026-09-13T00:00:00.953Z | INFO | INVENTORY | 54.9.255.208 | PUT | /login | 201 | 1003 | req-6289 | user-1122 | notification sent
+2026-09-13T00:00:00.954Z | DEBUG | INVENTORY | 95.210.202.7 | DELETE | /api/payments | 201 | 1290 | req-32605 | user-872 | cache miss
+2026-09-13T00:00:00.955Z | DEBUG | DATABASE | 68.14.42.157 | GET | /api/orders | 200 | 1409 | req-14014 | user-482 | data validation failed
+2026-09-13T00:00:00.956Z | ERROR | PAYMENT | 155.148.160.83 | POST | /api/payments | 500 | 1472 | req-6601 | user-4930 | data validation failed
+2026-09-13T00:00:00.957Z | ERROR | ORDER | 105.180.93.208 | DELETE | /api/notifications | 201 | 880 | req-69100 | user-596 | payment service unavailable
+2026-09-13T00:00:00.958Z | WARN | AUTH | 17.127.87.64 | GET | /api/users | 401 | 774 | req-77271 | user-3034 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.959Z | ERROR | NOTIFICATION | 23.207.61.101 | PATCH | /api/payments | 204 | 1226 | req-66436 | - | authentication failed
+2026-09-13T00:00:00.960Z | ERROR | USER | 103.225.237.113 | PATCH | /api/users | 200 | 578 | req-51296 | - | database connection failed
+2026-09-13T00:00:00.961Z | INFO | INVENTORY | 111.234.20.64 | DELETE | /api/payments | 401 | 1400 | req-5621 | user-746 | request completed
+2026-09-13T00:00:00.962Z | DEBUG | DATABASE | 29.141.71.90 | DELETE | /health | 401 | 85 | req-45774 | user-1073 | notification sent
+2026-09-13T00:00:00.963Z | INFO | API_GATEWAY | 48.89.137.5 | DELETE | /api/notifications | 204 | 132 | req-62972 | user-4174 | data validation failed
+2026-09-13T00:00:00.964Z | INFO | API_GATEWAY | 44.170.32.27 | PATCH | /api/orders/{id} | 201 | 473 | req-14162 | user-612 | resource not found
+2026-09-13T00:00:00.965Z | INFO | API_GATEWAY | 16.219.120.117 | PUT | /logout | 204 | 1416 | req-18359 | user-8671 | request completed
+2026-09-13T00:00:00.966Z | INFO | AUTH | 185.179.64.54 | PATCH | /api/orders/{id} | 204 | 929 | req-18960 | - | request completed
+2026-09-13T00:00:00.967Z | WARN | API_GATEWAY | 146.48.212.131 | PATCH | /api/notifications | 200 | 648 | req-45915 | user-1848 | retry scheduled after 5 attempts
+2026-09-13T00:00:00.968Z | INFO | API_GATEWAY | 63.60.143.142 | PATCH | /api/users | 400 | 1118 | req-39986 | - | notification sent
+2026-09-13T00:00:00.969Z | INFO | INVENTORY | 208.59.255.230 | POST | /api/notifications | 204 | 1004 | req-33659 | - | notification sent
+2026-09-13T00:00:00.970Z | DEBUG | PAYMENT | 192.33.134.96 | GET | /api/payments | 401 | 1132 | req-60677 | user-868 | request completed
+2026-09-13T00:00:00.971Z | INFO | API_GATEWAY | 146.183.66.198 | PUT | /logout | 200 | 1018 | req-89873 | - | data validation failed
+2026-09-13T00:00:00.972Z | INFO | INVENTORY | 182.73.255.206 | PATCH | /api/payments | 404 | 718 | req-9192 | - | user session created
+2026-09-13T00:00:00.973Z | ERROR | INVENTORY | 101.131.236.128 | DELETE | /api/payments | 204 | 128 | req-15441 | user-2087 | cache miss
+2026-09-13T00:00:00.974Z | ERROR | INVENTORY | 87.4.48.113 | PUT | /logout | 503 | 1304 | req-43716 | user-7433 | request completed
+2026-09-13T00:00:00.975Z | ERROR | INVENTORY | 110.164.6.103 | DELETE | /api/users | 201 | 664 | req-16295 | - | database connection failed
+2026-09-13T00:00:00.976Z | ERROR | AUTH | 127.85.240.4 | GET | /api/inventory | 401 | 159 | req-62138 | - | notification sent
+2026-09-13T00:00:00.977Z | INFO | USER | 205.232.194.186 | POST | /login | 200 | 994 | req-88187 | - | cache miss
+2026-09-13T00:00:00.978Z | INFO | PAYMENT | 154.77.245.248 | PUT | /api/orders | 200 | 653 | req-26936 | user-4565 | resource not found
+2026-09-13T00:00:00.979Z | WARN | USER | 82.85.233.28 | GET | /api/payments | 404 | 579 | req-10906 | user-4245 | retry scheduled after 1 attempts
+2026-09-13T00:00:00.980Z | DEBUG | PAYMENT | 188.40.235.214 | PATCH | /api/payments | 201 | 976 | req-76234 | user-3277 | request completed
+2026-09-13T00:00:00.981Z | ERROR | DATABASE | 106.173.217.93 | PUT | /logout | 204 | 1081 | req-28080 | user-6450 | connection timeout
+2026-09-13T00:00:00.982Z | WARN | NOTIFICATION | 190.97.19.102 | PATCH | /health | 201 | 1300 | req-79651 | - | retry scheduled after 1 attempts
+2026-09-13T00:00:00.983Z | ERROR | INVENTORY | 223.1.248.78 | GET | /api/orders/{id} | 204 | 1471 | req-22138 | user-4221 | inventory lookup failed
+2026-09-13T00:00:00.984Z | ERROR | NOTIFICATION | 72.18.65.67 | GET | /login | 204 | 1044 | req-82112 | user-1246 | request completed
+2026-09-13T00:00:00.985Z | DEBUG | USER | 67.229.83.141 | POST | /logout | 204 | 699 | req-6108 | user-7512 | request completed
+2026-09-13T00:00:00.986Z | DEBUG | USER | 74.205.199.124 | POST | /login | 200 | 397 | req-84214 | - | data validation failed
+2026-09-13T00:00:00.987Z | INFO | NOTIFICATION | 81.44.126.20 | PATCH | /api/orders | 204 | 160 | req-8442 | user-2455 | notification sent
+2026-09-13T00:00:00.988Z | DEBUG | NOTIFICATION | 178.104.209.10 | GET | /health | 200 | 208 | req-65894 | user-4014 | data validation failed
+2026-09-13T00:00:00.989Z | INFO | AUTH | 168.120.52.245 | POST | /api/users | 401 | 874 | req-11112 | user-2030 | user session created
+2026-09-13T00:00:00.990Z | ERROR | PAYMENT | 17.119.203.75 | PATCH | /login | 200 | 208 | req-20201 | user-2401 | data validation failed
+2026-09-13T00:00:00.991Z | DEBUG | INVENTORY | 195.218.41.58 | DELETE | /api/orders | 200 | 446 | req-86419 | - | request completed
+2026-09-13T00:00:00.992Z | ERROR | USER | 48.175.23.210 | PATCH | /api/orders/{id} | 201 | 316 | req-89425 | user-7872 | database connection failed
+2026-09-13T00:00:00.993Z | ERROR | INVENTORY | 70.30.227.97 | POST | /api/inventory | 200 | 1024 | req-3299 | user-337 | request completed
+2026-09-13T00:00:00.994Z | INFO | ORDER | 162.80.199.34 | GET | /api/users | 204 | 756 | req-79690 | - | request completed
+2026-09-13T00:00:00.995Z | ERROR | USER | 6.89.230.36 | POST | /api/notifications | 204 | 474 | req-53445 | user-1122 | user session created
+2026-09-13T00:00:00.996Z | DEBUG | AUTH | 208.109.18.142 | GET | /api/notifications | 401 | 469 | req-72832 | - | cache miss
+2026-09-13T00:00:00.997Z | ERROR | PAYMENT | 133.225.196.99 | PATCH | /api/inventory | 200 | 301 | req-51241 | user-7352 | order processed successfully
+2026-09-13T00:00:00.998Z | ERROR | NOTIFICATION | 140.252.125.36 | POST | /api/orders/{id} | 204 | 198 | req-30972 | user-1317 | user session created
+2026-09-13T00:00:00.999Z | ERROR | API_GATEWAY | 129.231.190.109 | PATCH | /login | 200 | 705 | req-73108 | - | order processed successfully
