@@ -5,3 +5,25 @@ target/
 .vscode/
 .idea/
 *.log
+
+# Node / frontend
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# JVM dumps / runtime output
+hs_err_pid*
+replay_pid*
+logs/
+*.hprof
