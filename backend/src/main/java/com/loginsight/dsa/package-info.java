@@ -7,6 +7,8 @@
  *
  * <p>Phase boundary: Phase 1 creates the package skeleton; Phase 2 adds the analytics engine; Phase 3
  * implements the string algorithm engine under {@code string/}, {@code string/aho} and
- * {@code string/suffix}.</p>
+ * {@code string/suffix}; Phase 4 implements the advanced dynamic programming engine under {@code dp/}
+ * ({@code dp/editdistance}, {@code dp/alignment}, {@code dp/interval}, {@code dp/bitmask},
+ * {@code dp/tree}, {@code dp/sos}).</p>
  */
 package com.loginsight.dsa;
