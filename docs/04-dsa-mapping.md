@@ -67,10 +67,17 @@ Par = Parallel Lab, Play = DSA Playground.
 
 | Syllabus | Algorithm / component | Java class | Feature | Endpoint | UI | Complexity | Test |
 |---|---|---|---|---|---|---|---|
-| Matching | Maximal matching | `approximation/MaximalMatching` | matching edges feeding the cover | (via vertex cover) | Approx | O(E) | `VertexCoverApproximationTest` |
-| Approximation | Vertex cover 2-approx | `approximation/VertexCoverApproximation`, `approximation/ApproximationResult` | cover + bound + ratio reporting | `POST /api/approximation/vertex-cover` | Approx | O(E) | `VertexCoverApproximationTest` |
+| Matching | Maximal matching | `approximation/MaximalMatching` | greedy maximal matching feeding the cover | (via vertex cover) | Approx | O(E) | `MaximalMatchingTest`, `VertexCoverApproximationTest` |
+| Approximation | Vertex cover 2-approx | `approximation/VertexCoverApproximation`, `approximation/ApproximationResult` | cover + matching + lower bound + ratio reporting; ratio <= 2 | `POST /api/approximation/vertex-cover` | Approx | O(E) | `VertexCoverApproximationTest` |
 | Approximation app | Incident Coverage Planner | `service/ApproximationService` + `SetCoverDemo` | services covering required incident relationships; NP-hard caveat explained | `POST /api/approximation/incident-coverage`, `POST /api/approximation/set-cover` | Approx | greedy ln(n) | `SetCoverDemoTest` |
-| Complexity theory | P/NP/co-NP/NP-hard/NP-complete, reductions, classic problems, PTAS/FPTAS/APX/FPT/kernelization | documented | `docs/np-completeness.md` | - | Docs | - | - |
+| Approximation app | Set cover (APX, H(n) bound) | `approximation/SetCoverDemo`, `approximation/SetCoverResult` | greedy set-cover demonstration; NP-hard caveat explained | (via tests/docs) | Approx | greedy | `SetCoverDemoTest` |
+| FPT | Vertex cover parameterized by k | `approximation/BoundedVertexCover` | exact decision/certificate via bounded branching when k is small | (via tests/docs) | Docs | O(2^k (V+E)) | `BoundedVertexCoverTest` |
+| Kernelization | VC kernelization rules | `approximation/VertexCoverKernelization`, `approximation/KernelizationResult` | self-loop + high-degree rules preserving tau(G) <= k | (via tests/docs) | Docs | O(nE) | `KernelizationTest` |
+| FPTAS | 0/1 knapsack value-scaling FPTAS | `approximation/KnapsackFPTAS`, `approximation/KnapsackResult` | A >= (1-eps) OPT with polynomial n, 1/eps runtime | (via tests/docs) | Docs | O(n^3/eps) | `KnapsackFPTASTest` |
+| Reduction | Vertex cover ↔ Independent set | `approximation/IndependentSetReduction` | V-S complement transformation + verifiers | (via tests/docs) | Docs | O(n+E) | `ReductionsTest` |
+| Reduction | Clique ↔ IS in complement | `approximation/ComplementGraph` | complement transformation + clique verifier | (via tests/docs) | Docs | O(V^2) | `ReductionsTest` |
+| Tractable-tool road map | Shared undirected graph model | `approximation/UndirectedGraph`, `approximation/UndirectedEdge` | simple graph with duplicate policy, self-loop policy, FPT-friendly removal | (transversal) | Approx | O(E) scans | all Phase 6 tests |
+| Complexity theory | P/NP/co-NP/NP-hard/NP-complete, Cook-Levin, reduction zoo, PTAS/FPTAS/APX, FPT, kernelization | documented | `docs/np-completeness.md` | - | Docs | - | - |
 
 ### Module 6A - Randomized Algorithms
 
@@ -120,7 +127,8 @@ String matching: naive, KMP, Z, Rabin-Karp, multi-pattern Aho-Corasick, suffix a
 DP: 3 edit-distance variants, global + local alignment, interval (matrix chain), bitmask (TSP +
 Hamiltonian), tree (diameter + rerooting), SOS subset DP.
 Flow: Ford-Fulkerson, Edmonds-Karp, Dinic, min-cut, bipartite matching, min-cost max-flow (SSP).
-Approximation: maximal matching, 2-approx vertex cover, greedy set cover, incident coverage app.
+Approximation: maximal matching, 2-approx vertex cover, FPT bounded-branching vertex cover, vertex cover
+kernelization, knapsack FPTAS, greedy set cover, VC<->independent-set and clique<->complement reductions.
 Randomized: Miller-Rabin, reservoir sampling, universal hashing, randomized quicksort.
 Parallel: reduce, prefix scan, sort, work/span analysis, benchmark.
 

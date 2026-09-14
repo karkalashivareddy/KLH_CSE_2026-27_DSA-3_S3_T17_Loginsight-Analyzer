@@ -10,6 +10,8 @@
  * {@code string/suffix}; Phase 4 implements the advanced dynamic programming engine under {@code dp/}
  * ({@code dp/editdistance}, {@code dp/alignment}, {@code dp/interval}, {@code dp/bitmask},
  * {@code dp/tree}, {@code dp/sos}); Phase 5 implements the network flow and matching engine under
- * {@code flow/} plus the {@code common/} queue and stack it relies on.</p>
+ * {@code flow/} plus the {@code common/} queue and stack it relies on; Phase 6 implements the
+ * NP-completeness and approximation engine under {@code approximation/} (maximal matching, vertex cover
+ * 2-approximation, FPT bounded branching, kernelization, knapsack FPTAS, set cover, reductions).</p>
  */
 package com.loginsight.dsa;

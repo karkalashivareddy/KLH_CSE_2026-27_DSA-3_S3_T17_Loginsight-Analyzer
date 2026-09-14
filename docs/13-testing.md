@@ -69,9 +69,23 @@
   graphs, forced bad FF cases on integers).
 
 ### Approximation (`dsa/approximation`)
-- `VertexCoverApproximationTest` - cover is valid (every edge covered), size <= 2*OPT on small
-  graphs solved by brute force, empty graph, isolated vertices.
-- `SetCoverDemoTest` - greedy covers universe, ratio bound respected in demo sizes.
+- `MaximalMatchingTest` - greedy matching is valid (endpoint-disjoint) and maximal (no strictly larger
+  matching extends it on small graphs).
+- `VertexCoverApproximationTest` - cover is valid (every edge covered), size <= 2*OPT on small graphs
+  solved by subset-enumeration oracle, determinism, self-loops force their vertex, duplicates per the
+  simple-graph contract, isolated vertices, empty graph, disconnected graphs.
+- `SetCoverDemoTest` - greedy covers universe, empty family/universe, duplicates inside a set,
+  H(n) bound reporting.
+- `ReductionsTest` - S is a cover iff V-S is independent; clique in G iff independent set in complement(G),
+  on tiny graphs by direct definition.
+- `BoundedVertexCoverTest` - FPT decision/certificate matches the brute-force oracle on seeded small
+  graphs, k=0, edgeless, disconnected, k too small.
+- `KernelizationTest` - reduction preserves tau(G) <= k (oracle on original vs reduced + forced),
+  high-degree correctness, infeasible cases.
+- `KnapsackFPTASTest` - vs independent exact DP on seeded random instances; A >= (1-eps)*OPT; empty/one
+  item/capacity edge cases; varying eps.
+- `ApproximationExperimentTest` - deterministic exact-vs-approx-vs-FPT comparison demo (OPT, approximate
+  cover, ratio, FPT decision for selected k) on fixed graphs.
 
 ### Randomized (`dsa/randomized`)
 - `MillerRabinTest` - small primes/composites, Carmichael number (561), safe ranges, deterministic
