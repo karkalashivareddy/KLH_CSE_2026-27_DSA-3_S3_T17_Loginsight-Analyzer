@@ -16,6 +16,9 @@
  * Phase 7 implements the randomized algorithms engine under {@code randomized/} (randomized
  * quicksort, Miller-Rabin primality, universal and FKS perfect hashing, reservoir sampling, plus
  * the shared seeded {@link com.loginsight.dsa.randomized.RandomSource} and overflow-safe
- * {@link com.loginsight.dsa.randomized.ModularArithmetic} supports).</p>
+ * {@link com.loginsight.dsa.randomized.ModularArithmetic} supports); Phase 8 implements the
+ * parallel algorithms engine under {@code parallel/} (parallel reduction, Blelloch prefix scan,
+ * parallel merge sort, work/span analysis and benchmark) — the only package permitted to use
+ * {@code java.util.concurrent}, per docs/02 §8.2.</p>
  */
 package com.loginsight.dsa;

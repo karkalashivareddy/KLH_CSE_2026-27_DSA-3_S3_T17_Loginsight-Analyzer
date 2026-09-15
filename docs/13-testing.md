@@ -113,12 +113,25 @@
   a key, structural accessors, insert/remove throw `UnsupportedOperationException`.
 
 ### Parallel (`dsa/parallel`)
-- `ParallelReduceTest` - sum/count/max/error-count results equal sequential across sizes incl.
-  small n (threshold falls back to sequential).
-- `ParallelPrefixScanTest` - inclusive/exclusive scan equals sequential scan; work/span sanity.
-- `ParallelSortTest` - output sorted and equals sequential sort results.
-- `ParallelCrossCheckTest` - reduce/scan/sort parallel == sequential on shared datasets, including
-  n below parallelism threshold.
+- `ParallelReduceTest` - each operator (SUM, COUNT, MAX, ERROR_COUNT) equals its sequential fold
+  on small n (below the 1024 sequential threshold) and large n (4096-divisible, 200k) at several
+  worker counts (2/4/8); result independent of worker count; empty/single/all-negative/overflow-
+  wrapping inputs; MAX-on-empty rejected; input never mutated; null/invalid-parallelism rejected.
+- `ParallelPrefixScanTest` - inclusive/exclusive scan equals the sequential fold on small n and
+  large n (4096/5000/8192), power-of-two and non-power-of-two sizes; hand-computed manual
+  baselines; inclusive == exclusive + input elementwise; empty/single/two-element/negative/
+  overflow inputs; input never mutated; deterministic across runs; null/invalid-parallelism
+  rejected.
+- `ParallelSortTest` - output equals the gold-standard sorted array (`Arrays.sort` oracle,
+  test-only) and the same-schedule sequential sort on empty/single/pairs/sorted/reverse/all-equal/
+  duplicate-heavy/negative inputs; below-threshold fallback (n=500); 4096 and 50k random; input
+  never mutated; deterministic; null/invalid-parallelism rejected.
+- `ParallelCrossCheckTest` - reduce/scan/sort parallel == sequential on the same shared datasets
+  covering n = 0, 1, 2, 15, 100, 1024, 1025, 4096, 10 000, 50 001 (straddling the sequential
+  threshold); sort == `Arrays.sort` on 8192; WorkSpanAnalyzer work/span/parallelism on leaf,
+  parallel-take-max, sequential-sum, binaryReduceTree (work = 2n-1), and the full Blelloch
+  up+down sweep schedule; benchmark rows are sane (size-ordered, positive times/speedup/
+  throughput, reduce work = 2n-1); benchmark parameter validation.
 
 ## 5. Explicit Edge-Case Catalogue (required coverage)
 
@@ -152,6 +165,8 @@ Independent implementations MUST agree:
 | Edit distance | Levenshtein brute force (recursive memoised, n <= 6) == DP result |
 | Sorted results | randomized quicksort and parallel sort == gold-standard sorted array |
 | Sampling | reservoir sample membership subset-of-stream and uniformity tolerance |
+| Reduction | every parallel reduce operator == its sequential fold on shared datasets incl. below-threshold n |
+| Prefix scan | inclusive/exclusive parallel scan == sequential scan on shared datasets incl. below-threshold n |
 
 ## 7. Controller Tests (MockMvc)
 
