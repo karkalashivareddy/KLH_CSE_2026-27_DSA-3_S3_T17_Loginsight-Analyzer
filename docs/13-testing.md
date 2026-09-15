@@ -88,14 +88,29 @@
   cover, ratio, FPT decision for selected k) on fixed graphs.
 
 ### Randomized (`dsa/randomized`)
-- `MillerRabinTest` - small primes/composites, Carmichael number (561), safe ranges, deterministic
-  verdicts for what the implementation actually supports, rounds behavior.
-- `ReservoirSamplingTest` - size N <= K (whole stream), uniform distribution sanity over many runs
-  (statistical, tolerance-based), K=1.
-- `RandomHashTest` - same key + same seed reproducible, different seeds spread, collision
-  probability bounded, universal family property (pairwise independence check on small universe).
-- `RandomizedQuicksortTest` - sorted output == sorted reference, unstable-sort immaterial, empty
-  arrays, duplicates; comparison-count sanity.
+- `MillerRabinTest` - small primes/composites, Carmichael numbers (561, 1105, 1729, 2465, 2821,
+  6601, 8911), Mersenne primes (2^31-1, 2^61-1), Long.MAX_VALUE (composite), 2^63-25 (prime),
+  pseudoprimes (341550071728321, 3825123056546413051), negative n rejected, deterministic verdicts
+  cross-checked against `BigInteger.isProbablePrime` (test-only oracle), Monte Carlo rounds
+  behavior, rng/rounds validation.
+- `ReservoirSamplingTest` - size N <= K (whole stream), uniform distribution sanity over 40k seeded
+  trials (statistical, tolerance-based, n=10 k=3 each item within 3/10 ± 0.015), K=1, K=0 always
+  empty, defensive-copy checks, deterministic same-seed reproducibility, large stream (100k).
+- `RandomHashTest` - same key + same seed reproducible, different seeds spread, collision count vs
+  the birthday bound n(n-1)/(2m) on random keys (consecutive keys are a known invalid check for a
+  linear universal hash), pairwise independence on small universe (empirical ≈ 1/m, labeled a demo,
+  not a proof), RandomizedHash demo statistics, parameter validation.
+- `RandomizedQuicksortTest` - sorted output == `Arrays.sort` oracle (test-only), empty/single/
+  sorted/reverse-sorted/all-equal/duplicates/negative/5000-random, input never mutated,
+  deterministic same-seed output, null rejected.
+- `RandomSourceTest` - same-seed reproducibility, different seeds differ, bounds respected,
+  unseeded factory reports no seed, invalid bounds rejected.
+- `ModularArithmeticTest` - normalize/add/subtract semantics, wraparound, `5*3 mod 7 = 1`,
+  overflow-safety (2^62 * 2^62 mod (2^61-1) = 4), 200 random multiplyMod and 30 random powMod
+  checks against a `BigInteger` oracle (test-only), mod = 1 and invalid-mod rejection.
+- `PerfectHashTest` - membership for all inserted keys, absence for non-keys, empty/single/large
+  (200), negative keys, deterministic same seed, different seeds still valid, sentinel never equals
+  a key, structural accessors, insert/remove throw `UnsupportedOperationException`.
 
 ### Parallel (`dsa/parallel`)
 - `ParallelReduceTest` - sum/count/max/error-count results equal sequential across sizes incl.

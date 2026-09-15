@@ -12,6 +12,10 @@
  * {@code dp/tree}, {@code dp/sos}); Phase 5 implements the network flow and matching engine under
  * {@code flow/} plus the {@code common/} queue and stack it relies on; Phase 6 implements the
  * NP-completeness and approximation engine under {@code approximation/} (maximal matching, vertex cover
- * 2-approximation, FPT bounded branching, kernelization, knapsack FPTAS, set cover, reductions).</p>
+ * 2-approximation, FPT bounded branching, kernelization, knapsack FPTAS, set cover, reductions);
+ * Phase 7 implements the randomized algorithms engine under {@code randomized/} (randomized
+ * quicksort, Miller-Rabin primality, universal and FKS perfect hashing, reservoir sampling, plus
+ * the shared seeded {@link com.loginsight.dsa.randomized.RandomSource} and overflow-safe
+ * {@link com.loginsight.dsa.randomized.ModularArithmetic} supports).</p>
  */
 package com.loginsight.dsa;

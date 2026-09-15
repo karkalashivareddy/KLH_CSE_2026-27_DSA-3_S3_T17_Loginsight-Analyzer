@@ -83,12 +83,16 @@ Par = Parallel Lab, Play = DSA Playground.
 
 | Syllabus | Algorithm / component | Java class | Feature | Endpoint | UI | Complexity | Test |
 |---|---|---|---|---|---|---|---|
-| Randomized sort | Randomized quicksort | `randomized/RandomizedQuickSort` | random pivot comparison | `POST /api/randomized/quicksort` | Rand | O(n log n) expected | `RandomizedQuicksortTest` |
-| Primality | Miller-Rabin | `randomized/MillerRabin` | manual modular exponentiation, d*2^s, witnesses, rounds | `POST /api/randomized/miller-rabin` | Rand | O(k * log^3 n) | `MillerRabinTest` |
-| Randomized hashing | Universal hashing family | `randomized/UniversalHashFamily` | random seed, collision probability taught | `POST /api/randomized/hash` | Rand | O(1) op | `RandomHashTest` |
-| Randomized hashing (demo) | Randomized hash | `randomized/RandomizedHash` | educational hash demo (not disguised HashMap) | `POST /api/randomized/hash` | Rand | O(1) op | `RandomHashTest` |
+| Randomized sort | Randomized quicksort | `randomized/RandomizedQuickSort` | random pivot comparison, Hoare partition, tail-call eliminated | `POST /api/randomized/quicksort` | Rand | O(n log n) expected, O(n²) worst | `RandomizedQuicksortTest` |
+| Primality | Miller-Rabin | `randomized/MillerRabin`, `randomized/MillerRabinResult` | manual modular exponentiation, d·2^s, witnesses, rounds; deterministic 7-witness set covers all positive `long` | `POST /api/randomized/miller-rabin` | Rand | O(k · log³ n) bit ops | `MillerRabinTest` |
+| Randomized hashing | Universal hashing family | `randomized/UniversalHashFamily` | random seed, collision probability ≈ 1/m taught, pairwise independence | `POST /api/randomized/hash` | Rand | O(1) op | `RandomHashTest` |
+| Randomized hashing (demo) | Randomized hash | `randomized/RandomizedHash`, `randomized/RandomizedHash.HashStatistics` | educational hash demo: collision counts, max chain, load factor (not disguised HashMap) | `POST /api/randomized/hash` | Rand | O(n) build, O(1) op | `RandomHashTest` |
 | Randomized hashing (demo) | Randomized result | `randomized/RandomizedResult` | wraps randomization evidence | transversal | Rand | - | `RandomHashTest` |
-| Streaming | Reservoir sampling | `randomized/ReservoirSampling` | uniform K-sample of N logs, O(K) storage | `POST /api/randomized/reservoir` | Rand | O(N) time, O(K) space | `ReservoirSamplingTest` |
+| Randomized hashing | Perfect hashing (FKS) | `randomized/PerfectHash` | two-level static hash, O(1) worst-case membership, sentinel slots, rebuild-until-collision-free | (via tests/docs) | Docs | O(1) lookup; expected O(n), worst O(n²) space | `PerfectHashTest` |
+| Randomness support | Dep-injected seeded RNG | `randomized/RandomSource` | no hidden global RNG; fixed seeds for tests, unseeded production | transversal | all randomized | O(1) op | `RandomSourceTest` |
+| Modular arithmetic support | Overflow-safe modular arithmetic | `randomized/ModularArithmetic` | addMod/multiplyMod (double-and-add)/powMod (square-and-multiply), no BigInteger | (via tests/docs) | Docs | O(log² n) word ops per powMod | `ModularArithmeticTest` |
+| Streaming | Reservoir sampling | `randomized/ReservoirSampling` | uniform K-sample of N logs, O(K) storage, Algorithm R | `POST /api/randomized/reservoir` | Rand | O(N) time, O(K) space | `ReservoirSamplingTest` |
+| Concepts | Las Vegas vs Monte Carlo | documented | `docs/09-randomized.md` | - | Docs | - | - |
 
 ### Module 6B - Parallel Algorithms
 
@@ -129,13 +133,16 @@ Hamiltonian), tree (diameter + rerooting), SOS subset DP.
 Flow: Ford-Fulkerson, Edmonds-Karp, Dinic, min-cut, bipartite matching, min-cost max-flow (SSP).
 Approximation: maximal matching, 2-approx vertex cover, FPT bounded-branching vertex cover, vertex cover
 kernelization, knapsack FPTAS, greedy set cover, VC<->independent-set and clique<->complement reductions.
-Randomized: Miller-Rabin, reservoir sampling, universal hashing, randomized quicksort.
+Randomized: Miller-Rabin (deterministic + Monte Carlo), reservoir sampling, universal hashing family,
+educational randomized hash demo, FKS perfect hashing, randomized quicksort; overflow-safe modular
+arithmetic and dependency-injected seeded RNG as shared supports.
 Parallel: reduce, prefix scan, sort, work/span analysis, benchmark.
 
 ### 3.2 Explicitly conceptual (documented, not implemented - stated honestly)
 - SA-IS O(n) suffix construction - `docs/05-string-algorithms.md`.
 - Cycle-cancelling min-cost flow - `docs/07-network-flow.md`.
 - NP-completeness theory body - `docs/np-completeness.md`.
+- Las Vegas vs Monte Carlo taxonomy - `docs/09-randomized.md`.
 
 ### 3.3 Cross-evaluation guarantees
 - `FlowCrossCheckTest`: Ford-Fulkerson == Edmonds-Karp == Dinic on the same graphs.
