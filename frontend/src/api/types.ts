@@ -148,7 +148,7 @@ export interface TraceStep {
   operation: string;
   description: string;
   state: Record<string, unknown>;
-  highlighted: string[] | null;
+  highlighted: number[] | null;
   metrics: Record<string, unknown> | null;
 }
 
