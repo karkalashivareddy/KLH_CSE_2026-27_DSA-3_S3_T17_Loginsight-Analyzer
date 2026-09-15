@@ -1,6 +1,12 @@
 package com.loginsight.dsa.flow;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.loginsight.dsa.common.CustomStack;
+import com.loginsight.trace.StepRecorder;
+import com.loginsight.trace.TracedResult;
 
 /**
  * Algorithm: <strong>Ford-Fulkerson</strong> maximum flow with an explicit <em>depth-first</em>
@@ -85,9 +91,83 @@ public final class FordFulkerson {
             maxFlow += bottleneck;
             augmentations++;
         }
-        long elapsed = System.nanoTime() - start;
+long elapsed = System.nanoTime() - start;
         return FlowResult.of(ALGORITHM, graph, residual, maxFlow, source, sink, augmentations,
                 elapsed, "O(E * f_max)", "O(V + E)");
+    }
+
+    /**
+     * Trace-capable path: identical DFS augmenting loop but recording every discovered augmenting
+     * path (path edges, bottleneck, new flow value). Result equals the untraced max-flow.
+     */
+    public TracedResult maxFlowTracked(FlowGraph graph, int source, int sink) {
+        FlowValidator.requireFlowEndpoint(graph, source, sink);
+        StepRecorder recorder = new StepRecorder();
+        long start = System.nanoTime();
+        ResidualNetwork residual = new ResidualNetwork(graph);
+        int n = graph.vertexCount();
+        int[] parentEdge = new int[n];
+        long maxFlow = 0;
+        int augmentations = 0;
+        while (findAugmentingPath(residual, source, sink, parentEdge)) {
+            List<Integer> pathEdges = new ArrayList<>();
+            long bottleneck = Long.MAX_VALUE;
+            for (int v = sink; v != source; ) {
+                int e = parentEdge[v];
+                pathEdges.add(e);
+                long capacity = residual.residualCapacity(e);
+                if (capacity < bottleneck) {
+                    bottleneck = capacity;
+                }
+                v = residual.edgeFrom(e);
+            }
+            List<Integer> pathVertices = verticesOfPath(residual, pathEdges, source);
+            for (int v = sink; v != source; ) {
+                int e = parentEdge[v];
+                residual.push(e, bottleneck);
+                v = residual.edgeFrom(e);
+            }
+            maxFlow += bottleneck;
+            augmentations++;
+            recorder.record("AUGMENT",
+                    "DFS found augmenting path " + pathVertices + ": bottleneck=" + bottleneck
+                            + ", flow now " + maxFlow + ".",
+                    StepRecorder.state("phase", "augment", "augmentation", augmentations,
+                            "pathVertices", pathVertices, "pathEdgeIds", pathEdges, "bottleneck",
+                            bottleneck, "flow", maxFlow, "edges", residualEdges(graph, residual)),
+                    pathEdges, Map.of("bottleneck", bottleneck, "flow", maxFlow));
+        }
+        recorder.record("DONE", "No residual path from source to sink exists; flow is maximum.",
+                StepRecorder.state("phase", "done", "maxFlow", maxFlow, "augmentations",
+                        augmentations, "edges", residualEdges(graph, residual)));
+        long elapsed = System.nanoTime() - start;
+        return new TracedResult(ALGORITHM,
+                Map.of("maxFlow", maxFlow, "source", source, "sink", sink, "augmentations",
+                        augmentations, "edges", residualEdges(graph, residual)),
+                Map.of("edges", residualEdges(graph, residual), "steps", recorder.collect(),
+                        "truncated", recorder.isTruncated()),
+                recorder.collect(), elapsed, "O(E * f_max)", "O(V + E)");
+    }
+
+    private static List<Integer> verticesOfPath(ResidualNetwork residual,
+                                                List<Integer> pathEdges, int source) {
+        List<Integer> vertices = new ArrayList<>();
+        vertices.add(source);
+        for (int k = pathEdges.size() - 1; k >= 0; k--) {
+            vertices.add(residual.edgeTo(pathEdges.get(k)));
+        }
+        return vertices;
+    }
+
+    private static List<Map<String, Object>> residualEdges(FlowGraph graph,
+                                                           ResidualNetwork residual) {
+        List<Map<String, Object>> edges = new ArrayList<>();
+        for (int id = 0; id < graph.edgeCount(); id++) {
+            edges.add(Map.of("from", graph.edgeFrom(id), "to", graph.edgeTo(id),
+                    "capacity", graph.edgeCapacity(id),
+                    "flow", residual.flowOfOriginal(id), "residual", residual.residualOfOriginal(id)));
+        }
+        return edges;
     }
 
     /** Iterative DFS: true when a positive-residual path was found and {@code parentEdge} updated. */

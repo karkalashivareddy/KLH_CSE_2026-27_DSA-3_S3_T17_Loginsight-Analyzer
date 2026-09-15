@@ -1,5 +1,12 @@
 package com.loginsight.dsa.randomized;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.loginsight.trace.StepRecorder;
+import com.loginsight.trace.TracedResult;
+
 /**
  * Miller–Rabin probabilistic primality test.
  *
@@ -151,5 +158,91 @@ public final class MillerRabin {
         return mode == Mode.DETERMINISTIC
                 ? "definitely prime (7-witness deterministic set covers all n < 2^64)"
                 : "probable prime (Monte Carlo, false-positive probability <= 4^(-rounds))";
+    }
+
+    /**
+     * Trace-capable path: identical decomposition + witness loop recording the {@code n-1 = d·2^s}
+     * decomposition, every witness base, the modular exponentiation result, every squaring test and
+     * the verdict.
+     */
+    public TracedResult testTracked(long n, Mode mode, RandomSource rng, int rounds) {
+        StepRecorder recorder = new StepRecorder();
+        long start = System.nanoTime();
+        if (n < 0) {
+            throw new IllegalArgumentException("n must be >= 0, got " + n);
+        }
+        if (n < 2) {
+            return new TracedResult("MillerRabin",
+                    Map.of("prime", false, "n", n, "mode", mode.name(), "bases", List.of(),
+                            "note", "n < 2 is not prime"),
+                    Map.of("steps", recorder.collect(), "truncated", recorder.isTruncated()),
+                    recorder.collect(), System.nanoTime() - start, "O(k log^2 n)", "O(1)");
+        }
+        if (n == 2 || n == 3) {
+            return new TracedResult("MillerRabin",
+                    Map.of("prime", true, "n", n, "mode", mode.name(), "bases", List.of(),
+                            "note", "small prime"),
+                    Map.of("steps", recorder.collect(), "truncated", recorder.isTruncated()),
+                    recorder.collect(), System.nanoTime() - start, "O(k log^2 n)", "O(1)");
+        }
+        if (n % 2 == 0) {
+            return new TracedResult("MillerRabin",
+                    Map.of("prime", false, "n", n, "mode", mode.name(), "bases", List.of(),
+                            "note", "even > 2 is composite"),
+                    Map.of("steps", recorder.collect(), "truncated", recorder.isTruncated()),
+                    recorder.collect(), System.nanoTime() - start, "O(k log^2 n)", "O(1)");
+        }
+
+        long d = n - 1;
+        int s = 0;
+        while (d % 2 == 0) {
+            d /= 2;
+            s++;
+        }
+        recorder.record("DECOMPOSE", "n-1=" + (n - 1) + " = " + d + " * 2^" + s + ".",
+                StepRecorder.state("phase", "decompose", "n", n, "d", d, "s", s));
+
+        long[] bases = resolveBases(n, mode, rng, rounds);
+        boolean prime = true;
+        String note = deterministicModeNote(mode);
+        List<Long> basesList = new ArrayList<>();
+        for (long a : bases) {
+            basesList.add(a);
+            if (a % n == 0) {
+                continue;
+            }
+            long x = ModularArithmetic.powMod(a, d, n);
+            recorder.record("WITNESS", "Witness a=" + a + ": a^d mod n = " + x + ".", StepRecorder
+                    .state("phase", "witness", "a", a, "d", d, "x", x, "n", n), List.of(),
+                    Map.of("a", a, "x", x));
+            if (x == 1 || x == n - 1) {
+                continue;
+            }
+            boolean found = false;
+            for (int r = 1; r < s; r++) {
+                x = ModularArithmetic.multiplyMod(x, x, n);
+                recorder.record("SQUARE", "Square x -> " + x + " (round " + r + " of " + (s - 1)
+                        + ").", StepRecorder.state("phase", "witness", "a", a, "x", x, "r", r,
+                        "n", n), List.of(), Map.of("x", x));
+                if (x == n - 1) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                prime = false;
+                note = "composite (witness found)";
+                break;
+            }
+        }
+        long elapsed = System.nanoTime() - start;
+        recorder.record("VERDICT", (prime ? "Probable/definite prime" : "Composite") + " after "
+                        + basesList.size() + " bases: " + basesList + ".",
+                StepRecorder.state("phase", "verdict", "prime", prime, "bases", basesList));
+        return new TracedResult("MillerRabin",
+                Map.of("prime", prime, "n", n, "mode", mode.name(), "bases", basesList, "note",
+                        note, "s", s, "d", d),
+                Map.of("steps", recorder.collect(), "truncated", recorder.isTruncated()),
+                recorder.collect(), elapsed, "O(k log^2 n)", "O(1)");
     }
 }

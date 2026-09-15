@@ -1,5 +1,12 @@
 package com.loginsight.dsa.approximation;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.loginsight.trace.StepRecorder;
+import com.loginsight.trace.TracedResult;
+
 /**
  * Algorithm: <strong>vertex cover 2-approximation</strong> via a greedy maximal matching.
  *
@@ -105,5 +112,89 @@ public final class VertexCoverApproximation {
         int[] result = new int[count];
         System.arraycopy(values, 0, result, 0, count);
         return result;
+    }
+
+    /**
+     * Trace-capable path: identical greedy maximal-matching run, recording every scanned edge, the
+     * chosen matchings (both endpoints added to the cover), forced self-loop vertices and the final
+     * cover with its approximation bound.
+     */
+    public TracedResult approximateTracked(UndirectedGraph graph) {
+        if (graph == null) {
+            throw new IllegalArgumentException("graph must not be null");
+        }
+        StepRecorder recorder = new StepRecorder();
+        long start = System.nanoTime();
+        int n = graph.vertexCount();
+
+        boolean[] forced = new boolean[n];
+        int forcedCount = 0;
+        List<Integer> forcedVerticesFinal = new ArrayList<>();
+        for (int id = 0; id < graph.edgeCount(); id++) {
+            UndirectedEdge edge = graph.edge(id);
+            if (edge.isSelfLoop() && !forced[edge.getU()]) {
+                forced[edge.getU()] = true;
+                forcedCount++;
+                forcedVerticesFinal.add(edge.getU());
+                recorder.record("FORCE", "Self-loop at vertex " + edge.getU()
+                        + " forces it into every cover.",
+                        StepRecorder.state("phase", "force", "vertex", edge.getU(), "forced",
+                                forcedVerticesFinal), List.of(edge.getU()), Map.of());
+            }
+        }
+
+        UndirectedGraph remaining = graph;
+        int[] forcedVertices = collectSet(forced, n);
+        for (int v : forcedVertices) {
+            remaining = remaining.withoutVertex(v);
+        }
+        recorder.record("REDUCE", "Removed forced vertices and their incident edges; "
+                + remaining.edgeCount() + "/" + graph.edgeCount() + " edges remain.",
+                StepRecorder.state("phase", "reduce", "remainingEdges", remaining.edgeCount(),
+                        "totalEdges", graph.edgeCount()), forcedVerticesFinal, Map.of());
+
+        MaximalMatching matching = new MaximalMatching();
+        int[] matchedEdges = matching.matchingEdgeIds(remaining);
+        int[] cover = new int[forcedCount + 2 * matchedEdges.length];
+        System.arraycopy(forcedVertices, 0, cover, 0, forcedCount);
+        int index = forcedCount;
+        List<List<Integer>> chosenEdges = new ArrayList<>();
+        for (int edgeId : matchedEdges) {
+            UndirectedEdge edge = remaining.edge(edgeId);
+            cover[index++] = edge.getU();
+            cover[index++] = edge.getV();
+            chosenEdges.add(List.of(edge.getU(), edge.getV()));
+            recorder.record("MATCH", "Greedy maximal matching takes edge " + edge.getU() + "-"
+                    + edge.getV() + " (endpoints both free); add both to the cover.",
+                    StepRecorder.state("phase", "match", "edge", List.of(edge.getU(), edge.getV()),
+                            "coverSoFar", List.of(box(cover, index))), List.of(edge.getU(),
+                            edge.getV()), Map.of());
+        }
+        long elapsed = System.nanoTime() - start;
+        int coverSize = forcedCount + 2 * matchedEdges.length;
+        int lowerBound = forcedCount + matchedEdges.length;
+        String notes = "2-approximation via maximal matching; optimal vertex cover size >= matching size"
+                + " + forced self-loop vertices, so |C| <= 2*OPT";
+        recorder.record("DONE", "Final cover size |C|=" + coverSize + "; OPT lower bound |M|+|F|="
+                        + lowerBound + "; ratio |C|/OPT <= 2.",
+                StepRecorder.state("phase", "done", "cover", List.of(box(cover, coverSize)),
+                        "coverSize", coverSize, "lowerBound", lowerBound, "ratio", coverSize
+                                + "/" + (lowerBound > 0 ? lowerBound : 1)));
+        return new TracedResult("VertexCoverApproximation",
+                Map.of("cover", List.of(box(cover, coverSize)), "coverSize", coverSize,
+                        "matchingSize", matchedEdges.length, "forcedCount", forcedCount,
+                        "lowerBound", lowerBound, "ratio", coverSize
+                                + "/" + (lowerBound > 0 ? lowerBound : 1)),
+                Map.of("steps", recorder.collect(), "truncated", recorder.isTruncated(),
+                        "matchingEdges", chosenEdges),
+                recorder.collect(), elapsed, "O(E)", "O(V)");
+    }
+
+    private static List<Integer> box(int[] values, int size) {
+        List<Integer> out = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            out.add(values[i]);
+        }
+        return out;
     }
 }

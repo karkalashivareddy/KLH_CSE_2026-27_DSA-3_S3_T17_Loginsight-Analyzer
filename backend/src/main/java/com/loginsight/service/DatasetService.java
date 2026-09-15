@@ -65,6 +65,26 @@ public class DatasetService {
         return dataset;
     }
 
+    /** Names of the bundled sample datasets available for import (docs/12 §2). */
+    public List<String> availableSamples() {
+        Path dir = Paths.get(sampleDataDir);
+        if (!Files.isDirectory(dir)) {
+            return List.of();
+        }
+        try (java.util.stream.Stream<Path> paths = Files.list(dir)) {
+            List<String> names = new ArrayList<>();
+            for (Path path : paths.sorted()
+                    .filter(p -> !Files.isDirectory(p) && !p.getFileName().toString()
+                            .equals("README.md"))
+                    .toList()) {
+                names.add(path.getFileName().toString());
+            }
+            return names;
+        } catch (IOException e) {
+            return List.of();
+        }
+    }
+
     /** Drop the current dataset. */
     public void clear() {
         this.currentDataset = null;

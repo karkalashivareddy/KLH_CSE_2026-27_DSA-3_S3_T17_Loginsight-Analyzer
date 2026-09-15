@@ -1,5 +1,13 @@
 package com.loginsight.dsa.string;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import com.loginsight.trace.StepRecorder;
+import com.loginsight.trace.TracedResult;
+
 /**
  * Algorithm: Naive pattern matching (baseline).
  * <p>
@@ -67,5 +75,65 @@ public final class NaiveMatcher implements StringMatcher {
         int[] trimmed = new int[size];
         System.arraycopy(positions, 0, trimmed, 0, size);
         return trimmed;
+    }
+
+    /**
+     * Trace-capable search path used by the Algorithm Laboratory. Runs the identical start-position
+     * loop while recording every character comparison, alignment failure and match.
+     */
+    public TracedResult matchTracked(String text, String pattern) {
+        TextValidator.requireNonNull(text, pattern);
+        TextValidator.requireNonEmpty(pattern);
+        char[] t = text.toCharArray();
+        char[] p = pattern.toCharArray();
+        int n = t.length;
+        int m = p.length;
+        StepRecorder recorder = new StepRecorder();
+        long start = System.nanoTime();
+        int[] positions = new int[n - m + 1 > 0 ? n - m + 1 : 0];
+        int count = 0;
+        int comparisons = 0;
+        for (int i = 0; i <= n - m; i++) {
+            boolean matched = true;
+            for (int j = 0; j < m; j++) {
+                comparisons++;
+                boolean equal = t[i + j] == p[j];
+                recorder.record("COMPARE", "Compare text[" + (i + j) + "]='" + t[i + j]
+                        + "' with pattern[" + j + "]='" + p[j] + "'",
+                        StepRecorder.state("phase", "search", "i", i, "j", j, "textC", t[i + j],
+                                "patternC", p[j], "equal", equal, "matchCount", count),
+                        List.of(i + j, j), Map.of("comparisons", comparisons));
+                if (!equal) {
+                    matched = false;
+                    recorder.record("MISMATCH", "Mismatch at alignment " + i + " char " + j
+                            + "; restart from position " + (i + 1),
+                            StepRecorder.state("phase", "search", "i", i, "j", j, "textC",
+                                    t[i + j], "patternC", p[j]),
+                            List.of(i + j), Map.of("comparisons", comparisons));
+                    break;
+                }
+            }
+            if (matched) {
+                positions[count++] = i;
+                recorder.record("MATCH", "Full match found at offset " + i
+                        + " after comparing all " + m + " characters from scratch.",
+                        StepRecorder.state("phase", "search", "i", i, "j", m, "matchCount", count,
+                                "position", i),
+                        List.of(i), Map.of("comparisons", comparisons));
+            }
+        }
+        long elapsed = System.nanoTime() - start;
+        int[] result = trim(positions, count);
+        return new TracedResult("Naive", Map.of("matchCount", count, "positions", boxed(result)),
+                Map.of("steps", recorder.collect(), "truncated", recorder.isTruncated()),
+                recorder.collect(), elapsed, "O(n * m)", "O(1) auxiliary");
+    }
+
+    private static List<Integer> boxed(int[] values) {
+        List<Integer> out = new ArrayList<>(values.length);
+        for (int v : values) {
+            out.add(v);
+        }
+        return out;
     }
 }

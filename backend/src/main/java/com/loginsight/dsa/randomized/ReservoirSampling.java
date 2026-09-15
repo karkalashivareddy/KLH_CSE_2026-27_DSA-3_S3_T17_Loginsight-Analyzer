@@ -1,5 +1,12 @@
 package com.loginsight.dsa.randomized;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.loginsight.trace.StepRecorder;
+import com.loginsight.trace.TracedResult;
+
 /**
  * Reservoir sampling — Algorithm R (Vitter, 1985).
  *
@@ -87,5 +94,56 @@ public final class ReservoirSampling {
     /** Total number of elements offered to the reservoir so far. */
     public int countSeen() {
         return count;
+    }
+
+    /**
+     * Trace-capable path: identical Algorithm R loop over the provided stream, recording a step per
+     * offered element (position, decision: direct fill / replace / skip, chosen j, reservoir state).
+     */
+    public TracedResult sampleTracked(long[] stream) {
+        StepRecorder recorder = new StepRecorder();
+        long start = System.nanoTime();
+        long[] reservoir = new long[k];
+        int countSeen = 0;
+        List<Long> streamList = new ArrayList<>();
+        for (long item : stream) {
+            countSeen++;
+            streamList.add(item);
+            String decision;
+            Map<String, Object> state;
+            if (countSeen <= k) {
+                reservoir[countSeen - 1] = item;
+                decision = "FILL";
+                state = StepRecorder.state("phase", "sample", "i", countSeen, "k", k, "item",
+                        item, "decision", decision, "reservoir", box(reservoir,
+                                Math.min(countSeen, k)), "stream", streamList);
+            } else {
+                int j = rng.nextInt(countSeen);
+                decision = j < k ? "REPLACE" : "SKIP";
+                if (j < k) {
+                    reservoir[j] = item;
+                }
+                state = StepRecorder.state("phase", "sample", "i", countSeen, "k", k, "item",
+                        item, "decision", decision, "j", j, "reservoir", box(reservoir, k),
+                        "stream", streamList);
+            }
+            recorder.record(decision, "Stream element #" + countSeen + " = " + item + ": " + decision
+                    + ".", state, List.of(countSeen), Map.of("i", countSeen));
+        }
+        long elapsed = System.nanoTime() - start;
+        int len = Math.min(countSeen, k);
+        List<Long> sample = box(reservoir, len);
+        return new TracedResult("ReservoirSampling",
+                Map.of("sample", sample, "k", k, "streamSize", countSeen),
+                Map.of("steps", recorder.collect(), "truncated", recorder.isTruncated()),
+                recorder.collect(), elapsed, "O(n) time, O(k) space", "O(k)");
+    }
+
+    private static List<Long> box(long[] values, int size) {
+        List<Long> out = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            out.add(values[i]);
+        }
+        return out;
     }
 }

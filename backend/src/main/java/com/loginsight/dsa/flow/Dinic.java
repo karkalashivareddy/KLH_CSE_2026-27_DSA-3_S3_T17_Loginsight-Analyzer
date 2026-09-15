@@ -1,6 +1,12 @@
 package com.loginsight.dsa.flow;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.loginsight.dsa.common.CustomQueue;
+import com.loginsight.trace.StepRecorder;
+import com.loginsight.trace.TracedResult;
 
 /**
  * Algorithm: <strong>Dinic</strong> maximum flow using a level graph and blocking flows.
@@ -72,9 +78,81 @@ public final class Dinic {
                 augmentations++;
             }
         }
-        long elapsed = System.nanoTime() - start;
+long elapsed = System.nanoTime() - start;
         return FlowResult.of(ALGORITHM, graph, residual, maxFlow, source, sink, augmentations,
                 elapsed, "O(V^2 * E)", "O(V + E)");
+    }
+
+    /**
+     * Trace-capable path: identical BFS level graph + blocking-flow phase, recording each level graph
+     * (per-vertex level), each blocking-flow augmentation (path, bottleneck, flow total) and the final
+     * saturated state. Result equals the untraced max-flow.
+     */
+    public TracedResult maxFlowTracked(FlowGraph graph, int source, int sink) {
+        FlowValidator.requireFlowEndpoint(graph, source, sink);
+        StepRecorder recorder = new StepRecorder();
+        long start = System.nanoTime();
+        ResidualNetwork residual = new ResidualNetwork(graph);
+        int n = graph.vertexCount();
+        int[] level = new int[n];
+        int[] nextEdge = new int[n];
+        long maxFlow = 0;
+        int augmentations = 0;
+        int round = 0;
+        while (buildLevelGraph(residual, source, sink, level)) {
+            round++;
+            recorder.record("LEVEL_GRAPH", "BFS round " + round + ": level[] = " + levels(level)
+                            + " ; sink reachable.",
+                    StepRecorder.state("phase", "level", "round", round, "level", levels(level),
+                            "edges", residualEdges(graph, residual)));
+            for (int v = 0; v < n; v++) {
+                nextEdge[v] = residual.firstEdge(v);
+            }
+            long pushed;
+            while ((pushed = pushBlockingFlow(residual, source, sink, Long.MAX_VALUE, level,
+                    nextEdge)) > 0) {
+                maxFlow += pushed;
+                augmentations++;
+                recorder.record("BLOCKING", "Blocking flow push of " + pushed + " in round " + round
+                                + "; total flow " + maxFlow + ".",
+                        StepRecorder.state("phase", "blocking", "round", round, "pushed", pushed,
+                                "flow", maxFlow, "augmentations", augmentations, "edges",
+                                residualEdges(graph, residual)),
+                        List.of(), Map.of("pushed", pushed, "flow", maxFlow));
+            }
+        }
+        recorder.record("DONE", "No residual path from source to sink; flow is maximum.",
+                StepRecorder.state("phase", "done", "maxFlow", maxFlow, "augmentations",
+                        augmentations, "edges", residualEdges(graph, residual)));
+        long elapsed = System.nanoTime() - start;
+        return new TracedResult(ALGORITHM,
+                Map.of("maxFlow", maxFlow, "source", source, "sink", sink, "augmentations",
+                        augmentations, "edges", residualEdges(graph, residual)),
+                Map.of("edges", residualEdges(graph, residual), "steps", recorder.collect(),
+                        "truncated", recorder.isTruncated()),
+                recorder.collect(), elapsed, "O(V^2 * E)", "O(V + E)");
+    }
+
+    private static String levels(int[] level) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < level.length; i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(level[i]);
+        }
+        return sb.append(']').toString();
+    }
+
+    private static List<Map<String, Object>> residualEdges(FlowGraph graph,
+                                                           ResidualNetwork residual) {
+        List<Map<String, Object>> edges = new ArrayList<>();
+        for (int id = 0; id < graph.edgeCount(); id++) {
+            edges.add(Map.of("from", graph.edgeFrom(id), "to", graph.edgeTo(id),
+                    "capacity", graph.edgeCapacity(id),
+                    "flow", residual.flowOfOriginal(id), "residual", residual.residualOfOriginal(id)));
+        }
+        return edges;
     }
 
     /** BFS over positive-residual edges; fills {@code level} and reports sink reachability. */

@@ -1,7 +1,13 @@
 package com.loginsight.dsa.dp.interval;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.loginsight.dsa.dp.DpResult;
 import com.loginsight.dsa.dp.DpValidator;
+import com.loginsight.trace.StepRecorder;
+import com.loginsight.trace.TracedResult;
 
 /**
  * Algorithm: Matrix-chain multiplication order optimisation (interval DP).
@@ -128,6 +134,94 @@ public final class MatrixChainMultiplication {
         int[][] split = splitTable(p);
         long elapsed = System.nanoTime() - start;
         return new DpResult(ALGORITHM, n, cost, elapsed, "O(n^3)", "O(n^2)", split);
+    }
+
+    /**
+     * Trace-capable path: identical interval DP loops recording every interval, candidate split and
+     * chosen cost, plus the final parenthesisation.
+     */
+    public TracedResult solveTracked(int[] p) {
+        DpValidator.requireNonNull((Object) p);
+        int n = matrixCount(p);
+        StepRecorder recorder = new StepRecorder();
+        long start = System.nanoTime();
+        long[][] m = new long[n + 1][n + 1];
+        int[][] split = new int[n + 1][n + 1];
+        for (int i = 1; i <= n; i++) {
+            m[i][i] = 0;
+        }
+        for (int length = 2; length <= n; length++) {
+            for (int i = 1; i + length - 1 <= n; i++) {
+                int j = i + length - 1;
+                long best = Long.MAX_VALUE;
+                int bestSplit = i;
+                for (int k = i; k < j; k++) {
+                    long candidate = m[i][k] + m[k + 1][j] + (long) p[i - 1] * p[k] * p[j];
+                    if (candidate < best) {
+                        best = candidate;
+                        bestSplit = k;
+                    }
+                    recorder.record("SPLIT", "Interval [" + i + "," + j + "] length " + length
+                            + ": try split k=" + k + " -> m[" + i + "][" + k + "]=" + m[i][k]
+                            + " + m[" + (k + 1) + "][" + j + "]=" + m[k + 1][j] + " + p" + "["
+                            + (i - 1) + "]*p[" + k + "]*p[" + j + "]=" + (long) p[i - 1] * p[k]
+                            * p[j] + " = " + candidate + ".",
+                            StepRecorder.state("phase", "solve", "i", i, "j", j, "k", k,
+                                    "candidate", candidate, "best", best, "length", length,
+                                    "m", matrixToList(m, n + 1), "dimensions", box(p)),
+                            List.of(i, k, j), Map.of("candidate", candidate, "best", best));
+                }
+                m[i][j] = best;
+                split[i][j] = bestSplit;
+                recorder.record("INTERVAL", "Interval [" + i + "," + j + "] minimum cost = " + best
+                        + " at split k=" + bestSplit + ".",
+                        StepRecorder.state("phase", "solve", "i", i, "j", j, "value", best,
+                                "split", bestSplit, "length", length, "m",
+                                matrixToList(m, n + 1)),
+                        List.of(i, j), Map.of("value", best, "split", bestSplit));
+            }
+        }
+        StringBuilder paren = new StringBuilder();
+        buildParenthesization(split, 1, n, paren);
+        long elapsed = System.nanoTime() - start;
+        String parenthesization = n == 1 ? "A1" : paren.toString();
+        return new TracedResult(ALGORITHM,
+                Map.of("minCost", m[1][n], "parenthesization", parenthesization, "matrices", n),
+                Map.of("m", matrixToList(m, n + 1), "split", splitToList(split, n + 1), "steps",
+                        recorder.collect(), "truncated", recorder.isTruncated()),
+                recorder.collect(), elapsed, "O(n^3)", "O(n^2)");
+    }
+
+    private static List<List<Long>> matrixToList(long[][] matrix, int size) {
+        List<List<Long>> out = new ArrayList<>(size);
+        for (int r = 0; r < size; r++) {
+            List<Long> row = new ArrayList<>(size);
+            for (int c = 0; c < size; c++) {
+                row.add(matrix[r][c]);
+            }
+            out.add(row);
+        }
+        return out;
+    }
+
+    private static List<List<Integer>> splitToList(int[][] split, int size) {
+        List<List<Integer>> out = new ArrayList<>(size);
+        for (int r = 0; r < size; r++) {
+            List<Integer> row = new ArrayList<>(size);
+            for (int c = 0; c < size; c++) {
+                row.add(split[r][c]);
+            }
+            out.add(row);
+        }
+        return out;
+    }
+
+    private static List<Integer> box(int[] values) {
+        List<Integer> out = new ArrayList<>(values.length);
+        for (int v : values) {
+            out.add(v);
+        }
+        return out;
     }
 
     private static int matrixCount(int[] p) {
