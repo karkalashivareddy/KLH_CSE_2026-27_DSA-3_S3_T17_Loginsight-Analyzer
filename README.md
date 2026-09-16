@@ -1,185 +1,137 @@
-﻿# LogInsight Analyzer — DSA-3 Advanced Algorithmic Log Intelligence
+# LogInsight Analyzer
 
-KLH CSE 2026-27 DSA-3 Semester 3, Team T17
+LogInsight Analyzer is a full-stack log-analysis laboratory built around executable data-structures and algorithms. It ingests bundled text/JSONL log datasets, normalizes events, exposes algorithmic analysis through a Spring Boot API, and presents the results in a React dashboard with trace playback and benchmark views.
 
-## Project Summary
+The repository is intentionally self-contained: the backend keeps runtime data in memory and the sample datasets live in [`sample-data/`](sample-data/). It is an academic/portfolio project, not a production log platform.
 
-LogInsight Analyzer is a full-stack algorithmic log intelligence platform that applies real DSA algorithms to real log data. Every algorithm result, every trace step, and every analytics metric is computed from genuine execution — no fabricated data, no fake animations.
+## What is implemented
 
----
+- Log ingestion and parsing for the bundled text and JSONL samples.
+- Analytics for service dependencies, errors, top frequencies, and time windows.
+- A typed React/Vite frontend with overview, logs, analytics, datasets, laboratory, benchmark, system, and documentation pages.
+- Algorithm endpoints that execute the selected implementation against the request data.
+- Trace recording for selected algorithms through `StepRecorder`, then replay in the Algorithm Laboratory.
+- Sequential-versus-parallel benchmark requests and a dataset management API.
 
 ## Architecture
 
-| Layer | Stack |
-|-------|-------|
-| **Frontend** | React 18 · TypeScript · Vite (port 5173, dev proxy to :8080) |
-| **Backend** | Spring Boot 3.5.16 · Java 21 · In-memory (no JPA / no DB) |
-| **Algorithms** | 35 registered engines across 6 DSA categories |
-| **Tracing** | 13 instrumented algorithms with real-time step recording |
+```mermaid
+flowchart LR
+    U[Browser] --> F[React + TypeScript + Vite]
+    F -->|REST /api| B[Spring Boot API]
+    D[(Bundled sample-data)] --> B
+    B --> P[Log parser and analytics services]
+    B --> A[DSA engines]
+    A --> T[StepRecorder and trace catalog]
+    P --> R[JSON responses]
+    T --> R
+    R --> F
+```
 
----
+There is no database or JPA layer in the current implementation. The backend is an in-memory service designed to make algorithm behavior inspectable.
 
-## Running the Application
+## Algorithm coverage
 
-### Prerequisites
-- Java 21+ (`java -version`)
-- Node.js 18+ (`node --version`)
+The implementations are organized under `backend/src/main/java/com/loginsight/dsa/` and `backend/src/main/java/com/loginsight/query/engine/`.
 
-### Start the Backend
+| Area | Implemented examples |
+| --- | --- |
+| String search | Naive search, KMP, Z-algorithm, Rabin-Karp, Aho-Corasick, suffix-array search, fuzzy/edit-distance search |
+| Dynamic programming | Levenshtein, Damerau, weighted edit distance, global/local alignment, matrix-chain ordering, optimal BST, bitmask TSP, Hamiltonian path, tree DP, rerooting DP, SOS DP |
+| Graph and flow | Ford-Fulkerson, Edmonds-Karp, Dinic, min-cut, bipartite matching, min-cost flow |
+| Approximation | Vertex-cover approximation, incident-cover variants, set cover, and supporting reductions |
+| Randomized | Randomized quicksort, Miller-Rabin, reservoir sampling, and universal hashing |
+| Parallel | Parallel reduce, prefix scan, and merge-sort-style endpoints |
+
+The trace catalog is the authoritative list of algorithms that currently expose step-by-step execution. It is available from `GET /api/trace/catalog`.
+
+## Technology stack
+
+| Layer | Technologies |
+| --- | --- |
+| Backend | Java 21, Spring Boot 3.5.16, Spring Web |
+| Frontend | React 18, TypeScript, Vite, React Router |
+| Data | In-memory services and bundled sample datasets; no external database |
+| Quality | JUnit/Spring Boot tests, Maven Wrapper, JaCoCo configuration |
+
+## Run locally
+
+Prerequisites: Java 21 or newer and Node.js 18 or newer.
+
+Start the backend:
+
 ```bash
 cd backend
-./mvnw spring-boot:run          # Linux / macOS
-mvnw.cmd spring-boot:run        # Windows
+./mvnw spring-boot:run       # Linux/macOS
+mvnw.cmd spring-boot:run     # Windows
 ```
-Backend starts on http://localhost:8080
 
-### Start the Frontend
+The API listens on `http://localhost:8080`.
+
+Start the frontend in a second terminal:
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Frontend starts on http://localhost:5173 and proxies `/api` to the backend.
 
-### Run All Tests
+Open `http://localhost:5173`. Vite proxies `/api` requests to the backend.
+
+## Representative API surface
+
+All algorithm endpoints accept JSON bodies defined by the controller/request model that owns the endpoint. The complete endpoint mapping is documented in [`docs/12-api-documentation.md`](docs/12-api-documentation.md).
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/health` | Basic service health |
+| `GET` | `/api/logs`, `/api/logs/stats` | Read log events and summary statistics |
+| `GET` | `/api/analytics/dependencies` | Build service dependency information |
+| `POST` | `/api/search/kmp` | Execute a string-search engine |
+| `POST` | `/api/dp/levenshtein` | Execute a dynamic-programming engine |
+| `POST` | `/api/flow/dinic` | Execute a flow algorithm |
+| `GET` | `/api/trace/catalog` | List traceable algorithms |
+| `POST` | `/api/benchmark/run` | Run the benchmark service |
+
+## Testing and builds
+
 ```bash
 cd backend
-./mvnw clean verify             # 669 tests, JaCoCo coverage report
+./mvnw clean verify       # Linux/macOS
+mvnw.cmd clean verify     # Windows
+
+cd ../frontend
+npm run build
 ```
 
----
+The Maven `verify` lifecycle includes the configured JaCoCo report. The repository does not claim a fixed test count or coverage percentage; run the commands above against the current checkout for the latest result.
 
-## Algorithm Categories
+## Project structure
 
-### String Search (7 algorithms)
-Naive Pattern Search · KMP · Z-Algorithm · Rabin-Karp · Aho-Corasick Multi-Pattern · Suffix Array Build/Search · Fuzzy Edit-Distance Search
-
-### Dynamic Programming (12 algorithms)
-Levenshtein · Damerau · Weighted Edit · Needleman-Wunsch Global Alignment · Smith-Waterman Local Alignment · Matrix Chain Ordering · Optimal BST · Bitmask TSP · Hamiltonian Path · Tree Diameter DP · Rerooting DP · Sum-Over-Subsets DP
-
-### Graph & Flow (6 algorithms)
-Ford-Fulkerson Max Flow · Edmonds-Karp Max Flow · Dinic Max Flow · Min-Cut · Bipartite Matching · Min-Cost Flow
-
-### Approximation Algorithms (3 algorithms)
-Vertex Cover 2-Approximation · Incident-on-Call Cover · Greedy Set Cover
-
-### Randomized Algorithms (4 algorithms)
-Randomized QuickSort · Miller-Rabin Primality Test · Reservoir Sampling · Universal Hashing
-
-### Parallel Algorithms (3 algorithms)
-Parallel Prefix Sum (Scan) · Parallel Merge-Sort · Parallel Reduce
-
----
-
-## Trace / Algorithm Laboratory
-
-13 of the above algorithms are instrumented with a `StepRecorder` that captures every observable operation during execution. The Algorithm Laboratory (frontend `/lab` page) replays these genuine steps in sequence — never fabricated animation state.
-
-| Category | Traceable Algorithms |
-|----------|---------------------|
-| Strings | Naive, KMP, Z-Algorithm, Rabin-Karp |
-| Dynamic Programming | Levenshtein, Matrix Chain Ordering |
-| Graph & Flow | Ford-Fulkerson, Edmonds-Karp, Dinic |
-| Approximation | Vertex Cover 2-Approximation |
-| Randomized | QuickSort, Miller-Rabin, Reservoir Sampling |
-
-Trace API: `GET /api/trace/catalog` + `POST /api/trace/{category}/{algorithm}`
-
----
-
-## REST API Surface
-
-| Endpoint Group | Path | Methods |
-|---------------|------|---------|
-| Health | `/api/health`, `/api/health/status`, `/api/health/dataset` | GET |
-| Datasets | `/api/datasets`, `/api/datasets/{name}`, `/api/datasets/current` | GET, POST, DELETE |
-| Logs | `/api/logs`, `/api/logs/first`, `/api/logs/stats` | GET |
-| Analytics | `/api/analytics/dependencies`, `/api/analytics/errors`, `/api/analytics/top`, `/api/analytics/windows` | GET |
-| String Search | `/api/search/{naive,kmp,z,rabin-karp}`, `/api/search/multi`, `/api/fuzzy/search` | POST |
-| DP | `/api/dp/{levenshtein,damerau,weighted-edit,global,local,matrix-chain,obst,tsp,hamiltonian,tree,rerooting,sos}` | POST |
-| Flow | `/api/flow`, `/api/flow/{edmonds-karp,dinic,min-cut,matching,min-cost}` | POST |
-| Approximation | `/api/approx/{vertex-cover,incident-cover,set-cover}` | POST |
-| Randomized | `/api/random/{prime,sample,hash,quicksort}` | POST |
-| Trace | `/api/trace/catalog`, `/api/trace/{search,dp,flow,approx,random}/{algorithm}` | GET, POST |
-| Benchmark | `/api/benchmark/run` | POST |
-| Parallel | `/api/parallel/{reduce,scan,sort}` | POST |
-
-All endpoints are documented in `docs/12-api-documentation.md`.
-
----
-
-## Testing & Coverage
-
-| Metric | Value |
-|--------|-------|
-| **Total tests** | 669 (0 failures, 0 errors) |
-| **Instruction coverage** | 92.7% |
-| **Branch coverage** | 81.0% |
-| **Line coverage** | 93.4% |
-
-Coverage targets:
-- Backend overall: ≥ 90% lines ✓
-- Algorithm packages: ≥ 95% ✓
-- Critical services/controllers: ≥ 90% ✓
-
-Cross-check tests (`TraceCrossCheckTest`) verify that traced algorithm variants produce identical results to the original untraced implementations.
-
----
-
-## Frontend Pages
-
-| Page | Description |
-|------|-------------|
-| `/` (Overview) | Live health, dataset stats, traffic chart, service distribution, log levels |
-| `/logs` | Paginated log event table with level badges, timestamps, endpoints |
-| `/analytics` | Service dependency graph (SVG), traffic time series, top-K frequency, error patterns |
-| `/datasets` | List available samples, load/clear dataset, current status |
-| `/lab` | Algorithm Laboratory: select algorithm, edit input JSON, replay real steps with playback controls |
-| `/benchmarks` | Configure and run sequential-vs-parallel benchmark sweeps |
-| `/system` | Service status, uptime, engine count, build information |
-| `/docs` | Architecture overview, algorithm catalog, API endpoint reference |
-
----
-
-## Design Principles
-
-1. **No fake data** — every algorithm runs for real; every trace step was recorded during genuine execution
-2. **No fabricated animations** — the lab replays actual `AlgorithmStep` records from the backend
-3. **Existing methods untouched** — traced variants added alongside originals; existing code never broken
-4. **One commit per phase** — clean Git history, no squashing, no history rewrites
-5. **Test-first verification** — all changes verified with `./mvnw clean verify` before commit
-
----
-
-## Project Structure
-
-```
-loginsight-analyzer/
-├── backend/
-│   ├── src/main/java/com/loginsight/
-│   │   ├── dsa/                    # Algorithm implementations (string, dp, flow, approximation, randomized, parallel)
-│   │   ├── trace/                  # StepRecorder, AlgorithmStep, TraceCatalog, TracedResult
-│   │   ├── controller/             # REST controllers (Health, Search, Dp, Flow, Trace, Analytics, etc.)
-│   │   ├── service/                # Business services (Log, Dataset, Search, Trace, Benchmark, etc.)
-│   │   ├── query/engine/           # Query engines (per-algorithm result builders)
-│   │   ├── analytics/              # ErrorPatternAnalyzer, TimeWindowAnalyzer
-│   │   ├── graph/                  # ServiceGraphBuilder, ServiceDependencyGraph, TopKFrequentAnalyzer
-│   │   ├── dto/                    # Request/Response DTOs
-│   │   └── exception/              # GlobalExceptionHandler, custom exceptions
-│   └── src/test/                   # 669 tests (controllers, services, cross-check, analytics, graph)
-├── frontend/
-│   ├── src/
-│   │   ├── api/                    # client.ts (typed API client), types.ts (wire contracts)
-│   │   ├── components/             # Layout, UI components, TracePlayer, charts (hand-rolled SVG)
-│   │   ├── hooks/                  # useApi (data-fetching hook)
-│   │   ├── pages/                  # 8 routed pages
-│   │   └── styles/                 # global.css (dark-theme design system)
-│   └── package.json
-└── docs/                           # 10 design/architecture documents
+```text
+backend/
+  src/main/java/com/loginsight/
+    controller/       REST controllers
+    service/          log, dataset, analytics, benchmark, and trace services
+    dsa/              algorithm implementations
+    query/engine/     algorithm-specific query engines
+    trace/            step recording and trace catalog
+  src/test/           backend unit and integration tests
+frontend/
+  src/api/            typed API client and wire types
+  src/pages/          application routes
+  src/components/     layout, charts, UI, and trace player
+sample-data/          bundled input datasets
+docs/                 requirements, architecture, API, DSA, testing, and benchmarks
 ```
 
----
+## Engineering notes
 
-## License
+- Results are computed by the selected engine; the UI does not synthesize algorithm output.
+- Trace playback is implemented by recording execution steps in the backend and sending those records to the frontend.
+- The in-memory design keeps the project reproducible and makes algorithm experiments easy to run, but it is not intended for multi-instance deployment or unbounded log retention.
+- For a larger deployment, persistence, authentication, streaming ingestion, and bounded resource policies would be the next engineering concerns.
 
-Academic project — KLH University, CSE Department, 2026-27.
+## Author
+
+**Karkala Shiva Reddy** — [GitHub](https://github.com/karkalashivareddy)
