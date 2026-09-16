@@ -132,6 +132,14 @@ docs/                 requirements, architecture, API, DSA, testing, and benchma
 - The in-memory design keeps the project reproducible and makes algorithm experiments easy to run, but it is not intended for multi-instance deployment or unbounded log retention.
 - For a larger deployment, persistence, authentication, streaming ingestion, and bounded resource policies would be the next engineering concerns.
 
+Additional interview-oriented documentation:
+
+- [Engineering decisions](docs/ENGINEERING_DECISIONS.md)
+- [Interview guide](docs/INTERVIEW_GUIDE.md)
+
+GitHub Actions runs the backend Maven verification and frontend production build
+for pushes and pull requests.
+
 ## Author
 
 **Karkala Shiva Reddy** — [GitHub](https://github.com/karkalashivareddy)
