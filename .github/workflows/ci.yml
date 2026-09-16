@@ -19,7 +19,7 @@ jobs:
           distribution: temurin
           java-version: "21"
       - name: Verify with Maven
-        run: ./mvnw -q verify
+        run: mvn -q verify
 
   frontend:
     name: Frontend build
