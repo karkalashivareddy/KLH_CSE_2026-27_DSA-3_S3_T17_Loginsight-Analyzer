@@ -140,6 +140,21 @@ Additional interview-oriented documentation:
 GitHub Actions runs the backend Maven verification and frontend production build
 for pushes and pull requests.
 
+## Screenshots
+
+| View | Screenshot |
+| --- | --- |
+| Overview | ![Overview](docs/assets/screenshots/01-overview.png) |
+| Logs | ![Logs](docs/assets/screenshots/02-logs.png) |
+| Analytics | ![Analytics](docs/assets/screenshots/03-analytics.png) |
+| Datasets | ![Datasets](docs/assets/screenshots/04-datasets.png) |
+| Lab | ![Lab](docs/assets/screenshots/05-lab.png) |
+| Benchmarks | ![Benchmarks](docs/assets/screenshots/06-benchmarks.png) |
+| System | ![System](docs/assets/screenshots/07-system.png) |
+| Docs | ![Docs](docs/assets/screenshots/08-docs.png) |
+
+*Screenshots captured from live application (backend on :8082, frontend dist served on :8092) on 2026-09-17.*
+
 ## Author
 
 **Karkala Shiva Reddy** — [GitHub](https://github.com/karkalashivareddy)
