@@ -108,8 +108,9 @@
 ### 3. String algorithms (SearchController)
 
 All take `{ "pattern": "...", "text": "...", "datasetId": "...", "scope": "DATASET|EXPLICIT" }`.
-`scope=DATASET` searches over the concatenated message corpus of the current dataset;
-`scope=EXPLICIT` uses the `text` field as-is. For dataset mode `text` is optional.
+`scope` is optional and defaults to `EXPLICIT`: the supplied `text` is then used as-is (no loaded
+dataset required). `scope=DATASET` searches over the concatenated message corpus of the current
+dataset and returns 404 `DatasetException` when no dataset is loaded.
 
 | Method | Path | Highlights in response |
 |---|---|---|

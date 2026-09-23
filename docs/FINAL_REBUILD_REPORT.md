@@ -49,6 +49,32 @@ build` green, live smoke test of modules/text-hack/runs/SSE passed.
 - Parallel algorithms have no step recorder yet (benchmarked, not traced).
 - Suffix-array construction remains O(n log n) (SA-IS is a documented roadmap item, `05`).
 
+## Post-rebuild hardening pass
+
+A dedicated audit (`docs/POST_REBUILD_AUDIT.md`) re-verified every API, trace and UI surface after the
+rebuild and fixed all findings:
+
+- **Search scope**: canonical `/api/search/*` and `/api/search/multi` now default a missing `scope` to
+  `EXPLICIT` (the DTOs themselves normalised it to `DATASET`, which produced a confusing "No dataset
+  loaded" 404 for explicit-text runs). `scope:DATASET` still returns 404 honestly when no dataset is
+  loaded. API docs §3 updated.
+- **Trace Player**: keyboard shortcuts no longer hijack typing in the Lab JSON editor, TextHack console
+  or Run input.
+- **Run Sessions**: streamed FAILED runs and SSE connection loss now render visible errors instead of
+  hanging on "Waiting for streamed steps…"; a stale-response race is guarded.
+- **Laboratory**: deep links keep the `/labs/:module/:key` segment; 22 exposed non-tracked algorithms
+  gained working default inputs (36 of 42 catalogue entries open runnable — only the 6 library-only
+  classes show an empty editor).
+- **TextHack**: dataset-scoped queries explain the 404 instead of surfacing the raw error.
+- **Honesty**: benchmark charts state they are measured on this machine; module accents derived from
+  the algorithm key on the Runs page.
+- **Responsive**: a `≤640px` refinement block (header, page padding, hero, trace toolbar, forms).
+- **Stale assets**: the 8 unreferenced pre-rebuild `docs/screenshots/*.png` were removed (README links
+  to the live app).
+
+Result: unchanged verification — **696 tests / 0 failures** (`mvn -q verify`), `npm run build` clean,
+and the rebuilt jar passed the live smoke matrix (catalogue, searches without scope, TextHack, runs/SSE).
+
 ## How to verify
 
 ```powershell
