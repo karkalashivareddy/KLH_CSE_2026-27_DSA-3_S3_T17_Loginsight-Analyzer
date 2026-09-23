@@ -4,7 +4,7 @@ import { api } from '../api/client';
 import type { RunRecord, RunSummary, TraceResponse } from '../api/types';
 import { Card, Spinner, ErrorBox, EmptyState } from '../components/ui';
 import TracePlayer from '../components/TracePlayer';
-import { formatNanos, formatTs } from '../components/format';
+import { formatNanos, formatTs, moduleForAlgorithm } from '../components/format';
 
 function toTrace(run: RunRecord): TraceResponse {
   return {
@@ -29,30 +29,37 @@ export default function RunsPage() {
   const [live, setLive] = useState<TraceResponse | null>(null);
   const [streaming, setStreaming] = useState(false);
   const [streamMeta, setStreamMeta] = useState<Record<string, unknown> | null>(null);
+  const [streamError, setStreamError] = useState<string | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
+  const selectedIdRef = useRef<string | null>(null);
 
   const open = useCallback(async (id: string) => {
+    selectedIdRef.current = id;
     setSelectedId(id);
     setLive(null);
     setStreaming(false);
     setStreamMeta(null);
+    setStreamError(null);
     unsubscribeRef.current?.();
     unsubscribeRef.current = null;
     setRunLoading(true);
     try {
       const record = await api.runGet(id);
+      if (selectedIdRef.current !== id) return; // a newer selection superseded this request
       setRun(record);
     } catch (e) {
+      if (selectedIdRef.current !== id) return;
       setRun(null);
       console.error(e);
     } finally {
-      setRunLoading(false);
+      if (selectedIdRef.current === id) setRunLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (!summaries || summaries.length === 0) return;
     if (!selectedId) {
+      selectedIdRef.current = summaries[0].runId;
       setSelectedId(summaries[0].runId);
     }
   }, [summaries, selectedId]);
@@ -69,6 +76,8 @@ export default function RunsPage() {
     setStreaming(true);
     setLive({ algorithm: '…', category: '…', result: null, intermediateData: null, steps: [], truncated: false, executionTimeNanos: 0, timeComplexity: '…', spaceComplexity: '…' });
     setStreamMeta(null);
+    setStreamError(null);
+    setStreamError(null);
     unsubscribeRef.current = api.runsStream(id, {
       onMeta: (meta) => {
         setStreamMeta(meta as unknown as Record<string, unknown>);
@@ -98,6 +107,7 @@ export default function RunsPage() {
       },
       onError: (e) => {
         setStreaming(false);
+        setStreamError(e.message || 'Connection to the server was lost while streaming this run.');
         console.error('SSE error', e);
       },
       onClose: () => setStreaming(false)
@@ -108,12 +118,23 @@ export default function RunsPage() {
     unsubscribeRef.current?.();
     unsubscribeRef.current = null;
     setStreaming(false);
+    setStreamError(null);
   }, []);
 
   if (loading) return <Spinner label="Loading run history…" />;
   if (error) return <ErrorBox error={error} retry={reload} />;
 
   const list = summaries ?? [];
+
+  const accentId = moduleForAlgorithm(run?.algorithm ?? '');
+  const failedStream = streamMeta !== null && streamMeta.status === 'FAILED';
+  const failMessage =
+    streamError ??
+    (failedStream
+      ? String(streamMeta.error ?? run?.error ?? 'This run failed before any steps were recorded.')
+      : run?.status === 'FAILED'
+        ? (run.error ?? 'This run failed before any steps were recorded.')
+        : null);
 
   return (
     <div className="page">
@@ -181,12 +202,19 @@ export default function RunsPage() {
                   )}
                 </div>
 
-                {live && live.steps.length > 0 ? (
-                  <TracePlayer trace={live} accentId={run.category.toLowerCase()} />
+                {failMessage ? (
+                  <ErrorBox
+                    error={new Error(failMessage)}
+                    retry={failedStream ? () => stream(run.runId) : undefined}
+                  />
+                ) : live && live.steps.length > 0 ? (
+                  <TracePlayer trace={live} accentId={accentId} />
                 ) : !live ? (
-                  <TracePlayer trace={toTrace(run)} accentId={run.category.toLowerCase()} />
+                  <TracePlayer trace={toTrace(run)} accentId={accentId} />
                 ) : (
-                  <div className="empty-state">Waiting for streamed steps…</div>
+                  <div className="empty-state">
+                    {streaming ? 'Waiting for streamed steps…' : 'The stream recorded no steps for this run.'}
+                  </div>
                 )}
 
                 <div className="result-grid">

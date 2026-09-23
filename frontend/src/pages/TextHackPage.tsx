@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { api } from '../api/client';
-import type { TextHackResponse } from '../api/types';
+import type { ApiError, TextHackResponse } from '../api/types';
 import { Card, Spinner, ErrorBox } from '../components/ui';
 import { formatNanos, moduleAccent, moduleGlow, moduleLabel } from '../components/format';
 
@@ -107,7 +107,17 @@ export default function TextHackPage() {
       const res = await api.textHack(active.id, parsed);
       setResponse(res);
     } catch (e) {
-      setRunError(e instanceof Error ? e : new Error(String(e)));
+      const apiError = (e as Error & { apiError?: ApiError }).apiError;
+      if (apiError && apiError.status === 404 && apiError.message.includes('No dataset')) {
+        setRunError(new Error(
+          active.id === 'FUZZY_MATCH'
+            ? 'No dataset is loaded, so this query has no log lines to fuzzy-match against. ' +
+              'Load a dataset in Datasets first, or add a "text" field to the query to match an explicit corpus.'
+            : 'No dataset is loaded for this query. Load a dataset in Datasets first, then run it again.'
+        ));
+      } else {
+        setRunError(e instanceof Error ? e : new Error(String(e)));
+      }
     } finally {
       setRunning(false);
     }

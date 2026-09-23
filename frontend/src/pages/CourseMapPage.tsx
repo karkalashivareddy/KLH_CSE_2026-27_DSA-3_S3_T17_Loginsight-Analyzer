@@ -32,9 +32,8 @@ export default function CourseMapPage() {
     <div className="page">
       <h2 className="page-title">Course Map</h2>
       <p className="lab-intro">
-        The full DSA-3 algorithm catalogue mapped to the six TextHack modules. <strong>trace</strong>{' '}
-        = instrumented live replay, <strong>lib</strong> = implemented library algorithm (no step recorder),
-        <strong> — </strong> = exposed endpoint only.
+        The full DSA-3 algorithm catalogue mapped to the six TextHack modules. <strong>trace</strong> = live step
+        replay, <strong>lib</strong> = implemented library algorithm (no step recorder), no badge = exposed API only.
       </p>
 
       <div className="stat-grid">

@@ -76,6 +76,16 @@ export default function TracePlayer({ trace, names, accentId, notes }: TracePlay
 
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      const tag = t?.tagName;
+      if (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        t?.isContentEditable === true
+      ) {
+        return; // never steal keys while the user is typing (Lab JSON editor, TextHack, Run input)
+      }
       if (e.code === 'Space') {
         e.preventDefault();
         setPlaying((p) => (cursor >= last ? false : !p));

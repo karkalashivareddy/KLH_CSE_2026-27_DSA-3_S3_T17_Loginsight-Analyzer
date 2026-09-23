@@ -59,7 +59,7 @@ export default function LabPage() {
     setTrace(null);
     setPlainResult(null);
     setRunError(null);
-    navigate(`/labs/${entry.key}`, { replace: true });
+    navigate(`/labs/${entry.moduleId}/${entry.key}`, { replace: true });
   }, [navigate]);
 
   useEffect(() => {

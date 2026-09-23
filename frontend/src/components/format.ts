@@ -121,3 +121,26 @@ export function moduleLabel(moduleId: string): string {
   };
   return map[moduleId] ?? moduleId;
 }
+
+/** Algorithm key → module id (mirrors the backend AlgorithmCatalog). */
+export function moduleForAlgorithm(key: string): string {
+  const map: Record<string, string> = {
+    naive: 'strings', kmp: 'strings', z: 'strings', rabinkarp: 'strings',
+    aho_corasick: 'strings', suffix_array: 'strings', suffix_search: 'strings',
+    kasai_lcp: 'strings', fuzzy_search: 'strings',
+    levenshtein: 'dp', damerau: 'dp', weighted_edit: 'dp',
+    global_alignment: 'dp', local_alignment: 'dp', matrixchain: 'dp',
+    optimal_bst: 'dp', bitmask_tsp: 'dp', hamiltonian: 'dp',
+    tree_diameter: 'dp', rerooting: 'dp', sos: 'dp',
+    fordfulkerson: 'flow', edmondskarp: 'flow', dinic: 'flow', min_cut: 'flow',
+    bipartite_matching: 'flow', min_cost_max_flow: 'flow',
+    vertexcover: 'approximation', set_cover: 'approximation',
+    incident_cover: 'approximation', bounded_vertex_cover: 'approximation',
+    vertex_cover_kernelization: 'approximation', knapsack_fptas: 'approximation',
+    vc_is_reduction: 'approximation',
+    quicksort: 'randomized', millerrabin: 'randomized', reservoir: 'randomized',
+    universal_hash: 'randomized', perfect_hash: 'randomized',
+    parallel_reduce: 'parallel', parallel_scan: 'parallel', parallel_sort: 'parallel'
+  };
+  return map[key] ?? '';
+}

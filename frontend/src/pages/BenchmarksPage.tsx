@@ -51,6 +51,11 @@ export default function BenchmarksPage() {
   return (
     <div className="page">
       <h2 className="page-title">Benchmarks</h2>
+      <p className="lab-intro">
+        Sequential and parallel algorithms are executed for real and wall-clock timed. Ratios are
+        sequential ÷ parallel time over identical inputs; speedups are measured on this machine
+        (JVM 21 · {navigator.hardwareConcurrency ?? '?'} logical cores) and vary with host and load.
+      </p>
 
       <Card title="Configuration" className="bench-form-card">
         <div className="bench-form">
