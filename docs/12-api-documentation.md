@@ -378,3 +378,80 @@ Unknown sample names -> 404; algorithm failure -> 500 with safe message.
 Controllers accept `dto/request/*` and return `dto/response/*`. `AlgorithmResultDto` is a flat
 serializable view of `query/QueryResult` + `model/AlgorithmMetrics`. No `dsa` object is ever
 serialised directly, which keeps the wire contract stable as implementations evolve.
+
+---
+
+## 12. TextHack laboratory — catalogue, query facade, run sessions (Phases 2–4)
+
+Added by the TextHack rebuild; these endpoints drive the frontend Command Center, TextHack console,
+Laboratory and Run Sessions pages.
+
+### 12.1 Catalog (CatalogController, CatalogService, com.loginsight.catalog)
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/modules` | the six modules with per-module counts (`algorithmCount`, `exposedCount`, `trackableCount`) and the nested `algorithms` list |
+| GET | `/api/modules/{id}` | single module (id ∈ `strings, dp, flow, approximation, randomized, parallel`) |
+| GET | `/api/algorithms` | flat catalogue of all 42 algorithm descriptors |
+| GET | `/api/algorithms/{key}` | one descriptor (keys match the trace catalogue, e.g. `naive, kmp, z, rabinkarp`) |
+
+`AlgorithmInfo` fields: `key, name, moduleId, moduleLabel, problem, queryType, algorithmType,
+canonicalEndpoint, traceEndpoint, timeComplexity, spaceComplexity, tracked, exposed, defaultInput,
+description`. `exposed=false` marks library-only algorithms (no HTTP endpoint of their own);
+`tracked=true` means a step recorder exists.
+
+Module accent colours are part of the contract so the UI always matches the backend:
+strings `#22d3ee`, dp `#a78bfa`, flow `#fbbf24`, approximation `#34d399`, randomized `#f472b6`,
+parallel `#60a5fa`.
+
+### 12.2 TextHack query facade (TextHackController, TextHackService, TextHackCommand)
+
+| Method | Path | Body |
+|---|---|---|
+| POST | `/api/text-hack/query` | `{ "queryClass": "...", "input": { ... } }` |
+
+`queryClass` is one of `PATTERN_SEARCH, FUZZY_MATCH, DOCUMENT_SIMILARITY, CITATION_FLOW,
+PROJECT_SCHEDULING, PRIME_TESTING`. Each class routes to one real engine through the existing
+QueryDispatcher; responses are `TextHackResponseDto(queryClass, label, moduleId, moduleLabel,
+description, recommended[], executed, traceAlgorithmKey)`.
+
+| queryClass | engine | module | traceAlgorithmKey |
+|---|---|---|---|
+| PATTERN_SEARCH | KMP | strings | `kmp` |
+| FUZZY_MATCH | Levenshtein (fuzzy engine) | strings | — |
+| DOCUMENT_SIMILARITY | Needleman-Wunsch (+ derived `similarityPercent`/`identityMatches`) | dp | — |
+| CITATION_FLOW | Dinic | flow | `dinic` |
+| PROJECT_SCHEDULING | Vertex Cover 2-approx | approximation | `vertexcover` |
+| PRIME_TESTING | Miller-Rabin (seed param `0x5EED`) | randomized | `millerrabin` |
+
+`executed` is the canonical `AlgorithmResult` envelope; `recommended` is the ordered list of catalog
+descriptors the UI offers as "open in laboratory" jumps.
+
+### 12.3 Run sessions and SSE replay (RunController, RunService, com.loginsight.run)
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/api/runs` | `{ "algorithm": <traceable key>, "input": { ... } }` → executes the real trace-instrumented algorithm synchronously and returns the full `RunRecord` |
+| GET | `/api/runs` | newest-first `RunSummaryDto` list (max 64 retained) |
+| GET | `/api/runs/{id}` | full `RunRecord` (includes recorded `steps`) |
+| GET | `/api/runs/{id}/result` | `{ runId, status, result, error, stepCount, executionTimeNanos, truncated }` |
+| GET | `/api/runs/{id}/events` | `text/event-stream` replay: `meta` → repeated `step` → `complete` |
+
+`RunRecord`: `runId, algorithm, algorithmName, category, status (QUEUED/RUNNING/COMPLETED/FAILED),
+createdAt, completedAt, stepCount, executionTimeNanos, truncated, timeComplexity, spaceComplexity,
+input, result, steps, error`. The `steps` list mirrors the trace `TraceStep` shape
+(`index, operation, description, state, highlighted, metrics`) and `truncated` is set by the
+recorder, never by the API.
+
+SSE framing for `GET /api/runs/{id}/events`:
+
+```
+event: meta
+data: {"runId":"...","algorithm":"kmp","stepCount":10,"truncated":false,...}
+
+event: step
+data: {"index":1,"operation":"LPS_INIT","description":"...","state":{...},"highlighted":[],"metrics":{}}
+
+event: complete
+data: {"runId":"...","stepCount":10,"executionTimeNanos":1647700,"truncated":false,"status":"COMPLETED"}
+```
