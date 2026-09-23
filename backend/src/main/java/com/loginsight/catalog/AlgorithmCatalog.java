@@ -25,10 +25,102 @@ public final class AlgorithmCatalog {
 
     private static final Map<String, Map<String, Object>> DEFAULT_INPUTS = new LinkedHashMap<>();
 
+    /**
+     * Default inputs for exposed algorithms that are not trace-instrumented (so they are not in
+     * {@link TraceCatalog}). They match the request DTO of the canonical endpoint exactly, so the
+     * Laboratory opens with a runnable example instead of an empty {@code {}} editor.
+     */
+    private static final Map<String, Map<String, Object>> EXTRA_DEFAULT_INPUTS = new LinkedHashMap<>();
+
     static {
         for (TraceCatalog.Entry entry : TraceCatalog.ENTRIES) {
             DEFAULT_INPUTS.put(entry.key(), entry.defaultInput());
         }
+        extra("aho_corasick", input(
+                "patterns", List.of("error", "timeout"),
+                "text", "gateway error at 03:14, cache timeout at 03:15",
+                "scope", "EXPLICIT"));
+        extra("suffix_array", input("text", "banana bandana papaya"));
+        extra("suffix_search", input("text", "banana bandana papaya", "pattern", "ana"));
+        extra("fuzzy_search", input("query", "error", "maxDistance", 2,
+                "text", "an error occurred while loading config\na warning was logged"));
+        extra("damerau", input("a", "alex", "b", "axel"));
+        extra("weighted_edit", input("a", "kitten", "b", "sitting",
+                "insertCost", 1, "deleteCost", 1, "substituteCost", 2));
+        extra("global_alignment", input("a", "ATTACA", "b", "ATGCTA"));
+        extra("local_alignment", input("a", "ATCGT", "b", "ACGGT"));
+        extra("optimal_bst", input("freqs", List.of(2, 3, 1, 4)));
+        extra("bitmask_tsp", input("costs", List.of(
+                        List.of(0L, 10L, 15L, 20L),
+                        List.of(10L, 0L, 35L, 25L),
+                        List.of(15L, 35L, 0L, 30L),
+                        List.of(20L, 25L, 30L, 0L)),
+                "start", 0));
+        extra("hamiltonian", input(
+                "from", List.of(0, 1, 2, 3), "to", List.of(1, 2, 3, 0), "start", 0));
+        extra("tree_diameter", input(
+                "from", List.of(0, 0, 1), "to", List.of(1, 2, 3), "vertexCount", 4));
+        extra("rerooting", input(
+                "from", List.of(0, 0, 1), "to", List.of(1, 2, 3), "vertexCount", 4));
+        extra("sos", input("values", List.of(1L, 2L, 4L, 8L, 3L, 1L, 9L, 2L), "bits", 3));
+        extra("min_cut", flowExample());
+        extra("bipartite_matching", input(
+                "incidents", List.of("i1", "i2", "i3"),
+                "resources", List.of("r1", "r2"),
+                "edges", List.of(
+                        List.of("i1", "r1"), List.of("i1", "r2"),
+                        List.of("i2", "r2"), List.of("i3", "r1"))));
+        extra("min_cost_max_flow", input(
+                "suppliers", List.of("s1", "s2"),
+                "demand", List.of("c1", "c2"),
+                "costEdges", List.of(
+                        List.of("s1", "c1", "5"), List.of("s1", "c2", "2"),
+                        List.of("s2", "c1", "1"), List.of("s2", "c2", "6"))));
+        extra("set_cover", input(
+                "universe", List.of("1", "2", "3", "4", "5"),
+                "sets", new LinkedHashMap<>(Map.of(
+                        "s1", new String[]{"1", "2"},
+                        "s2", new String[]{"2", "3", "4"},
+                        "s3", new String[]{"4", "5"},
+                        "s4", new String[]{"1", "5"}))));
+        extra("incident_cover", input(
+                "services", List.of("S1", "S2", "S3"),
+                "relationships", List.of(List.of("S1", "S2"), List.of("S2", "S3"))));
+        extra("universal_hash", input("text", "hello world", "seed", 12345L, "m", 101));
+        extra("parallel_reduce", input("op", "ERROR_COUNT", "size", 256, "parallelism", 4, "marker", 1));
+        extra("parallel_scan", input("size", 64, "parallelism", 4));
+        extra("parallel_sort", input("size", 2048, "parallelism", 4));
+        DEFAULT_INPUTS.putAll(EXTRA_DEFAULT_INPUTS);
+    }
+
+    private static void extra(String key, Map<String, Object> body) {
+        EXTRA_DEFAULT_INPUTS.put(key, body);
+    }
+
+    private static Map<String, Object> input(Object... kv) {
+        Map<String, Object> out = new LinkedHashMap<>();
+        for (int i = 0; i + 1 < kv.length; i += 2) {
+            out.put(String.valueOf(kv[i]), kv[i + 1]);
+        }
+        return out;
+    }
+
+    private static Map<String, Object> flowExample() {
+        return input(
+                "source", "S", "sink", "T",
+                "nodes", List.of("S", "A", "B", "C", "T"),
+                "edges", List.of(
+                        edge("S", "A", 10L), edge("S", "B", 5L), edge("A", "B", 5L),
+                        edge("A", "C", 5L), edge("B", "C", 5L), edge("B", "T", 10L),
+                        edge("C", "T", 10L)));
+    }
+
+    private static Map<String, Object> edge(String from, String to, long capacity) {
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("from", from);
+        out.put("to", to);
+        out.put("capacity", capacity);
+        return out;
     }
 
     private static final List<AlgorithmInfo> ALGORITHMS = build();

@@ -50,11 +50,12 @@ public class SearchService {
     }
 
     public AlgorithmResultDto multi(MultiPatternRequest request) {
+        Scope scope = request.scope() == null ? Scope.EXPLICIT : request.scope();
         QueryContext context = QueryContext
                 .builder(QueryType.MULTI_PATTERN_SEARCH, AlgorithmType.AHO_CORASICK)
                 .request(request)
-                .text(resolveScope(request.scope(), request.text()))
-                .source(sourceOf(request.scope()))
+                .text(resolveScope(scope, request.text()))
+                .source(sourceOf(scope))
                 .param("patterns", request.patterns() == null ? new String[0] : request.patterns())
                 .build();
         return AlgorithmResultDto.from(dispatcher.dispatch(context), null);
@@ -97,13 +98,14 @@ public class SearchService {
     }
 
     private AlgorithmResultDto dispatchPattern(SearchRequest request, AlgorithmType algorithm) {
+        Scope scope = request.scope() == null ? Scope.EXPLICIT : request.scope();
         QueryContext context = QueryContext
                 .builder(QueryType.PATTERN_SEARCH, algorithm)
                 .request(request)
-                .scope(request.scope())
-                .text(resolveScope(request.scope(), request.text()))
+                .scope(scope)
+                .text(resolveScope(scope, request.text()))
                 .pattern(request.pattern())
-                .source(sourceOf(request.scope()))
+                .source(sourceOf(scope))
                 .build();
         return AlgorithmResultDto.from(dispatcher.dispatch(context), request.pattern());
     }
