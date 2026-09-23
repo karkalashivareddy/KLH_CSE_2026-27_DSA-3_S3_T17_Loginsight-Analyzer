@@ -8,11 +8,21 @@ export default function DocsPage() {
       <div className="doc-grid">
         <Card title="Project Overview" className="doc-card">
           <p>
-            <strong>LogInsight Analyzer</strong> is a DSA-3 Advanced Algorithmic Log Intelligence and
-            Text Analytics System built for the KLH CSE 2026-27 curriculum. It applies core DSA
+            <strong>TextHack</strong> is the DSA-3 Advanced Algorithmic Log Intelligence and
+            Text Analytics laboratory built for the KLH CSE 2026-27 curriculum. It applies core DSA
             algorithms to real log analysis problems using a Spring Boot + React architecture with
-            no fabricated data.
+            no fabricated data — every step shown in a replay was recorded by the real engine.
           </p>
+        </Card>
+
+        <Card title="Modules &amp; TextHack (Phases 2–3)" className="doc-card">
+          <table className="info-table">
+            <tbody>
+              <tr><th>Framing</th><td>6 modules (strings, dp, flow, approximation, randomized, parallel) exposed via the catalogue</td></tr>
+              <tr><th>TextHack Console</th><td>Pattern Search, Fuzzy Match, Document Similarity, Dependency Flow, Project Scheduling, Prime Testing</td></tr>
+              <tr><th>Run Sessions</th><td>Every trace-instrumented execution is recorded and replayed over SSE (meta / step / complete)</td></tr>
+            </tbody>
+          </table>
         </Card>
 
         <Card title="Algorithm Categories" className="doc-card">
@@ -113,6 +123,22 @@ export default function DocsPage() {
               <h3>Benchmark &amp; Parallel</h3>
               <code>POST /api/benchmark/run</code>
               <code>POST /api/parallel/{'{reduce|scan|sort}'}</code>
+            </div>
+            <div className="endpoint-group">
+              <h3>Catalog &amp; TextHack</h3>
+              <code>GET /api/modules</code>
+              <code>GET /api/modules/{'{id}'}</code>
+              <code>GET /api/algorithms</code>
+              <code>GET /api/algorithms/{'{key}'}</code>
+              <code>POST /api/text-hack/query</code>
+            </div>
+            <div className="endpoint-group">
+              <h3>Run Sessions &amp; SSE Replay</h3>
+              <code>POST /api/runs</code>
+              <code>GET /api/runs</code>
+              <code>GET /api/runs/{'{id}'}</code>
+              <code>GET /api/runs/{'{id}'}/events</code>
+              <code>GET /api/runs/{'{id}'}/result</code>
             </div>
           </div>
         </Card>

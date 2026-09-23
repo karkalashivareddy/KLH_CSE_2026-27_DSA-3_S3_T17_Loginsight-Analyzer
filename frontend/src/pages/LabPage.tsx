@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { api } from '../api/client';
-import type { TraceCatalogEntry, TraceResponse } from '../api/types';
+import type { AlgorithmInfo, TraceResponse } from '../api/types';
 import { Card, Spinner, ErrorBox } from '../components/ui';
 import TracePlayer from '../components/TracePlayer';
+import { moduleAccent, moduleLabel, formatNanos } from '../components/format';
 
 function pretty(object: unknown): string {
   return JSON.stringify(object, null, 2);
@@ -36,40 +38,47 @@ function Collapsible({ title, children, open = false }: {
 }
 
 export default function LabPage() {
-  const { data: catalog, loading: catLoading, error: catError } = useApi<TraceCatalogEntry[]>(() => api.traceCatalog());
+  const { key, module } = useParams<{ key?: string; module?: string }>();
+  const navigate = useNavigate();
 
-  const [selected, setSelected] = useState<TraceCatalogEntry | null>(null);
+  const { data: catalog, loading: catLoading, error: catError } =
+    useApi<AlgorithmInfo[]>(() => api.algorithms());
+  const trackable = useMemo(() => (catalog ?? []).filter((a) => a.tracked), [catalog]);
+
+  const [selected, setSelected] = useState<AlgorithmInfo | null>(null);
   const [inputText, setInputText] = useState('');
   const [trace, setTrace] = useState<TraceResponse | null>(null);
+  const [plainResult, setPlainResult] = useState<unknown>(null);
   const [running, setRunning] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [runError, setRunError] = useState<Error | null>(null);
 
+  const pick = useCallback((entry: AlgorithmInfo) => {
+    setSelected(entry);
+    setInputText(pretty(entry.defaultInput ?? {}));
+    setTrace(null);
+    setPlainResult(null);
+    setRunError(null);
+    navigate(`/labs/${entry.key}`, { replace: true });
+  }, [navigate]);
+
   useEffect(() => {
-    if (catalog && catalog.length > 0 && !selected) {
-      const first = catalog[0];
-      setSelected(first);
-      setInputText(pretty(first.defaultInput));
-      setTrace(null);
-      setRunError(null);
-    }
-  }, [catalog, selected]);
+    if (!catalog || catalog.length === 0) return;
+    const target = key ? catalog.find((a) => a.key === key) : undefined;
+    const first = target ?? trackable[0] ?? catalog[0];
+    if (first) pick(first);
+  }, [catalog, key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const groups = useMemo(() => {
-    const map = new Map<string, TraceCatalogEntry[]>();
+    const map = new Map<string, AlgorithmInfo[]>();
     for (const entry of catalog ?? []) {
-      const list = map.get(entry.category) ?? [];
+      if (module && entry.moduleId !== module) continue;
+      const list = map.get(entry.moduleId) ?? [];
       list.push(entry);
-      map.set(entry.category, list);
+      map.set(entry.moduleId, list);
     }
     return Array.from(map.entries());
-  }, [catalog]);
-
-  const pick = useCallback((entry: TraceCatalogEntry) => {
-    setSelected(entry);
-    setInputText(pretty(entry.defaultInput));
-    setTrace(null);
-    setRunError(null);
-  }, []);
+  }, [catalog, module]);
 
   const run = useCallback(async () => {
     if (!selected) return;
@@ -82,15 +91,41 @@ export default function LabPage() {
     }
     setRunning(true);
     setRunError(null);
+    setTrace(null);
+    setPlainResult(null);
     try {
-      const response = await api.traceRun(selected.endpoint, parsed);
-      setTrace(response);
+      if (selected.tracked && selected.traceEndpoint) {
+        const response = await api.traceRun(selected.traceEndpoint, parsed);
+        setTrace(response);
+      } else if (selected.canonicalEndpoint) {
+        setPlainResult(await api.execute(selected.canonicalEndpoint, parsed));
+      }
     } catch (e) {
       setRunError(e instanceof Error ? e : new Error(String(e)));
     } finally {
       setRunning(false);
     }
   }, [selected, inputText]);
+
+  const saveAsRun = useCallback(async () => {
+    if (!selected) return;
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(inputText);
+    } catch (e) {
+      setRunError(e instanceof Error ? new Error(`Invalid JSON: ${e.message}`) : new Error('Invalid JSON'));
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.run(selected.key, parsed as Record<string, unknown>);
+      navigate('/runs');
+    } catch (e) {
+      setRunError(e instanceof Error ? e : new Error(String(e)));
+    } finally {
+      setSaving(false);
+    }
+  }, [selected, inputText, navigate]);
 
   if (catLoading) return <Spinner label="Loading algorithm catalogue…" />;
   if (catError)    return <ErrorBox error={catError} />;
@@ -101,16 +136,27 @@ export default function LabPage() {
     <div className="page">
       <h2 className="page-title">Algorithm Laboratory</h2>
       <p className="lab-intro">
-        Pick an instrumented algorithm, edit its input, then replay the real steps the algorithm
-        recorded during execution.
+        Pick an instrumented algorithm, edit its input, then replay the <strong>real steps</strong> the
+        algorithm recorded during execution. Save any execution as a replay session.
+        {module && (
+          <>
+            {' '}Filtered to <strong style={{ color: moduleAccent(module) }}>{moduleLabel(module)}</strong>.{' '}
+            <Link to="/labs">Show all modules</Link>
+          </>
+        )}
       </p>
 
       <div className="lab-layout">
-        {/* Catalogue sidebar */}
+        {/* Catalogue sidebar grouped by module */}
         <Card className="lab-catalog">
-          {groups.map(([category, entries]) => (
-            <div key={category} className="catalog-group">
-              <div className="catalog-category">{category}</div>
+          {groups.map(([moduleId, entries]) => (
+            <div key={moduleId} className="catalog-group">
+              <div
+                className="catalog-category"
+                style={{ color: moduleAccent(moduleId), fontWeight: 650 }}
+              >
+                {moduleLabel(moduleId)} ({entries.length})
+              </div>
               {entries.map((entry) => (
                 <button
                   key={entry.key}
@@ -119,6 +165,7 @@ export default function LabPage() {
                   title={entry.description}
                 >
                   {entry.name}
+                  {!entry.exposed && <span className="badge" style={{ marginLeft: '0.4rem' }}>lib</span>}
                 </button>
               ))}
             </div>
@@ -128,11 +175,22 @@ export default function LabPage() {
         {/* Workspace */}
         <div className="lab-workspace">
           {selected && (
-            <Card title={selected.name} className="lab-input-card">
+            <Card
+              className="lab-input-card"
+              title={selected.name}
+              actions={
+                <button className="btn btn-sm" onClick={saveAsRun} disabled={saving}>
+                  {saving ? 'Saving…' : 'Save as run ›'}
+                </button>
+              }
+            >
               <div className="lab-meta">
-                <span className="badge">{selected.category}</span>
+                <span className="badge">{moduleLabel(selected.moduleId)}</span>
                 <span className="trace-time">{selected.timeComplexity}</span>
                 <span className="trace-time">{selected.spaceComplexity}</span>
+                {selected.tracked
+                  ? <span className="badge">live trace</span>
+                  : <span className="badge">library only</span>}
               </div>
               <p className="lab-desc">{selected.description}</p>
 
@@ -151,9 +209,21 @@ export default function LabPage() {
 
               {runError && <ErrorBox error={runError} />}
 
+              {!selected.tracked && !trace && (
+                <p className="lab-desc" style={{ marginTop: '0.8rem' }}>
+                  This algorithm is not trace-instrumented. Run it to inspect its output, or open it from
+                  the Command Center to build a recorded session.
+                </p>
+              )}
+
               {trace && (
-                <div className="lab-results">
-                  <TracePlayer trace={trace} names={names} />
+                <div className="lab-results" style={{ marginTop: '1rem' }}>
+                  <TracePlayer
+                    trace={trace}
+                    names={names}
+                    accentId={selected.moduleId}
+                    notes={`${selected.name} — module ${moduleLabel(selected.moduleId)} · ${formatNanos(trace.executionTimeNanos)} wall-time. ${selected.description}`}
+                  />
 
                   <div className="result-grid">
                     <Collapsible title="Result" open>
@@ -168,6 +238,14 @@ export default function LabPage() {
                       </Collapsible>
                     )}
                   </div>
+                </div>
+              )}
+
+              {plainResult !== null && (
+                <div className="lab-results" style={{ marginTop: '1rem' }}>
+                  <Collapsible title="Result" open>
+                    <pre className="json-block">{pretty(plainResult)}</pre>
+                  </Collapsible>
                 </div>
               )}
             </Card>

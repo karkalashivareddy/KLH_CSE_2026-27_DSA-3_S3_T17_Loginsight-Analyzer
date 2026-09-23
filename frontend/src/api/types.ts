@@ -187,3 +187,112 @@ export interface ApiError {
   timestamp: string;
   path: string;
 }
+
+/* ── RESTART · TextHack laboratory surface (backend docs/REBUILD_BASELINE Phase 2-4) ───────── */
+
+/** GET /api/modules — module framing with computed counts (backend ModuleInfo). */
+export interface ModuleInfo {
+  id: string;
+  label: string;
+  title: string;
+  description: string;
+  accent: string;
+  algorithmCount: number;
+  exposedCount: number;
+  trackableCount: number;
+  algorithms: AlgorithmInfo[];
+}
+
+/** GET /api/algorithms and GET /api/algorithms/{key} (backend AlgorithmInfo). */
+export interface AlgorithmInfo {
+  key: string;
+  name: string;
+  moduleId: string;
+  moduleLabel: string;
+  problem: string;
+  queryType: string;
+  algorithmType: string;
+  canonicalEndpoint: string | null;
+  traceEndpoint: string | null;
+  timeComplexity: string;
+  spaceComplexity: string;
+  tracked: boolean;
+  exposed: boolean;
+  defaultInput: Record<string, unknown> | null;
+  description: string;
+}
+
+/** POST /api/text-hack/query response (backend TextHackResponseDto). */
+export interface TextHackResponse {
+  queryClass: string;
+  label: string;
+  moduleId: string;
+  moduleLabel: string;
+  description: string;
+  recommended: AlgorithmInfo[];
+  executed: AlgorithmResult | null;
+  traceAlgorithmKey: string | null;
+}
+
+/** POST /api/runs response — the full recorded run (backend RunRecord). */
+export interface RunRecord {
+  runId: string;
+  algorithm: string;
+  algorithmName: string;
+  category: string;
+  status: 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  createdAt: string;
+  completedAt: string | null;
+  stepCount: number;
+  executionTimeNanos: number;
+  truncated: boolean;
+  timeComplexity: string;
+  spaceComplexity: string;
+  input: Record<string, unknown>;
+  result: unknown;
+  steps: TraceStep[];
+  error: string | null;
+}
+
+/** GET /api/runs — summaries (backend RunSummaryDto). */
+export interface RunSummary {
+  runId: string;
+  algorithm: string;
+  algorithmName: string;
+  category: string;
+  status: 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  createdAt: string;
+  completedAt: string | null;
+  stepCount: number;
+  executionTimeNanos: number;
+  truncated: boolean;
+  timeComplexity: string;
+  spaceComplexity: string;
+}
+
+/** SSE events emitted by GET /api/runs/{id}/events. */
+export interface RunMetaEvent {
+  runId: string;
+  algorithm: string;
+  algorithmName: string;
+  category: string;
+  status: string;
+  stepCount: number;
+  truncated: boolean;
+  timeComplexity: string;
+  spaceComplexity: string;
+  executionTimeNanos: number;
+  result: unknown;
+  error: string | null;
+}
+
+export interface RunCompleteEvent {
+  runId: string;
+  stepCount: number;
+  executionTimeNanos: number;
+  truncated: boolean;
+  status: string;
+}
+
+/** Course map row input: a module with its exercise/feature matrix statuses. */
+export type LabStatus = 'implemented' | 'exposed' | 'traceable' | 'extra';

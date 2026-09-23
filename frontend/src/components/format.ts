@@ -67,3 +67,57 @@ export function normaliseBuckets<T extends { service: string; count: number }>(i
     pct: Math.round((b.count / max) * 100)
   }));
 }
+
+/* ── Module identity helpers (TextHack laboratory) ─────────────────────────────────────── */
+
+/** Module id → CSS accent variable name. Falls back to the global accent. */
+export function moduleAccent(moduleId: string): string {
+  switch (moduleId) {
+    case 'strings':     return 'var(--mod-strings)';
+    case 'dp':          return 'var(--mod-dp)';
+    case 'flow':        return 'var(--mod-flow)';
+    case 'approximation': return 'var(--mod-approx)';
+    case 'randomized':  return 'var(--mod-random)';
+    case 'parallel':    return 'var(--mod-parallel)';
+    default:            return 'var(--accent)';
+  }
+}
+
+/** Module id → glow (soft background) variable name for tinted panes. */
+export function moduleGlow(moduleId: string): string {
+  switch (moduleId) {
+    case 'strings':     return 'var(--glow-strings)';
+    case 'dp':          return 'var(--glow-dp)';
+    case 'flow':        return 'var(--glow-flow)';
+    case 'approximation': return 'var(--glow-approx)';
+    case 'randomized':  return 'var(--glow-random)';
+    case 'parallel':    return 'var(--glow-parallel)';
+    default:            return 'var(--accent-dim)';
+  }
+}
+
+/** Resolve a module id to its CSS custom-property name, e.g. "strings" → "mod-strings". */
+export function moduleVar(moduleId: string): string {
+  const map: Record<string, string> = {
+    strings: 'mod-strings',
+    dp: 'mod-dp',
+    flow: 'mod-flow',
+    approximation: 'mod-approx',
+    randomized: 'mod-random',
+    parallel: 'mod-parallel'
+  };
+  return map[moduleId] ?? 'accent';
+}
+
+/** Short label for module ids used by the backend. */
+export function moduleLabel(moduleId: string): string {
+  const map: Record<string, string> = {
+    strings: 'String Algorithms',
+    dp: 'Dynamic Programming',
+    flow: 'Graph & Flow',
+    approximation: 'Approximation',
+    randomized: 'Randomized',
+    parallel: 'Parallel'
+  };
+  return map[moduleId] ?? moduleId;
+}

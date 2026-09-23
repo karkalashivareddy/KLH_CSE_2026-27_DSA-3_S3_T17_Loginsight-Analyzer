@@ -101,6 +101,27 @@ export default function BenchmarksPage() {
         </div>
       )}
 
+      {rows && rows.some((r) => r.speedup != null) && (
+        <div className="bench-charts">
+          <Card title="Parallel Speedup — Sequential ÷ Parallel wall time" className="card-wide">
+            <div className="chart-grid">
+              {deriveChart(rows).filter((g) => g.rows.some((r) => r.speedup != null)).map((group) => (
+                <Card key={group.algorithm} title={group.algorithm}>
+                  <BarChart
+                    data={group.rows.map((r) => ({
+                      label: formatNumber(r.inputSize),
+                      value: r.speedup ?? 0
+                    }))}
+                    height={140}
+                    label="speedup × (1 = no gain, >1 = faster)"
+                  />
+                </Card>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
+
       {rows && rows.length > 0 && (
         <Card title="Results" className="table-card">
           <div className="table-scroll">
