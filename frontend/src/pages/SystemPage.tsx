@@ -33,7 +33,7 @@ export default function SystemPage() {
             <tr><th>Frontend</th><td>React 18 + TypeScript + Vite</td></tr>
             <tr><th>Backend</th><td>Spring Boot 3.5 · Java 21 · In-Memory</td></tr>
             <tr><th>Algorithm Engines</th><td>{sys.engines} registered (real DSA execution)</td></tr>
-            <tr><th>TextHack Surface</th><td>{modules.data?.length ?? 0} modules · {modules.data?.reduce((n, m) => n + m.algorithmCount, 0) ?? '…'} algorithms catalogued · 6 query classes</td></tr>
+            <tr><th>DSA Engine Catalogue</th><td>{modules.data?.length ?? 0} modules · {modules.data?.reduce((n, m) => n + m.algorithmCount, 0) ?? '…'} algorithms catalogued</td></tr>
             <tr><th>Trace Capable</th><td>13 algorithms with real-time step recording + SSE replay</td></tr>
             <tr><th>Dataset</th><td>{sys.datasetLoaded ? `${sys.datasetName} — ${sys.datasetSize} events` : 'Not loaded'}</td></tr>
           </tbody>

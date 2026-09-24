@@ -7,7 +7,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,8 +79,30 @@ public class JsonLogParser implements LogParser {
                 .responseTime(parseLong(node, "responseTime", 0, lineNumber))
                 .requestId(textOrNull(node, "requestId"))
                 .userId(textOrNull(node, "userId"))
+                .traceId(textOrNull(node, "traceId"))
+                .spanId(textOrNull(node, "spanId"))
+                .url(textOrNull(node, "url"))
+                .source(textOrNull(node, "source"))
+                .attributes(collectAttributes(node))
                 .message(textOrNull(node, "message"))
+                .rawMessage(node.toString())
                 .build();
+    }
+
+    /** Picks up every unrecognised top-level field into the free-form attributes bag. */
+    private static Map<String, String> collectAttributes(JsonNode node) {
+        Map<String, String> attributes = new LinkedHashMap<>();
+        Set<String> known = Set.of("timestamp", "level", "service", "host", "ipAddress",
+                "httpMethod", "endpoint", "statusCode", "responseTime", "requestId", "userId",
+                "traceId", "spanId", "url", "source", "message");
+        node.fields().forEachRemaining(entry -> {
+            if (!known.contains(entry.getKey())) {
+                JsonNode value = entry.getValue();
+                attributes.put(entry.getKey(),
+                        value == null || value.isNull() ? null : value.asText());
+            }
+        });
+        return attributes;
     }
 
     private static Instant parseTimestamp(JsonNode node, int lineNumber) {

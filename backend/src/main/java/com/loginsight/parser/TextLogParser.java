@@ -67,6 +67,7 @@ public class TextLogParser implements LogParser {
                     .requestId(parts[8])
                     .userId(parseUserId(parts[9]))
                     .message(parts[10])
+                    .rawMessage(line)
                     .build();
             return ParsedLog.success(event, lineNumber, line);
         } catch (InvalidLogException e) {

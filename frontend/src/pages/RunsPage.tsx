@@ -146,8 +146,8 @@ export default function RunsPage() {
 
       {list.length === 0 ? (
         <EmptyState>
-          No recorded runs yet. Run an algorithm in the <strong>Laboratory</strong> or through{' '}
-          <strong>TextHack</strong> to create the first session.
+          No recorded runs yet. Run an algorithm from the <strong>Algorithms</strong> catalogue to
+          create the first session.
         </EmptyState>
       ) : (
         <div className="run-layout">

@@ -1,29 +1,41 @@
-# TextHack — Advanced Algorithms Laboratory
+# LogInsight Analyzer
 
-TextHack is a full-stack DSA-3 algorithms laboratory built around **real algorithms, real traces,
-and real log data** (formerly the LogInsight Analyzer). Six modules map onto the DSA-3 curriculum
-Modules 1–6; every algorithm executes honestly in the backend, trace-instrumented algorithms record
-their own execution steps, and the React dashboard **replays those recorded steps** — it never
-animates fabricated state.
+LogInsight Analyzer is a full-stack **algorithmic log intelligence and search** platform built for
+the DSA-3 curriculum. It applies core data-structure and algorithm theory — string matching,
+edit-distance, heaps/priority windows, token-pattern analysis — to a real (in-memory) log dataset,
+and serves it through a React dashboard. The architecture is a product shell around the DSA-3
+engines: the same algorithms are exposed both through product features (search, patterns,
+incidents) and through the Algorithm Insights catalogue and measured benchmarks.
 
-The repository is intentionally self-contained: the backend keeps runtime data in memory, the sample
-datasets live in [`sample-data/`](sample-data/), and the frontend adds no chart or state libraries
-(hand-rolled SVG charts). It is an academic/portfolio project, not a production log platform.
+The repository is intentionally self-contained: the backend keeps runtime data in memory, the demo
+and sample datasets live in [`sample-data/`](sample-data/), and the frontend adds no chart or state
+libraries (charts are hand-rolled SVG). Academic/portfolio project, not a production log platform.
 
 ## What is implemented
 
-- **Algorithm catalogue** — 42 algorithms across `strings, dp, flow, approximation, randomized,
-  parallel`, served by `GET /api/modules` and `GET /api/algorithms` with module order/labels/accents
-  as one source of truth.
-- **TextHack console** — six natural-style query classes (Pattern Search, Fuzzy Match, Document
-  Similarity, Dependency Flow, Project Scheduling, Prime Testing) that each route to one real engine.
-- **Run Sessions** — every trace-instrumented execution is stored (max 64) and replayable either
-  from the full record or streamed live over **SSE** (`meta / step / complete`).
-- **Laboratory + TraceStudio** — step-by-step replay with keyboard navigation, an operation ledger,
-  variable inspector, and education panels; deep-linkable per algorithm or per module.
-- **Course Map** — every syllabus row maps to a real implementation, test, endpoint, and UI page.
-- **Log intelligence** — ingestion, parsing and analytics over the bundled text/JSONL samples.
-- **Benchmarks** — sequential-vs-parallel sweeps with measured speedup, work, span, parallelism.
+- **Command Center** — live dashboard (`GET /api/overview`): event/error/service/host totals,
+  traffic timeline, severity distribution, HTTP status codes, top patterns, recent critical events
+  and a 7×24 activity heatmap. Every number is computed live from the loaded dataset.
+- **Log Explorer** — structured filters, time-window, paging and free-text search
+  (`GET /api/logs/explore`) over the loaded dataset, with per-event detail views
+  (`GET /api/logs/{id}`).
+- **Search** — product search (`POST /api/search`) whose DSA engine executes the user's pattern
+  over the rendered dataset haystack. Reports the measured strategy (Naive/KMP/Z/Rabin-Karp),
+  pattern length, text size and duration; a Levenshtein **"did you mean"** suggestion appears on a
+  miss; a typeahead feeds suggestions from `GET /api/search/suggest`.
+- **Analytics** — traffic timeline, severity, 7×24 heatmap, HTTP (status/methods/endpoints with
+  measured latency percentiles) and per-host rollups.
+- **Patterns** — heuristic (rule/token-based) message-structure discovery, labelled honestly as
+  not ML; drill into sample events per template (`GET /api/patterns`, `/examples`).
+- **Incidents** — windowed elevated-error detection (5-minute windows against the dataset's own
+  baseline), each with its supporting logs for verification (`GET /api/incidents`).
+- **Services** — per-service rollups and a drill-down detail with a 24-hour activity series.
+- **Live Stream** — labelled SSE replay of the dataset (`source: demo-replay`, "not real-time").
+- **Datasets / Ingestion** — one-click deterministic demo corpus, file upload (JSONL or canonical
+  text, parser auto-detected), clear, and honest parse summaries (failed lines reported).
+- **Analysis** — algorithm catalogue grouped by module, measured search benchmark (four matchers,
+  same haystack, same pattern), and recorded **Run Sessions** replayed step-by-step over SSE.
+- **System / Docs** — status and build information plus product documentation.
 
 ## Architecture
 
@@ -31,61 +43,47 @@ datasets live in [`sample-data/`](sample-data/), and the frontend adds no chart 
 flowchart LR
     U[Browser] --> F[React + TypeScript + Vite]
     F -->|REST /api| B[Spring Boot API]
-    D[(Bundled sample-data)] --> B
-    B --> P[Log parser and analytics services]
+    D[(Datasets)] --> B
+    B --> P[Parser + DatasetService]
     B --> A[DSA engines]
-    A -. trace instrumented .-> R[StepRecorder]
-    B --> C[Algorithm catalogue 42 entries]
-    B --> H[TextHack query facade]
-    B --> S[Run sessions + SSE replay]
-    C --> F
-    H --> F
-    S --> F
-    R --> S
+    A --> I[LogIndex / LogSearchService]
+    A --> E[PatternExtractor / IncidentDetector]
+    B --> O[Analytics + Overview services]
+    B --> L[LiveStreamService SSE]
+    B --> R[Run sessions + SSE replay]
+    P --> I
+    I --> B
+    E --> B
+    O --> B
+    L --> F
+    R --> F
 ```
 
-There is no database or JPA layer. The backend is an in-memory service designed to make algorithm
-behavior inspectable.
-
-## Modules (DSA-3 mapping)
-
-| Module | Title | Accent | Traceable | Highlights |
-| --- | --- | --- | --- | --- |
-| strings | String Algorithms | `#22d3ee` | 4 | Naive, KMP, Z, Rabin-Karp (cross-verified), Aho-Corasick, suffix array |
-| dp | Dynamic Programming | `#a78bfa` | 2 | Levenshtein, Needleman-Wunsch, Matrix Chain, TSP/Hamiltonian, tree/SOS DP |
-| flow | Graph & Flow | `#fbbf24` | 3 | Ford-Fulkerson, Edmonds-Karp, Dinic (cross-verified), min-cut, matching, min-cost flow |
-| approximation | Approximation | `#34d399` | 1 | VC 2-approx, bounded VC, kernelization, knapsack FPTAS, VC⇄IS reduction |
-| randomized | Randomized | `#f472b6` | 3 | Miller-Rabin, reservoir sampling, universal/FKS hashing, randomized quicksort |
-| parallel | Parallel | `#60a5fa` | 0 | prefix scan, merge-sort, reduce with work/span analysis |
-
-The full matrix, status marks (`trace` / `api` / `lib`) and cross-verification chains are in
-[`docs/COURSE_MAP.md`](docs/COURSE_MAP.md). The trace contract and replay pipeline are explained in
-[`docs/TRACE_ENGINE.md`](docs/TRACE_ENGINE.md).
+There is no database or JPA layer. `DatasetService` holds one in-memory dataset; `LogIndex`
+provides position lists and time-window lookups; `LogSearchService` combines index filters with a
+DSA matcher over the rendered haystack.
 
 ## Technology stack
 
 | Layer | Technologies |
 | --- | --- |
-| Backend | Java 21, Spring Boot 3.5.16, Spring Web |
+| Backend | Java 21, Spring Boot 3.5, Spring Web |
 | Frontend | React 18, TypeScript, Vite, React Router (no chart/state libraries) |
-| Data | In-memory services and bundled sample datasets; no external database |
-| Quality | JUnit/Spring Boot tests, Maven Wrapper, JaCoCo configuration |
+| Data | In-memory dataset; demo corpus and bundled samples; no external database |
+| Quality | JUnit / Spring Boot tests, Maven Wrapper, JaCoCo configuration |
 
 ## Run locally
 
 Prerequisites: Java 21 or newer and Node.js 18 or newer.
 
-Start the backend:
-
 ```bash
 cd backend
-./mvnw spring-boot:run       # Linux/macOS
-mvnw.cmd spring-boot:run     # Windows
+mvnw.cmd spring-boot:run      # Windows (./mvnw spring-boot:run on Linux/macOS)
 ```
 
 The API listens on `http://localhost:8080`.
 
-Start the frontend in a second terminal:
+In a second terminal:
 
 ```bash
 cd frontend
@@ -93,75 +91,89 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`. Vite proxies `/api` requests to the backend.
+Open `http://localhost:5173`. Vite proxies `/api` requests to the backend. Load the **Demo
+Dataset** from the Datasets or Ingestion screen to see every screen populated with honest data.
 
-## Representative API surface
+## API surface (summary)
 
-The complete endpoint mapping is documented in [`docs/12-api-documentation.md`](docs/12-api-documentation.md)
-(section 12 covers the TextHack laboratory surface).
+The full wire contract is documented in [`docs/API.md`](docs/API.md).
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/modules`, `/api/algorithms` | module framing + 42 algorithm descriptors |
-| `POST` | `/api/text-hack/query` | one of six engine-scoped query classes |
-| `POST` | `/api/runs` | execute + store a trace-instrumented run |
-| `GET` | `/api/runs`, `/api/runs/{id}` | run history and full record |
-| `GET` | `/api/runs/{id}/events` | SSE replay (`meta` → `step`×n → `complete`) |
-| `GET` | `/api/trace/catalog` | list traceable algorithms |
-| `POST` | `/api/search/kmp` | execute a string-search engine |
-| `POST` | `/api/benchmark/run` | run the benchmark service |
+| `GET` | `/api/overview?range=` | dashboard snapshot (`404` when no dataset) |
+| `GET` | `/api/logs`, `/api/logs/explore`, `/api/logs/{id}` | explorer + single event |
+| `POST` | `/api/search` · `GET` `/api/search/suggest` | product search + typeahead |
+| `GET` | `/api/patterns[/examples]` | message patterns |
+| `GET` | `/api/incidents[/count|/{id}|/{id}/logs]` | incident detection + evidence |
+| `GET` | `/api/services`, `/api/services/{name}` | service health |
+| `GET` | `/api/analytics/http|hosts|heatmap|windows|top|errors|dependencies` | analytics |
+| `GET` | `/api/live` (SSE) · `/api/live/status` | live replay stream |
+| `GET` | `/api/ingestion/status` · `POST` `/api/ingestion/demo` | ingestion status/demo |
+| `GET` | `/api/datasets` · `POST` `/api/datasets` · `POST` `/api/datasets/demo` | dataset options |
+| `GET` | `/api/analysis/algorithms` · `/api/analysis/benchmarks/search` | laboratory + benchmark |
+| `POST` | `/api/runs` · `GET` `/api/runs` · `GET` `/api/runs/{id}/events` | run sessions + SSE replay |
+| `GET` | `/api/analysis/…`, `/api/trace/catalog` | DSA engine catalogue |
 
 ## Testing and builds
 
 ```bash
 cd backend
-./mvnw.cmd clean verify      # Windows (./mvnw clean verify on Linux/macOS)
+.\mvnw.cmd -o clean verify     # Windows (./mvnw -o clean verify on Linux/macOS)
 
 cd ../frontend
 npm run build
 ```
 
-Current verification: **696 backend tests / 0 failures** (`mvn -q verify`), TypeScript + Vite
-production build clean. Run the commands above against the current checkout for the latest result.
+Current verification: **732 backend tests / 0 failures**, TypeScript + Vite production build
+clean. Run the commands above against the current checkout for the latest result.
 
 ## Project structure
 
 ```text
 backend/
   src/main/java/com/loginsight/
-    catalog/          algorithm + module descriptors
-    controller/       REST controllers (incl. Catalog/TextHack/Run)
-    service/          log, dataset, analytics, text-hack, run, trace services
+    analytics/        Timeline, Severity, Heatmap, Fleet analyzers (pure Java)
+    index/            LogIndex position lists + time-window lookups
+    search/           SearchQueryParser, LogSearchService (product search)
+    pattern/          PatternExtractor (heuristic token normalisation)
+    incident/         IncidentDetector (windowed baseline thresholding)
+    datasets/         DemoDatasetGenerator
+    service/          LogService, DatasetService, OverviewService, IncidentsService,
+                      LiveStreamService, SearchBenchmarkService, ...
+    controller/       REST controllers mapped 1:1 to docs/API.md
     dsa/              algorithm implementations (scope-guarded java.util surface)
-    query/engine/     algorithm-specific query engines
-    trace/            step recording and trace catalog
-  src/test/           backend unit and integration tests (696)
+    dto/              wire records (response + request)
+  src/test/           unit + integration tests (732)
 frontend/
-  src/api/            typed API client (incl. SSE parser) and wire types
-  src/pages/          Command Center, TextHack, Laboratory, Run Sessions,
-                      Course Map, + analytics/logs/datasets/benchmarks/system/docs
-  src/components/     layout, charts, UI, and TraceStudio player
+  src/api/            typed API client (incl. SSE parsers) and wire types
+  src/pages/          Overview, Logs, Search, Analytics, Patterns, Incidents, Services,
+                      Live, Datasets, Ingestion, Analysis, Algorithms, Benchmarks, Runs, ...
+  src/components/     layout, hand-rolled SVG charts, TracePlayer, formatters
+  src/styles/         global.css (dark control-room palette)
 sample-data/          bundled input datasets
-docs/                 requirements, architecture, API, DSA, testing, benchmarks
+docs/                 architecture, API, dataset, algorithms, UI/UX and reports
 ```
 
 ## Engineering notes
 
-- Results are computed by the selected engine; the UI does not synthesize algorithm output.
-- Trace playback replays **recorded** steps; `truncated` is set by the recorder, never guessed.
-- Probabilistic algorithms say so (`PROBABLY_PRIME`); approximation algorithms report their ratio
-  and lower bound; library-only algorithms are labeled `lib` in the UI.
-- The in-memory design keeps the project reproducible and experiments easy to run, but it is not
-  intended for multi-instance deployment or unbounded log retention (run history is capped at 64).
+- Product features are **never** fabricated: every count, latency, benchmark time and incident
+  derives from the loaded dataset or a measured run. Demo data is labelled; the live stream is a
+  labelled replay (`demo-replay`, "not real-time").
+- Incident detection is heuristic and labelled as such; patterns are token-based heuristics, not ML.
+- The DSA layer is inspectable: the Algorithm Catalogue, measured search benchmark and run-session
+  replay expose exactly which algorithm ran, on what haystack, and how long it measured.
+- The in-memory design keeps the project reproducible; it is not intended for multi-instance
+  deployment or unbounded retention (run history capped at 64).
 
 Additional documentation:
 
-- [Rebuild baseline](docs/REBUILD_BASELINE.md) · [Research principles](docs/RESEARCH.md)
+- [Architecture](docs/ARCHITECTURE.md) · [API](docs/API.md) · [Dataset](docs/DATASET.md)
+- [Algorithms](docs/ALGORITHMS.md) · [UI/UX](docs/UI-UX.md)
+- [LogInsight rebuild report](docs/LOGINSIGHT_REBUILD_REPORT.md) · [Rebuild baseline](docs/REBUILD_BASELINE.md)
 - [Course map](docs/COURSE_MAP.md) · [Trace engine](docs/TRACE_ENGINE.md) · [Final rebuild report](docs/FINAL_REBUILD_REPORT.md)
-- [Engineering decisions](docs/ENGINEERING_DECISIONS.md) · [Interview guide](docs/INTERVIEW_GUIDE.md)
 
-GitHub Actions runs the backend Maven verification and frontend production build for pushes and pull
-requests.
+GitHub Actions runs the backend Maven verification and the frontend production build for pushes and
+pull requests.
 
 ## Author
 

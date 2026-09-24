@@ -1,175 +1,139 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { api } from '../api/client';
-import type { DatasetStats, ModuleInfo, RunSummary, SystemStatus, DatasetSummary } from '../api/types';
-import { Card, StatCard, Spinner, ErrorBox, EmptyState, LevelBadge, TimeChart, BarChart } from '../components/ui';
-import { formatDuration, formatNanos, formatNumber, formatTs, moduleAccent, moduleVar, moduleGlow, normaliseBuckets } from '../components/format';
+import type { OverviewDto } from '../api/types';
+import {
+  Card, StatCard, Spinner, ErrorBox, EmptyState, LevelBadge,
+  TimeChart, DonutChart, HBarChart, HeatmapGrid, Badge
+} from '../components/ui';
+import { LEVEL_COLORS, formatNumber, formatTs, formatNanos } from '../components/format';
+
+const RANGES = ['5m', '15m', '1h', '6h', '24h'] as const;
 
 /**
- * Command Center: system health, the six algorithm modules (real counts from the catalogue),
- * recent run sessions, and the live dataset overview. Nothing is fabricated.
+ * Command Center: a live dashboard derived entirely from the loaded dataset via GET /api/overview.
+ * When nothing is loaded the first-run state points at the demo dataset — no numbers are fabricated.
  */
 export default function OverviewPage() {
-  const status  = useApi<SystemStatus>(() => api.systemStatus());
-  const stats   = useApi<DatasetStats>(() => api.stats());
-  const probe   = useApi<DatasetSummary>(() => api.datasetProbe());
-  const modules = useApi<ModuleInfo[]>(() => api.modules());
-  const runs    = useApi<RunSummary[]>(() => api.runs());
+  const [range, setRange] = useState<string>('1h');
+  const { data, loading, error, reload } = useApi<OverviewDto | null>(() => api.overview(range), range);
 
-  if (status.loading) return <Spinner label="Loading overview…" />;
-  if (status.error)  return <ErrorBox error={status.error} retry={status.reload} />;
+  if (loading) return <Spinner label="Loading overview…" />;
+  if (error) return <ErrorBox error={error} retry={reload} />;
 
-  const sys = status.data;
-  const ds  = probe.data;
-  const st  = stats.data;
-  const recentRuns = (runs.data ?? []).slice(0, 6);
+  if (!data) {
+    return (
+      <div className="page">
+        <h2 className="page-title">Command Center</h2>
+        <EmptyState>
+          <strong>No dataset loaded.</strong>
+          <span>Load the demo dataset to explore the analyzer, or head to Datasets to import a file.</span>
+          <div className="quick-actions">
+            <Link className="btn btn-run" to="/datasets">Open Datasets</Link>
+            <Link className="btn" to="/ingestion">Ingestion</Link>
+          </div>
+        </EmptyState>
+      </div>
+    );
+  }
+
+  const severityData = Object.entries(data.severity)
+    .map(([label, value]) => ({ label, value, color: LEVEL_COLORS[label.toUpperCase()] ?? '#666' }));
+  const statusData = Object.entries(data.statusCodes)
+    .map(([label, value]) => ({ label, value, color: '#4a9' }));
+  const timeline = data.timeline.map((p) => ({ label: formatTs(p.start), value: p.count }));
 
   return (
     <div className="page">
-      {/* Hero */}
       <div className="hero-banner">
         <div>
           <h2 className="hero-title">Command Center</h2>
           <p className="hero-sub">
-            DSA-3 advanced algorithms on real log intelligence · trace over animation · zero fabricated data
+            {data.dataset} · {data.systemStatus} · every number computed live from the loaded dataset
           </p>
         </div>
-        <div className="quick-actions">
-          <Link className="btn btn-run" to="/text-hack">⌗ TextHack</Link>
-          <Link className="btn" to="/labs">⚙ Laboratory</Link>
-          <Link className="btn" to="/benchmarks">▤ Benchmarks</Link>
-        </div>
-      </div>
-
-      {/* Status banner */}
-      <div className="banner-row">
-        <div className="status-banner status-banner--up">
-          <span className="status-dot" />
-          <span>Service {sys?.status ?? '…'} — {sys?.service}</span>
-        </div>
-        <span className="banner-meta">Engines: {sys?.engines ?? '…'}</span>
-        <span className="banner-meta">Uptime: {sys ? formatDuration(sys.uptimeMillis) : '…'}</span>
-      </div>
-
-      {/* Module cards */}
-      {modules.loading ? (
-        <Spinner label="Loading modules…" />
-      ) : modules.data && modules.data.length > 0 ? (
-        <div className="module-grid">
-          {modules.data.map((mod) => (
-            <Link
-              key={mod.id}
-              to={`/labs/${mod.id}`}
-              className="module-card"
-              style={{
-                ['--mod-color' as never]: moduleAccent(mod.id),
-                ['--glow-mod' as never]: moduleGlow(mod.id)
-              }}
-            >
-              <div className="module-card-head">
-                <h3 className="module-card-title">{mod.title}</h3>
-                <span className="chip chip--accent">{moduleVar(mod.id)}</span>
-              </div>
-              <p>{mod.description}</p>
-              <div className="module-card-meta">
-                <span className="chip">{mod.algorithmCount} algorithms</span>
-                <span className="chip">{mod.exposedCount} exposed</span>
-                <span className="chip">{mod.trackableCount} traceable</span>
-              </div>
-            </Link>
+        <div className="range-tabs">
+          {RANGES.map((r) => (
+            <button key={r} className={`btn btn-sm${range === r ? ' btn-primary' : ''}`} onClick={() => setRange(r)}>
+              {r}
+            </button>
           ))}
         </div>
-      ) : (
-        <EmptyState>Module catalogue unavailable — is the backend running?</EmptyState>
-      )}
+      </div>
 
-      {/* Recent runs */}
-      {recentRuns.length > 0 && (
-        <Card
-          title="Recent Run Sessions"
-          actions={<Link className="btn btn-sm" to="/runs">Open Run Sessions ›</Link>}
-        >
-          <div className="run-list" style={{ maxHeight: 'none' }}>
-            {recentRuns.map((s) => (
-              <Link key={s.runId} className="run-item" to="/runs">
-                <div className="run-item-top">
-                  <span className="run-item-name">{s.algorithmName}</span>
-                  <span className={`status-pill status-pill--${s.status}`}>{s.status}</span>
+      <div className="stat-grid">
+        <StatCard label="Events"        value={formatNumber(data.events)}      color="var(--accent)" />
+        <StatCard label="Errors"        value={formatNumber(data.errors)}      color="#e74c3c" />
+        <StatCard label="Warnings"      value={formatNumber(data.warnings)}    color="#f1c40f" />
+        <StatCard label="Services"      value={formatNumber(data.services)}    color="#3498db" />
+        <StatCard label="Hosts"         value={formatNumber(data.hosts)}       color="#9b59b6" />
+        <StatCard label="Events / min"  value={String(data.eventsPerMinute)}   color="#2ecc71" />
+        <StatCard label="Active Incidents" value={formatNumber(data.activeIncidents)} color="#e67e22" sub="heuristic detection" />
+      </div>
+
+      <div className="grid-2">
+        <Card title={`Timeline (${data.range})`}>
+          <TimeChart data={timeline} height={160} />
+        </Card>
+        <Card title="Severity Distribution">
+          {severityData.length > 0 ? <DonutChart data={severityData} size={140} /> : <EmptyState>No levels</EmptyState>}
+        </Card>
+      </div>
+
+      <div className="grid-2">
+        <Card title="Top Services">
+          <HBarChart data={data.topServices.map((s) => ({ label: s.name, value: s.events }))} maxItems={8} />
+        </Card>
+        <Card title="HTTP Status Codes">
+          {statusData.length > 0 ? <HBarChart data={statusData} maxItems={10} /> : <EmptyState>No HTTP events</EmptyState>}
+        </Card>
+      </div>
+
+      <Card title="Top Message Patterns" sub="heuristic token pattern extraction">
+        {data.topPatterns.length > 0 ? (
+          <div className="pattern-list">
+            {data.topPatterns.map((p) => (
+              <div key={p.template} className="pattern-item">
+                <LevelBadge level={p.level} />
+                <code className="pattern-template">{p.template}</code>
+                <span className="pattern-count">{formatNumber(p.count)}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState>No patterns found</EmptyState>
+        )}
+      </Card>
+
+      <Card title="Activity Heatmap" sub="7 × 24 grid, hours in UTC">
+        <HeatmapGrid days={data.heatmap.days} columns={data.heatmap.columns} cells={data.heatmap.cells} />
+      </Card>
+
+      <Card title="Recent Critical Events" actions={<Link className="btn btn-sm" to="/logs">Open Log Explorer ›</Link>}>
+        {data.recentCritical.length > 0 ? (
+          <div className="log-list">
+            {data.recentCritical.map((e) => (
+              <Link key={e.id} className="log-item" to={`/logs/${e.id}`}>
+                <div className="log-item-top">
+                  <LevelBadge level={e.level} />
+                  <span className="log-item-service">{e.service}</span>
+                  <span className="log-item-host">{e.host}</span>
+                  <span className="log-item-time">{formatTs(e.timestamp)}</span>
                 </div>
-                <div className="run-item-meta">
-                  <span>{formatTs(s.createdAt)}</span>
-                  <span>{s.stepCount} steps</span>
-                  <span>{s.executionTimeNanos !== 0 ? formatNanos(s.executionTimeNanos) : '—'}</span>
+                <div className="log-item-msg">{e.message}</div>
+                <div className="log-item-meta">
+                  {e.httpMethod && <Badge>{e.httpMethod}</Badge>}
+                  {e.statusCode > 0 && <Badge>{e.statusCode}</Badge>}
+                  {e.responseTime > 0 && <span>{formatNanos(e.responseTime)}</span>}
                 </div>
               </Link>
             ))}
           </div>
-        </Card>
-      )}
-
-      {/* Dataset overview */}
-      {!ds?.loaded ? (
-        <EmptyState>
-          No dataset loaded yet. Head to <strong>Datasets</strong> to import one.
-        </EmptyState>
-      ) : (
-        <>
-          <div className="stat-grid">
-            <StatCard label="Total Logs" value={formatNumber(st?.totalLogs ?? 0)} color="var(--accent)" />
-            <StatCard label="Errors"     value={formatNumber(st?.errors ?? 0)}     color="#e74c3c" />
-            <StatCard label="Warnings"   value={formatNumber(st?.warnings ?? 0)}   color="#f1c40f" />
-            <StatCard label="Services"   value={formatNumber(st?.services ?? 0)}   color="#38c172" />
-            <StatCard label="Unique IPs" value={formatNumber(st?.uniqueIps ?? 0)}  color="#9b59b6" />
-            <StatCard label="Avg Response" value={`${(st?.avgResponseTimeMs ?? 0).toFixed(0)} ms`} color="#3498db" />
-            <StatCard label="Req/min"    value={`${(st?.requestsPerMinute ?? 0).toFixed(1)}`} />
-            <StatCard label="Dataset"    value={ds.datasetName ?? '—'} sub={ds.size != null ? `${formatNumber(ds.size)} events` : undefined} />
-          </div>
-
-          {st?.topError && (
-            <Card title="Most Frequent Error" className="alert-card">
-              <p className="error-msg">{st.topError}</p>
-            </Card>
-          )}
-
-          <div className="chart-grid">
-            <Card title="Traffic Over Time">
-              {st ? (
-                <TimeChart data={st.logsOverTime.map((b) => ({ label: b.start.slice(11, 16), value: b.count }))} />
-              ) : <Spinner label="Loading traffic…" />}
-            </Card>
-
-            <Card title="Log Levels">
-              {st ? (() => {
-                const entries = Object.entries(st.levels);
-                const total = entries.reduce((s, [, v]) => s + v, 0);
-                if (total === 0) return <EmptyState>No levels</EmptyState>;
-                return (
-                  <div className="level-list">
-                    {entries.map(([lvl, cnt]) => (
-                      <div key={lvl} className="level-row">
-                        <LevelBadge level={lvl} />
-                        <span className="level-bar-wrap">
-                          <span className="level-bar" style={{ width: `${(cnt / total) * 100}%` }} />
-                        </span>
-                        <span className="level-count">{cnt}</span>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })() : <Spinner label="Loading levels…" />}
-            </Card>
-
-            <Card title="Top Services">
-              {st ? (
-                <BarChart
-                  data={normaliseBuckets(st.topServices)}
-                  label={`${st.topServices.length} services`}
-                />
-              ) : <Spinner label="Loading services…" />}
-            </Card>
-          </div>
-        </>
-      )}
+        ) : (
+          <EmptyState>No critical events in range</EmptyState>
+        )}
+      </Card>
     </div>
   );
 }

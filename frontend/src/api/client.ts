@@ -1,20 +1,40 @@
 import type {
+  AlgorithmGroup,
   ApiError,
   AlgorithmInfo,
   AlgorithmResult,
   BenchmarkRequest,
   BenchmarkRow,
   DatasetName,
+  DatasetResult,
   DatasetStats,
   DatasetSummary,
   ErrorAnalytics,
   Health,
+  Heatmap,
+  HostRow,
+  HttpStatsDto,
+  IngestionStatus,
+  IncidentDetail,
+  IncidentDto,
+  LiveBatch,
+  LiveReplayComplete,
+  LiveStartEvent,
+  LiveStatus,
   LogEvent,
+  LogSearchRequest,
+  LogSearchResponse,
   ModuleInfo,
   ObjectApiResponse,
+  OverviewDto,
+  PatternDto,
   RunCompleteEvent,
   RunRecord,
   RunSummary,
+  SearchBenchmarkResponse,
+  ServiceDetail,
+  ServiceStatsDto,
+  SuggestionDto,
   SystemStatus,
   TextHackResponse,
   TimeBucket,
@@ -103,6 +123,148 @@ class Api {
     post<AlgorithmResult>(path, payload);
 
   benchmark = (payload: BenchmarkRequest): Promise<BenchmarkRow[]> => post<BenchmarkRow[]>('/benchmark/run', payload);
+
+  /* ── LogInsight Analyzer product surface (docs/API.md) ────────────────────────────── */
+
+  /** Dashboard snapshot; 404 when no dataset is loaded (resolved as `null`). */
+  overview = (range = '1h'): Promise<OverviewDto | null> =>
+    request<OverviewDto>(`/overview?range=${encodeURIComponent(range)}`).catch(() => null);
+
+  /** Structured explorer: filters, paging and free-text search over the loaded dataset. */
+  explore = (params: LogSearchRequest): Promise<LogSearchResponse> => {
+    const qs = new URLSearchParams();
+    if (params.query) qs.set('q', params.query);
+    if (params.from) qs.set('from', params.from);
+    if (params.to) qs.set('to', params.to);
+    qs.set('page', String(params.page));
+    qs.set('size', String(params.size));
+    qs.set('sort', params.sort);
+    return request<LogSearchResponse>(`/logs/explore?${qs.toString()}`);
+  };
+
+  logById = (id: number): Promise<LogEvent | null> =>
+    request<LogEvent>(`/logs/${id}`).catch(() => null);
+
+  /** Product search — the DSA engine executes the pattern over the dataset haystack. */
+  productSearch = (payload: LogSearchRequest): Promise<LogSearchResponse> =>
+    post<LogSearchResponse>('/search', payload);
+
+  suggest = (q: string, limit = 10): Promise<SuggestionDto[]> =>
+    request<SuggestionDto[]>(`/search/suggest?q=${encodeURIComponent(q)}&limit=${limit}`);
+
+  patterns = (level = 'all', limit = 50): Promise<PatternDto[]> =>
+    request<PatternDto[]>(`/patterns?level=${encodeURIComponent(level)}&limit=${limit}`);
+
+  patternExamples = (template: string, limit = 50): Promise<LogEvent[]> =>
+    request<LogEvent[]>(`/patterns/examples?template=${encodeURIComponent(template)}&limit=${limit}`);
+
+  incidents = (limit = 20): Promise<IncidentDto[]> =>
+    request<IncidentDto[]>(`/incidents?limit=${limit}`);
+  incidentCount = (): Promise<number> => request<number>('/incidents/count');
+  incidentDetail = (id: number, logs = 100): Promise<IncidentDetail> =>
+    request<IncidentDetail>(`/incidents/${id}?logs=${logs}`);
+  incidentLogs = (id: number, limit = 100, offset = 0): Promise<LogEvent[]> =>
+    request<LogEvent[]>(`/incidents/${id}/logs?limit=${limit}&offset=${offset}`);
+
+  services = (limit = 50): Promise<ServiceStatsDto[]> =>
+    request<ServiceStatsDto[]>(`/services?limit=${limit}`);
+  serviceDetail = (name: string, recent = 50): Promise<ServiceDetail> =>
+    request<ServiceDetail>(`/services/${encodeURIComponent(name)}?recent=${recent}`);
+
+  httpAnalytics = (): Promise<HttpStatsDto> => request<HttpStatsDto>('/analytics/http');
+  hostAnalytics = (limit = 25): Promise<HostRow[]> =>
+    request<HostRow[]>(`/analytics/hosts?limit=${limit}`);
+  heatmap = (): Promise<Heatmap> => request<Heatmap>('/analytics/heatmap');
+
+  liveStatus = (): Promise<LiveStatus> => request<LiveStatus>('/live/status');
+
+  loadDemo = (): Promise<DatasetResult> => post<DatasetResult>('/datasets/demo');
+  ingestionDemo = (): Promise<DatasetResult> => post<DatasetResult>('/ingestion/demo');
+  ingestionStatus = (): Promise<IngestionStatus> => request<IngestionStatus>('/ingestion/status');
+
+  /** Upload a JSONL / canonical-text log file (multipart); auto-detected by the parser. */
+  uploadDataset = (file: File, name?: string): Promise<DatasetResult> => {
+    const form = new FormData();
+    form.append('file', file);
+    if (name) form.append('name', name);
+    return request<DatasetResult>('/datasets', { method: 'POST', body: form });
+  };
+
+  /** Exposed algorithms grouped by module, for the Algorithm Laboratory screens. */
+  algorithmGroups = (): Promise<AlgorithmGroup[]> => request<AlgorithmGroup[]>('/analysis/algorithms');
+
+  /** Measured search benchmark: one execution per matcher over the dataset haystack. */
+  searchBenchmark = (pattern: string): Promise<SearchBenchmarkResponse> =>
+    request<SearchBenchmarkResponse>(`/analysis/benchmarks/search?pattern=${encodeURIComponent(pattern)}`);
+
+  /**
+   * Subscribe to the LogInsight live stream (SSE, docs/API.md §9). Events: `start` (LiveStartEvent),
+   * `batch` (LiveBatch), `replay-complete` (LiveReplayComplete). Returns an unsubscribe function.
+   */
+  liveStream(
+    handlers: {
+      onStart?: (start: LiveStartEvent) => void;
+      onBatch?: (batch: LiveBatch) => void;
+      onComplete?: (complete: LiveReplayComplete) => void;
+      onError?: (error: Error) => void;
+      onClose?: () => void;
+    },
+    opts?: { batchSize?: number; intervalMs?: number }
+  ): () => void {
+    const controller = new AbortController();
+    const batchSize = opts?.batchSize ?? 50;
+    const intervalMs = opts?.intervalMs ?? 700;
+    void (async () => {
+      try {
+        const response = await fetch(
+          `${BASE}/live?batchSize=${batchSize}&intervalMs=${intervalMs}`,
+          { headers: { Accept: 'text/event-stream' }, signal: controller.signal }
+        );
+        if (!response.ok || !response.body) {
+          throw new Error(`Live stream failed (${response.status})`);
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let sep = buffer.indexOf('\n\n');
+          while (sep !== -1) {
+            const raw = buffer.slice(0, sep);
+            buffer = buffer.slice(sep + 2);
+            let event = 'message';
+            const data: string[] = [];
+            for (const line of raw.split('\n')) {
+              if (line.startsWith('event:')) event = line.slice(6).trim();
+              else if (line.startsWith('data:')) data.push(line.slice(5).trimStart());
+            }
+            const payload = data.join('\n');
+            if (payload) {
+              let parsed: unknown = null;
+              try {
+                parsed = JSON.parse(payload);
+              } catch {
+                parsed = null;
+              }
+              if (event === 'start' && parsed && handlers.onStart) handlers.onStart(parsed as LiveStartEvent);
+              else if (event === 'batch' && parsed && handlers.onBatch) handlers.onBatch(parsed as LiveBatch);
+              else if (event === 'replay-complete' && parsed && handlers.onComplete) handlers.onComplete(parsed as LiveReplayComplete);
+            }
+            sep = buffer.indexOf('\n\n');
+          }
+        }
+        handlers.onClose?.();
+      } catch (e) {
+        if (!controller.signal.aborted) {
+          handlers.onError?.(e instanceof Error ? e : new Error(String(e)));
+        }
+        handlers.onClose?.();
+      }
+    })();
+    return () => controller.abort();
+  }
 
   /* ── Phase 2-4 surface: catalog, TextHack, run & replay ─────────────────────────── */
 

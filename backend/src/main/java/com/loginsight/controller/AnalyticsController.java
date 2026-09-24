@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.loginsight.analytics.ErrorPatternAnalyzer;
+import com.loginsight.analytics.FleetAnalyzer;
+import com.loginsight.analytics.HeatmapAnalyzer;
 import com.loginsight.analytics.TimeWindowAnalyzer;
+import com.loginsight.dto.response.HttpStatsDto;
 import com.loginsight.graph.ServiceDependencyGraph;
 import com.loginsight.graph.ServiceGraphBuilder;
 import com.loginsight.graph.TopKFrequentAnalyzer;
@@ -20,8 +23,9 @@ import com.loginsight.service.LogService;
 
 /**
  * Analytics endpoints (docs/12 §2, §6): service-dependency topology, error patterns, top-K
- * frequencies and the time-window traffic series. All answers are computed live from the currently
- * loaded dataset through the pure-Java analyzers; nothing is precomputed or fabricated.
+ * frequencies and the time-window traffic series, plus HTTP and host aggregation. All answers are
+ * computed live from the currently loaded dataset through the pure-Java analyzers; nothing is
+ * precomputed or fabricated.
  */
 @RestController
 @RequestMapping("/api/analytics")
@@ -31,6 +35,8 @@ public class AnalyticsController {
     private final ErrorPatternAnalyzer errorPatternAnalyzer = new ErrorPatternAnalyzer();
     private final TopKFrequentAnalyzer topKFrequentAnalyzer = new TopKFrequentAnalyzer();
     private final TimeWindowAnalyzer timeWindowAnalyzer = new TimeWindowAnalyzer();
+    private final FleetAnalyzer fleetAnalyzer = new FleetAnalyzer();
+    private final HeatmapAnalyzer heatmapAnalyzer = new HeatmapAnalyzer();
 
     public AnalyticsController(LogService logService) {
         this.logService = logService;
@@ -99,5 +105,23 @@ public class AnalyticsController {
     @GetMapping("/windows")
     public List<Map<String, Object>> windows(@RequestParam(defaultValue = "10") int buckets) {
         return timeWindowAnalyzer.windows(logService.events(), buckets);
+    }
+
+    /** HTTP analytics (status distribution, methods, top endpoints, measured latency percentiles). */
+    @GetMapping("/http")
+    public HttpStatsDto http() {
+        return fleetAnalyzer.http(logService.events());
+    }
+
+    /** Per-host rollups: events, errors, error rate (docs/API.md §8). */
+    @GetMapping("/hosts")
+    public List<Map<String, Object>> hosts(@RequestParam(defaultValue = "25") int limit) {
+        return fleetAnalyzer.hosts(logService.events(), limit);
+    }
+
+    /** Hour-of-day × day-of-week activity heatmap over the loaded dataset. */
+    @GetMapping("/heatmap")
+    public HeatmapAnalyzer.Heatmap heatmap() {
+        return heatmapAnalyzer.hourByWeekday(logService.events());
     }
 }

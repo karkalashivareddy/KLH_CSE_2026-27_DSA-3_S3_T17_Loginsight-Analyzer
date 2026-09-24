@@ -51,6 +51,7 @@ export function levelClass(level: string | null): string {
 
 /** Badge colour mapping for log levels. */
 export const LEVEL_COLORS: Record<string, string> = {
+  FATAL: '#c0392b',
   ERROR: '#e74c3c',
   WARN:  '#f1c40f',
   INFO:  '#3498db',

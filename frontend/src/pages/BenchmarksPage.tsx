@@ -1,198 +1,92 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
+import { useApi } from '../hooks/useApi';
 import { api } from '../api/client';
-import type { BenchmarkRequest, BenchmarkRow } from '../api/types';
-import { Card, Spinner, ErrorBox, EmptyState, BarChart } from '../components/ui';
-import { formatNanos, formatNumber } from '../components/format';
+import { Link } from 'react-router-dom';
+import type { SearchBenchmarkResponse } from '../api/types';
+import { Card, Spinner, ErrorBox, EmptyState } from '../components/ui';
+import { formatNumber } from '../components/format';
 
-type FormState = {
-  scenario: string;
-  sizes: string;
-  repetitions: string;
-  parallelism: string;
-};
-
-const DEFAULTS: FormState = {
-  scenario: 'dataset',
-  sizes: '1000,10000,100000',
-  repetitions: '3',
-  parallelism: '4'
-};
-
+/**
+ * Search benchmark (GET /api/analysis/benchmarks/search). Each of the four string matchers runs
+ * once over the exact same dataset haystack; every time is measured on that run and the winner is
+ * simply the fastest measurement — no fabricated averages.
+ */
 export default function BenchmarksPage() {
-  const [form, setForm] = useState<FormState>(DEFAULTS);
-  const [rows, setRows] = useState<BenchmarkRow[] | null>(null);
-  const [running, setRunning] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [input, setInput] = useState('');
+  const [pattern, setPattern] = useState<string | null>(null);
+  const { data, loading, error, reload } = useApi<SearchBenchmarkResponse | null>(
+    () => pattern ? api.searchBenchmark(pattern) : Promise.resolve(null),
+    pattern ?? ''
+  );
 
-  const run = useCallback(async () => {
-    const sizes = form.sizes.split(/[,;\s]+/).map(Number).filter((n) => n > 0);
-    const reps  = parseInt(form.repetitions, 10) || 3;
-    const para  = parseInt(form.parallelism, 10) || 4;
-    const payload: BenchmarkRequest = { scenario: form.scenario, sizes, repetitions: reps, parallelism: para };
-    setRunning(true);
-    setError(null);
-    setRows(null);
-    try {
-      const result = await api.benchmark(payload);
-      setRows(result);
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error(String(e)));
-    } finally {
-      setRunning(false);
-    }
-  }, [form]);
-
-  const update = (field: keyof FormState, value: string) =>
-    setForm((f) => ({ ...f, [field]: value }));
-
-  // Derive chart data: group by algorithm, then each size as a bar
-  const chartData = rows ? deriveChart(rows) : null;
+  const run = () => {
+    const p = input.trim();
+    if (p) setPattern(p);
+  };
 
   return (
     <div className="page">
-      <h2 className="page-title">Benchmarks</h2>
-      <p className="lab-intro">
-        Sequential and parallel algorithms are executed for real and wall-clock timed. Ratios are
-        sequential ÷ parallel time over identical inputs; speedups are measured on this machine
-        (JVM 21 · {navigator.hardwareConcurrency ?? '?'} logical cores) and vary with host and load.
-      </p>
+      <h2 className="page-title">Search Benchmarks</h2>
 
-      <Card title="Configuration" className="bench-form-card">
-        <div className="bench-form">
-          <label className="form-field">
-            <span className="form-label">Scenario</span>
-            <select className="select-sm form-input" value={form.scenario} onChange={(e) => update('scenario', e.target.value)}>
-              <option value="dataset">Dataset</option>
-              <option value="synthetic">Synthetic</option>
-              <option value="worst">Worst-case</option>
-            </select>
-          </label>
-          <label className="form-field">
-            <span className="form-label">Input sizes (comma-separated)</span>
-            <input className="form-input" value={form.sizes} onChange={(e) => update('sizes', e.target.value)} />
-          </label>
-          <label className="form-field">
-            <span className="form-label">Repetitions</span>
-            <input className="form-input" type="number" min={1} max={20} value={form.repetitions} onChange={(e) => update('repetitions', e.target.value)} />
-          </label>
-          <label className="form-field">
-            <span className="form-label">Parallelism (threads)</span>
-            <input className="form-input" type="number" min={1} max={64} value={form.parallelism} onChange={(e) => update('parallelism', e.target.value)} />
-          </label>
-          <button className="btn btn-run" onClick={run} disabled={running} style={{ alignSelf: 'flex-end' }}>
-            {running ? 'Running…' : 'Run Benchmarks'}
-          </button>
+      <Card title="Benchmark Setup" sub="one measured execution per matcher">
+        <div className="explorer-filters">
+          <input
+            className="input"
+            type="text"
+            placeholder="Pattern to search for in the dataset haystack… e.g. payment"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && run()}
+          />
+          <button className="btn btn-run" onClick={run} disabled={!input.trim()}>Run benchmark</button>
+          <Link className="btn" to="/search">Try product search instead ›</Link>
         </div>
       </Card>
 
-      {error && <ErrorBox error={error} />}
-
-      {running && <Spinner label="Running benchmark sweep…" />}
-
-      {chartData && chartData.length > 0 && (
-        <div className="bench-charts">
-          {chartData.map((group) => (
-            <Card key={group.algorithm} title={`${group.algorithm} — Time by Input Size`}>
-              <BarChart
-                data={group.rows.map((r) => ({
-                  label: formatNumber(r.inputSize),
-                  value: r.executionTimeNanos
-                }))}
-                height={150}
-                label={`${group.rows.length} sizes`}
-              />
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {rows && rows.some((r) => r.speedup != null) && (
-        <div className="bench-charts">
-          <Card title="Parallel Speedup — Sequential ÷ Parallel wall time" className="card-wide">
-            <div className="chart-grid">
-              {deriveChart(rows).filter((g) => g.rows.some((r) => r.speedup != null)).map((group) => (
-                <Card key={group.algorithm} title={group.algorithm}>
-                  <BarChart
-                    data={group.rows.map((r) => ({
-                      label: formatNumber(r.inputSize),
-                      value: r.speedup ?? 0
-                    }))}
-                    height={140}
-                    label="speedup × (1 = no gain, >1 = faster)"
-                  />
-                </Card>
-              ))}
-            </div>
+      {loading ? (
+        <Spinner label="Running matchers…" />
+      ) : error ? (
+        <ErrorBox error={error} retry={reload} />
+      ) : !data ? (
+        <EmptyState>Enter a pattern and run the benchmark — all four matchers execute over the loaded dataset.</EmptyState>
+      ) : (
+        <>
+          <Card title="Benchmark Context">
+            <table className="info-table">
+              <tbody>
+                <tr><th>Problem</th><td>{data.problem}</td></tr>
+                <tr><th>Dataset</th><td>{data.dataset}</td></tr>
+                <tr><th>Pattern</th><td><code>"{data.pattern}"</code></td></tr>
+                <tr><th>Haystack length</th><td>{formatNumber(data.textLength)} characters</td></tr>
+              </tbody>
+            </table>
+            <p className="muted">Haystack preview: <code className="log-snippet">{data.textPreview}</code></p>
           </Card>
-        </div>
-      )}
 
-      {rows && rows.length > 0 && (
-        <Card title="Results" className="table-card">
-          <div className="table-scroll">
+          <Card title={`Measurements — winner: ${data.winner}`}>
             <table className="log-table">
               <thead>
-                <tr>
-                  <th>Algorithm</th>
-                  <th>Input Size</th>
-                  <th>Time</th>
-                  <th>Throughput</th>
-                  <th>Result Size</th>
-                  <th>Sequential</th>
-                  <th>Parallel</th>
-                  <th>Speedup</th>
-                  <th>Work / Span</th>
-                  <th>Parallelism</th>
-                </tr>
+                <tr><th>Algorithm</th><th>Match count</th><th>Time (ms)</th><th>Time complexity</th><th>Space complexity</th></tr>
               </thead>
               <tbody>
-                {rows.map((row, i) => (
-                  <tr key={i}>
-                    <td>{row.algorithm}</td>
-                    <td className="num">{formatNumber(row.inputSize)}</td>
-                    <td className="num">{formatNanos(row.executionTimeNanos)}</td>
-                    <td className="num">{formatNumber(Math.round(row.throughputPerSec))}/s</td>
-                    <td className="num">{formatNumber(row.resultSize)}</td>
-                    <td className="num">{row.sequentialNanos != null ? formatNanos(row.sequentialNanos) : '—'}</td>
-                    <td className="num">{row.parallelNanos   != null ? formatNanos(row.parallelNanos)   : '—'}</td>
-                    <td className="num">{row.speedup         != null ? `${row.speedup.toFixed(2)}×`     : '—'}</td>
-                    <td className="num">{row.work != null && row.span != null ? `${formatNumber(row.work)} / ${formatNumber(row.span)}` : '—'}</td>
-                    <td className="num">{row.parallelism != null ? row.parallelism : '—'}</td>
+                {data.results.map((r) => (
+                  <tr key={r.algorithm} className={r.algorithm === data.winner ? 'winner-row' : ''}>
+                    <td>
+                      {r.algorithm === data.winner && <span className="winner-tag">WINNER</span>}
+                      {r.algorithm}
+                    </td>
+                    <td>{r.matchCount}</td>
+                    <td>{r.timeMs.toFixed(3)}</td>
+                    <td>{r.timeComplexity}</td>
+                    <td>{r.spaceComplexity}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </Card>
-      )}
-
-      {rows && rows.length === 0 && !running && (
-        <EmptyState>The benchmark returned no rows for the selected configuration.</EmptyState>
-      )}
-
-      {!rows && !running && !error && (
-        <EmptyState>
-          Configure a sweep above and click <strong>Run Benchmarks</strong> to measure real sequential vs. parallel execution times.
-        </EmptyState>
+            <div className="note-line">{data.note}</div>
+          </Card>
+        </>
       )}
     </div>
   );
-}
-
-interface ChartGroup {
-  algorithm: string;
-  rows: BenchmarkRow[];
-}
-
-function deriveChart(rows: BenchmarkRow[]): ChartGroup[] {
-  const map = new Map<string, BenchmarkRow[]>();
-  for (const row of rows) {
-    const list = map.get(row.algorithm) ?? [];
-    list.push(row);
-    map.set(row.algorithm, list);
-  }
-  return Array.from(map.entries()).map(([algorithm, group]) => ({
-    algorithm,
-    rows: group.sort((a, b) => a.inputSize - b.inputSize)
-  }));
 }

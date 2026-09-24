@@ -1,31 +1,52 @@
 package com.loginsight.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.loginsight.dto.request.FuzzyRequest;
+import com.loginsight.dto.request.LogSearchRequest;
 import com.loginsight.dto.request.MultiPatternRequest;
 import com.loginsight.dto.request.SearchRequest;
 import com.loginsight.dto.request.SuffixBuildRequest;
 import com.loginsight.dto.request.SuffixSearchRequest;
 import com.loginsight.dto.response.AlgorithmResultDto;
+import com.loginsight.dto.response.LogSearchResponse;
+import com.loginsight.dto.response.SuggestionDto;
+import com.loginsight.search.LogSearchService;
 import com.loginsight.service.SearchService;
 
 /**
  * String-search endpoints (docs/12 §1): the four single-matcher algorithms over the dataset or an
- * explicit text, the multi-pattern automaton search, suffix-array build/search and the fuzzy
- * (edit-distance) search over the dataset lines.
+ * explicit text, the multi-pattern automaton search, suffix-array build/search, the fuzzy
+ * (edit-distance) search over the dataset lines, and the LogInsight product search (docs/API.md §3).
  */
 @RestController
 @RequestMapping("/api")
 public class SearchController {
 
     private final SearchService searchService;
+    private final LogSearchService logSearchService;
 
-    public SearchController(SearchService searchService) {
+    public SearchController(SearchService searchService, LogSearchService logSearchService) {
         this.searchService = searchService;
+        this.logSearchService = logSearchService;
+    }
+
+    @PostMapping("/search")
+    public LogSearchResponse productSearch(@RequestBody LogSearchRequest request) {
+        return logSearchService.search(request);
+    }
+
+    @GetMapping("/search/suggest")
+    public List<SuggestionDto> suggest(@RequestParam(value = "q", defaultValue = "") String q,
+                                       @RequestParam(defaultValue = "12") int limit) {
+        return logSearchService.suggest(q, limit);
     }
 
     @PostMapping("/search/naive")

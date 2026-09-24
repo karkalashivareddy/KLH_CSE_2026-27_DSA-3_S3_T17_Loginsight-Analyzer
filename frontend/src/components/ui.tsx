@@ -3,17 +3,21 @@ import { LEVEL_COLORS } from './format';
 
 /* ────────────────────────────────────────────────────────────────────────────────────────── */
 
-export function Card({ title, children, className = '', actions }: {
+export function Card({ title, sub, children, className = '', actions }: {
   title?: string;
+  sub?: ReactNode;
   children: ReactNode;
   className?: string;
   actions?: ReactNode;
 }) {
   return (
     <div className={`card ${className}`}>
-      {(title || actions) && (
+      {(title || sub || actions) && (
         <div className="card-header">
-          {title && <h2 className="card-title">{title}</h2>}
+          <div className="card-title-block">
+            {title && <h2 className="card-title">{title}</h2>}
+            {sub && <div className="card-sub">{sub}</div>}
+          </div>
           {actions && <div className="card-actions">{actions}</div>}
         </div>
       )}
@@ -89,6 +93,42 @@ export function SectionTitle({ children, sub }: { children: ReactNode; sub?: Rea
 /* ────────────────────────────────────────────────────────────────────────────────────────── */
 /*  SVG Charts (hand-rolled, no external chart library)                                      */
 /* ────────────────────────────────────────────────────────────────────────────────────────── */
+
+/** Activity heatmap grid: rows = days, columns = UTC hours. Zero cells stay visible. */
+export function HeatmapGrid({ days, columns, cells }: {
+  days: string[];
+  columns: number;
+  cells: number[][];
+}) {
+  const max = Math.max(1, ...cells.flat());
+  return (
+    <div className="heatmap-wrap">
+      <div className="heatmap" role="grid" aria-label="Activity heatmap">
+        {days.map((day, row) => (
+          <div key={day} className="heatmap-row">
+            <span className="heatmap-day">{day}</span>
+            <div className="heatmap-cells">
+              {(cells[row] ?? []).slice(0, columns).map((value, col) => {
+                const alpha = value === 0 ? 0.04 : 0.18 + (value / max) * 0.82;
+                return (
+                  <span
+                    key={col}
+                    className="heatmap-cell"
+                    style={{ background: `rgba(80, 170, 220, ${alpha})` }}
+                    title={`${day} ${String(col).padStart(2, '0')}:00 UTC — ${value} events`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="heatmap-legend">
+        <span>Hours in UTC · 0–{columns - 1}</span>
+      </div>
+    </div>
+  );
+}
 
 /** Vertical bar chart. `data` should be ordered; bars fill available width. */
 export function BarChart({ data, height = 160, label }: {

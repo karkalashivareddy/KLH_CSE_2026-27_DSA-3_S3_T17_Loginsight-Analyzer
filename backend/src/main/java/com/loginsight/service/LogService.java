@@ -38,6 +38,15 @@ public class LogService {
         return LogEventDto.from(currentEvents().get(0));
     }
 
+    /** Single event by its dataset-assigned id; DatasetException → 404 when unknown. */
+    public LogEventDto byId(long id) {
+        List<LogEvent> events = currentEvents();
+        if (id < 0 || id >= events.size()) {
+            throw new DatasetException("Log id out of range for the current dataset: " + id);
+        }
+        return LogEventDto.from(events.get((int) id));
+    }
+
     /** Slice of the current dataset from {@code offset} for {@code limit} rows. */
     public List<LogEventDto> list(int limit, int offset) {
         if (limit < 1 || limit > 1000) {
