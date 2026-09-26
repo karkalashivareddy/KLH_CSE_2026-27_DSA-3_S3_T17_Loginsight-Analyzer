@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useState, type KeyboardEvent } from 'react';
 import { formatNumber } from './format';
+
+const Topology3D = lazy(() => import('./Topology3D'));
 
 export type TopologyMode = '2d' | '3d' | 'depth';
 
@@ -31,6 +33,7 @@ export interface TopologyPanelProps {
 const WIDTH = 760;
 const HEIGHT = 440;
 const PADDING = 76;
+const DEFAULT_VISIBLE_EDGE_LIMIT = 18;
 
 type Point = { x: number; y: number };
 
@@ -100,11 +103,24 @@ export function TopologyPanel({ nodes, edges, title = 'Observed service topology
   const reducedMotion = usePrefersReducedMotion();
   const [internalMode, setInternalMode] = useState<TopologyMode>(defaultMode);
   const [internalSelected, setInternalSelected] = useState<string | null>(selectedId ?? null);
+  const [showAllEdges, setShowAllEdges] = useState(false);
   const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [focusToken, setFocusToken] = useState(0);
+  const [resetToken, setResetToken] = useState(0);
   const activeMode = normalizeMode(mode ?? internalMode);
   const activeSelected = selectedId === undefined ? internalSelected : selectedId;
   const maxEvents = Math.max(1, ...nodes.map((node) => Math.max(0, node.events)));
   const maxWeight = Math.max(1, ...edges.map((edge) => Math.max(0, edge.weight)));
+  const visualEdges = useMemo(() => {
+    if (showAllEdges || edges.length <= DEFAULT_VISIBLE_EDGE_LIMIT) return edges;
+    return [...edges]
+      .sort((left, right) => Math.max(0, right.weight) - Math.max(0, left.weight) || left.source.localeCompare(right.source) || left.target.localeCompare(right.target))
+      .slice(0, DEFAULT_VISIBLE_EDGE_LIMIT);
+  }, [edges, showAllEdges]);
+  const edgeScope = `${visualEdges.length} of ${edges.length} observed dependencies shown`;
+  const stageDescription = edges.length > visualEdges.length
+    ? `${description} The visualization shows the ${visualEdges.length} strongest returned edges by observed weight; the accessible adjacency list below includes all ${edges.length} returned edges.`
+    : `${description} The visualization shows all ${edges.length} returned edges.`;
 
   const positions = useMemo(() => {
     const map = new Map<string, Point>();
@@ -138,11 +154,14 @@ export function TopologyPanel({ nodes, edges, title = 'Observed service topology
   };
 
   const focusSelected = () => {
-    if (activeSelected) setFocusedId(activeSelected);
+    if (!activeSelected) return;
+    setFocusedId(activeSelected);
+    setFocusToken((value) => value + 1);
   };
 
   const resetView = () => {
     setFocusedId(null);
+    setResetToken((value) => value + 1);
     select(null);
   };
 
@@ -159,7 +178,8 @@ export function TopologyPanel({ nodes, edges, title = 'Observed service topology
       <div className="topology-toolbar" role="group" aria-label="Topology controls">
         <div className="topology-mode-switch" role="group" aria-label="Topology display mode">
           <button className={`btn btn-sm${activeMode === '2d' ? ' btn-primary' : ''}`} type="button" aria-pressed={activeMode === '2d'} onClick={() => changeMode('2d')}>2D</button>
-          <button className={`btn btn-sm${activeMode === '3d' ? ' btn-primary' : ''}`} type="button" aria-pressed={activeMode === '3d'} onClick={() => changeMode('3d')}>3D / depth</button>
+          <button className={`btn btn-sm${activeMode === '3d' ? ' btn-primary' : ''}`} type="button" aria-pressed={activeMode === '3d'} onClick={() => changeMode('3d')}>3D WebGL</button>
+          {edges.length > DEFAULT_VISIBLE_EDGE_LIMIT && <button className="btn btn-sm topology-edge-toggle" type="button" aria-pressed={showAllEdges} onClick={() => setShowAllEdges((value) => !value)}>{showAllEdges ? `Show strongest ${DEFAULT_VISIBLE_EDGE_LIMIT}` : `Show all ${edges.length} edges`}</button>}
         </div>
         <div className="topology-actions">
           <button className="btn btn-sm" type="button" onClick={focusSelected} disabled={!activeSelected}>Focus selected</button>
@@ -168,18 +188,20 @@ export function TopologyPanel({ nodes, edges, title = 'Observed service topology
       </div>
       <p id={descriptionId} className="sr-only">{description} Edge thickness and particles encode observed request-trail weight, not verified infrastructure.</p>
       <div className={stageClass} data-mode={activeMode} data-reduced-motion={reducedMotion ? 'true' : 'false'}>
-        <div className="topology-renderer-note">{activeMode === '3d' ? '2.5D / SVG perspective · not WebGL' : '2D SVG renderer · not WebGL'}</div>
-        {nodes.length === 0 ? <div className="topology-empty" role="status">No observed service nodes were returned.</div> : <>
-          <svg className="topology-svg" viewBox={viewBox} role="img" aria-labelledby={`${titleId}-visual ${descriptionId}-visual`} focusable="false">
+        <div className="topology-renderer-note">{activeMode === '3d' ? 'THREE.JS · WEBGL' : 'OBSERVED DEPENDENCIES'}{edges.length > DEFAULT_VISIBLE_EDGE_LIMIT && <span className="topology-edge-scope">{edgeScope}</span>}</div>
+        {nodes.length === 0 ? <div className="topology-empty" role="status">No observed service nodes were returned.</div> : activeMode === '3d' ? <Suspense fallback={<div className="topology-empty" role="status">Loading 3D service view…</div>}>
+          <Topology3D nodes={nodes} edges={visualEdges} selectedId={activeSelected} focusToken={focusToken} resetToken={resetToken} reducedMotion={reducedMotion} onSelect={select} />
+        </Suspense> : <>
+          <svg className="topology-svg" viewBox={viewBox} role="img" aria-labelledby={`${titleId}-visual ${descriptionId}-visual`} aria-describedby={`${descriptionId}-visual`} focusable="false">
             <title id={`${titleId}-visual`}>{title}</title>
-            <desc id={`${descriptionId}-visual`}>{description} Selectable service nodes. Edge thickness and particles encode observed request-trail weight, not verified infrastructure.</desc>
+            <desc id={`${descriptionId}-visual`}>{stageDescription} Selectable service nodes. Edge thickness and particles encode observed request-trail weight, not verified infrastructure.</desc>
             <defs>
               <marker id={markerId} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-muted)" />
               </marker>
             </defs>
             <g className="topology-edges" aria-hidden="true">
-              {edges.map((edge, index) => {
+              {visualEdges.map((edge, index) => {
                 const from = positions.get(edge.source);
                 const to = positions.get(edge.target);
                 if (!from || !to) return null;

@@ -1,0 +1,445 @@
+import { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import type { TopologyEdge, TopologyNode } from './TopologyPanel';
+
+interface Topology3DProps {
+  nodes: TopologyNode[];
+  edges: TopologyEdge[];
+  selectedId: string | null;
+  focusToken: number;
+  resetToken: number;
+  reducedMotion: boolean;
+  onSelect: (id: string | null) => void;
+}
+
+type SceneNode = {
+  group: THREE.Group;
+  core: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
+  halo: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>;
+  position: THREE.Vector3;
+  health: NonNullable<TopologyNode['health']>;
+};
+
+type FlowParticle = {
+  curve: THREE.QuadraticBezierCurve3;
+  offset: number;
+  speed: number;
+  edgeIndex: number;
+};
+
+const HEALTH_COLORS: Record<NonNullable<TopologyNode['health']>, number> = {
+  healthy: 0x54ddb5,
+  watch: 0xf4bd55,
+  elevated: 0xfb6577,
+  unknown: 0x82969c
+};
+
+function graphPositions(nodes: TopologyNode[]): Map<string, THREE.Vector3> {
+  const positions = new Map<string, THREE.Vector3>();
+  const count = Math.max(nodes.length, 1);
+  const radius = Math.max(2.7, Math.min(5.6, 1.35 + count * 0.48));
+  nodes.forEach((node, index) => {
+    const angle = (Math.PI * 2 * index) / count - Math.PI / 2;
+    const y = count <= 2 ? (index === 0 ? 0.3 : -0.25) : Math.sin(index * 1.7) * 1.1;
+    positions.set(node.id, new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius * 0.66));
+  });
+  return positions;
+}
+
+export default function Topology3D({ nodes, edges, selectedId, focusToken, resetToken, reducedMotion, onSelect }: Topology3DProps) {
+  const stageRef = useRef<HTMLDivElement>(null);
+  const latestSelectionRef = useRef(selectedId);
+  const onSelectRef = useRef(onSelect);
+  const hoveredIdRef = useRef<string | null>(null);
+  const [retryToken, setRetryToken] = useState(0);
+  const [rendererError, setRendererError] = useState(false);
+  const [hovered, setHovered] = useState<{ id: string; x: number; y: number } | null>(null);
+
+  useEffect(() => { latestSelectionRef.current = selectedId; }, [selectedId]);
+  useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || nodes.length === 0) return;
+
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
+    } catch {
+      setRendererError(true);
+      return;
+    }
+
+    setRendererError(false);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+    renderer.setClearColor(0x071014, 0);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.domElement.className = 'topology-webgl-canvas';
+    renderer.domElement.setAttribute('aria-hidden', 'true');
+    stage.prepend(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x091216, 13, 30);
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 60);
+    camera.position.set(0, 7.7, 15.6);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = !reducedMotion;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 6;
+    controls.maxDistance = 24;
+    controls.maxPolarAngle = Math.PI * 0.82;
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    scene.add(new THREE.AmbientLight(0x94b9be, 1.25));
+    const keyLight = new THREE.PointLight(0x57dcca, 22, 24, 2);
+    keyLight.position.set(-5, 7, 4);
+    scene.add(keyLight);
+    const fillLight = new THREE.PointLight(0x648fe5, 12, 20, 2);
+    fillLight.position.set(5, 2, -5);
+    scene.add(fillLight);
+
+    const grid = new THREE.GridHelper(20, 20, 0x35656a, 0x29434a);
+    grid.position.y = -2.5;
+    const gridMaterials = Array.isArray(grid.material) ? grid.material : [grid.material];
+    gridMaterials.forEach((material) => {
+      material.transparent = true;
+      material.opacity = 0.2;
+    });
+    scene.add(grid);
+
+    const positions = graphPositions(nodes);
+    const maxEvents = Math.max(1, ...nodes.map((node) => Math.max(0, node.events)));
+    const maxWeight = Math.max(1, ...edges.map((edge) => Math.max(0, edge.weight)));
+    const nodeObjects = new Map<string, SceneNode>();
+    const nodeMeshes: THREE.Mesh[] = [];
+    nodes.forEach((node) => {
+      const position = positions.get(node.id);
+      if (!position) return;
+      const scale = 0.3 + Math.sqrt(Math.max(0, node.events) / maxEvents) * 0.48;
+      const health = node.health ?? 'unknown';
+      const color = HEALTH_COLORS[health];
+      const group = new THREE.Group();
+      group.position.copy(position);
+
+      const coreMaterial = new THREE.MeshStandardMaterial({
+        color: 0x0c1b20,
+        emissive: color,
+        emissiveIntensity: health === 'elevated' ? 0.58 : 0.34,
+        metalness: 0.36,
+        roughness: 0.38
+      });
+      const core = new THREE.Mesh(new THREE.SphereGeometry(scale, 28, 20), coreMaterial);
+      core.userData.serviceId = node.id;
+      group.add(core);
+
+      const shellMaterial = new THREE.MeshBasicMaterial({ color, wireframe: true, transparent: true, opacity: 0.14 });
+      const shell = new THREE.Mesh(new THREE.IcosahedronGeometry(scale * 1.42, 1), shellMaterial);
+      shell.userData.serviceId = node.id;
+      group.add(shell);
+
+      const haloMaterial = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.62 });
+      const halo = new THREE.Mesh(new THREE.TorusGeometry(scale * 1.28, 0.014, 6, 56), haloMaterial);
+      halo.rotation.x = Math.PI / 2.5;
+      group.add(halo);
+
+      const hitArea = new THREE.Mesh(
+        new THREE.SphereGeometry(scale * 1.9, 12, 10),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+      );
+      hitArea.userData.serviceId = node.id;
+      group.add(hitArea);
+      nodeMeshes.push(core, shell, hitArea);
+      scene.add(group);
+      nodeObjects.set(node.id, { group, core, halo, position: position.clone(), health });
+    });
+
+    const curves: THREE.QuadraticBezierCurve3[] = [];
+    const particles: FlowParticle[] = [];
+    edges.forEach((edge, edgeIndex) => {
+      const from = positions.get(edge.source);
+      const to = positions.get(edge.target);
+      if (!from || !to) return;
+      const midpoint = from.clone().add(to).multiplyScalar(0.5);
+      midpoint.y += 0.62 + (Math.max(0, edge.weight) / maxWeight) * 0.42;
+      const curve = new THREE.QuadraticBezierCurve3(from.clone(), midpoint, to.clone());
+      curves.push(curve);
+
+      const sourceHealth = nodes.find((node) => node.id === edge.source)?.health ?? 'unknown';
+      const targetHealth = nodes.find((node) => node.id === edge.target)?.health ?? 'unknown';
+      const edgeHealth = sourceHealth === 'elevated' || targetHealth === 'elevated'
+        ? 'elevated'
+        : sourceHealth === 'watch' || targetHealth === 'watch' ? 'watch' : 'healthy';
+      const color = HEALTH_COLORS[edgeHealth];
+      const normalized = Math.max(0, edge.weight) / maxWeight;
+      const tube = new THREE.Mesh(
+        new THREE.TubeGeometry(curve, 32, 0.007 + normalized * 0.014, 5, false),
+        new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.28, transparent: true, opacity: 0.32 + normalized * 0.35 })
+      );
+      scene.add(tube);
+
+      const count = edge.weight > 0 ? Math.min(14, Math.max(1, Math.ceil(normalized * 12))) : 0;
+      for (let index = 0; index < count; index += 1) {
+        particles.push({ curve, offset: (index + 1) / (count + 1), speed: 0.09 + normalized * 0.16, edgeIndex });
+      }
+    });
+
+    let flowMesh: THREE.InstancedMesh | null = null;
+    const particleGeometry = new THREE.SphereGeometry(0.045, 8, 6);
+    const particleMaterial = new THREE.MeshBasicMaterial({ color: 0x77deec, transparent: true, opacity: 0.9 });
+    if (particles.length > 0) {
+      flowMesh = new THREE.InstancedMesh(particleGeometry, particleMaterial, particles.length);
+      const dummy = new THREE.Object3D();
+      const particleColor = new THREE.Color();
+      particles.forEach((particle, index) => {
+        const edge = edges[particle.edgeIndex];
+        const sourceHealth = nodes.find((node) => node.id === edge?.source)?.health ?? 'healthy';
+        const targetHealth = nodes.find((node) => node.id === edge?.target)?.health ?? 'healthy';
+        particleColor.setHex(sourceHealth === 'elevated' || targetHealth === 'elevated' ? HEALTH_COLORS.elevated : sourceHealth === 'watch' || targetHealth === 'watch' ? HEALTH_COLORS.watch : 0x73d9e8);
+        dummy.position.copy(particle.curve.getPointAt(particle.offset));
+        dummy.updateMatrix();
+        flowMesh?.setMatrixAt(index, dummy.matrix);
+        flowMesh?.setColorAt(index, particleColor);
+      });
+      flowMesh.instanceMatrix.needsUpdate = true;
+      if (flowMesh.instanceColor) flowMesh.instanceColor.needsUpdate = true;
+      scene.add(flowMesh);
+    }
+
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    const dummy = new THREE.Object3D();
+    const bounds = new THREE.Sphere(new THREE.Vector3(), 1);
+    const worldUp = new THREE.Vector3(0, 1, 0);
+    const cameraGoal = { position: camera.position.clone(), target: controls.target.clone(), active: false };
+    let width = 1;
+    let height = 1;
+    let visible = true;
+    let pageVisible = !document.hidden;
+    let lastRender = 0;
+    let pointerPosition = { x: 0, y: 0 };
+
+    const updateHighlights = () => {
+      const selection = latestSelectionRef.current;
+      nodeObjects.forEach((entry, id) => {
+        const focused = selection === id || hoveredIdRef.current === id;
+        entry.core.material.emissiveIntensity = focused ? 0.72 : 0.34;
+        entry.halo.material.opacity = focused ? 0.95 : 0.55;
+        entry.halo.scale.setScalar(focused ? 1.13 : 1);
+      });
+    };
+    const renderOnce = () => {
+      controls.update();
+      updateHighlights();
+      renderer.render(scene, camera);
+    };
+    const animationFrame = (time: number) => {
+      if (!visible || !pageVisible || reducedMotion || time - lastRender < 32) return;
+      lastRender = time;
+      controls.update();
+      if (cameraGoal.active) {
+        camera.position.lerp(cameraGoal.position, 0.09);
+        controls.target.lerp(cameraGoal.target, 0.09);
+        if (camera.position.distanceTo(cameraGoal.position) < 0.035) cameraGoal.active = false;
+      }
+      const selection = latestSelectionRef.current;
+      const normalizedTime = time / 1000;
+      updateHighlights();
+      nodeObjects.forEach((entry) => {
+        const period = entry.health === 'elevated' ? 1.6 : entry.health === 'watch' ? 2.6 : 4;
+        const amplitude = entry.health === 'elevated' ? 0.018 : entry.health === 'watch' ? 0.012 : entry.health === 'healthy' ? 0.006 : 0;
+        const pulse = amplitude ? Math.sin((normalizedTime * Math.PI * 2) / period) * amplitude : 0;
+        entry.group.scale.setScalar(1 + pulse);
+      });
+      particles.forEach((particle, index) => {
+        const progress = (particle.offset + normalizedTime * particle.speed) % 1;
+        dummy.position.copy(particle.curve.getPointAt(progress));
+        dummy.scale.setScalar(selection && edges[particle.edgeIndex] && (edges[particle.edgeIndex].source === selection || edges[particle.edgeIndex].target === selection) ? 1.15 : 1);
+        dummy.updateMatrix();
+        flowMesh?.setMatrixAt(index, dummy.matrix);
+      });
+      if (flowMesh) flowMesh.instanceMatrix.needsUpdate = true;
+      renderer.render(scene, camera);
+    };
+
+    const startLoop = () => {
+      if (visible && pageVisible && !reducedMotion) renderer.setAnimationLoop(animationFrame);
+      else {
+        renderer.setAnimationLoop(null);
+        renderOnce();
+      }
+    };
+    const resize = () => {
+      const rect = stage.getBoundingClientRect();
+      width = Math.max(1, rect.width);
+      height = Math.max(1, rect.height);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height, false);
+      renderOnce();
+    };
+    const onVisibility = () => {
+      pageVisible = !document.hidden;
+      startLoop();
+    };
+    const setCameraGoal = (id: string | null) => {
+      if (id && nodeObjects.has(id)) {
+        const target = nodeObjects.get(id)!.position;
+        const direction = target.clone().sub(controls.target).normalize();
+        if (direction.lengthSq() === 0) direction.set(0, 0, 1);
+        cameraGoal.target.copy(target);
+        cameraGoal.position.copy(target.clone().add(direction.multiplyScalar(8)).add(worldUp.clone().multiplyScalar(3.2)));
+      } else {
+        bounds.setFromPoints([...positions.values()]);
+        bounds.radius += 1.5;
+        const target = bounds.center;
+        const distance = Math.max(13, bounds.radius * 2.7);
+        cameraGoal.target.copy(target);
+        cameraGoal.position.set(target.x, target.y + distance * 0.47, target.z + distance);
+      }
+      cameraGoal.active = !reducedMotion;
+      if (reducedMotion) {
+        camera.position.copy(cameraGoal.position);
+        controls.target.copy(cameraGoal.target);
+      }
+      renderOnce();
+    };
+    const onFocusRequest = () => setCameraGoal(latestSelectionRef.current);
+    const onFitRequest = () => setCameraGoal(null);
+    const onSelectionChange = () => renderOnce();
+    const onResetRequest = () => {
+      cameraGoal.position.set(0, 7.7, 15.6);
+      cameraGoal.target.set(0, 0, 0);
+      cameraGoal.active = !reducedMotion;
+      if (reducedMotion) {
+        camera.position.copy(cameraGoal.position);
+        controls.target.copy(cameraGoal.target);
+      }
+      renderOnce();
+    };
+    const onPointerLeave = () => {
+      stage.classList.remove('topology-stage--node-hover');
+      hoveredIdRef.current = null;
+      setHovered(null);
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      pointerPosition = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+      raycaster.setFromCamera(pointer, camera);
+      const hit = raycaster.intersectObjects(nodeMeshes, false).find((item) => typeof item.object.userData.serviceId === 'string');
+      const nextId = hit?.object.userData.serviceId as string | undefined;
+      stage.classList.toggle('topology-stage--node-hover', Boolean(nextId));
+      if (nextId) {
+        hoveredIdRef.current = nextId;
+        setHovered((current) => current?.id === nextId ? current : { id: nextId, ...pointerPosition });
+      } else if (hoveredIdRef.current) {
+        hoveredIdRef.current = null;
+        setHovered(null);
+      }
+      if (reducedMotion) renderOnce();
+    };
+    const onClick = (event: MouseEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hit = raycaster.intersectObjects(nodeMeshes, false).find((item) => typeof item.object.userData.serviceId === 'string');
+      const id = hit?.object.userData.serviceId as string | undefined;
+      if (id) onSelectRef.current(id);
+    };
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      renderer.setAnimationLoop(null);
+      setRendererError(true);
+    };
+    const onControlChange = () => { if (reducedMotion) renderOnce(); };
+
+    renderer.domElement.addEventListener('pointermove', onPointerMove);
+    renderer.domElement.addEventListener('pointerleave', onPointerLeave);
+    renderer.domElement.addEventListener('click', onClick);
+    renderer.domElement.addEventListener('webglcontextlost', onContextLost);
+    stage.addEventListener('topology-focus-selected', onFocusRequest);
+    stage.addEventListener('topology-fit-view', onFitRequest);
+    stage.addEventListener('topology-reset-view', onResetRequest);
+    stage.addEventListener('topology-selection-changed', onSelectionChange);
+    controls.addEventListener('change', onControlChange);
+    document.addEventListener('visibilitychange', onVisibility);
+    const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null;
+    resizeObserver?.observe(stage);
+    const intersectionObserver = typeof IntersectionObserver !== 'undefined'
+      ? new IntersectionObserver(([entry]) => { visible = Boolean(entry?.isIntersecting); startLoop(); }, { threshold: 0.05 })
+      : null;
+    intersectionObserver?.observe(stage);
+    if (!intersectionObserver) visible = true;
+    resize();
+    startLoop();
+
+    return () => {
+      renderer.setAnimationLoop(null);
+      document.removeEventListener('visibilitychange', onVisibility);
+      renderer.domElement.removeEventListener('pointermove', onPointerMove);
+      renderer.domElement.removeEventListener('pointerleave', onPointerLeave);
+      renderer.domElement.removeEventListener('click', onClick);
+      renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
+      stage.removeEventListener('topology-focus-selected', onFocusRequest);
+      stage.removeEventListener('topology-fit-view', onFitRequest);
+      stage.removeEventListener('topology-reset-view', onResetRequest);
+      stage.removeEventListener('topology-selection-changed', onSelectionChange);
+      controls.removeEventListener('change', onControlChange);
+      controls.dispose();
+      resizeObserver?.disconnect();
+      intersectionObserver?.disconnect();
+      scene.traverse((object) => {
+        if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
+          object.geometry.dispose();
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach((material) => material.dispose());
+        }
+      });
+      renderer.dispose();
+      renderer.domElement.remove();
+    };
+  }, [nodes, edges, reducedMotion, retryToken]);
+
+  useEffect(() => {
+    if (focusToken <= 0 || nodes.length === 0) return;
+    stageRef.current?.dispatchEvent(new CustomEvent('topology-focus-selected'));
+  }, [focusToken, nodes.length]);
+
+  useEffect(() => {
+    stageRef.current?.dispatchEvent(new CustomEvent('topology-selection-changed'));
+  }, [selectedId, nodes.length]);
+
+  useEffect(() => {
+    if (resetToken <= 0) return;
+    stageRef.current?.dispatchEvent(new CustomEvent('topology-reset-view'));
+  }, [resetToken]);
+
+  return (
+    <div className="topology-three-wrap">
+      <div ref={stageRef} className={`topology-three-stage${rendererError ? ' topology-three-stage--fallback' : ''}`} aria-label="Three-dimensional observed service topology">
+        {rendererError ? (
+          <div className="topology-webgl-fallback" role="status">
+            <span className="topology-fallback-mark" aria-hidden="true">3D</span>
+            <strong>3D visualization unavailable on this device.</strong>
+            <span>Use the 2D topology to inspect the same observed services and dependencies.</span>
+            <button className="btn btn-sm" type="button" onClick={() => { setRendererError(false); setRetryToken((value) => value + 1); }}>Retry WebGL</button>
+          </div>
+        ) : null}
+        {!rendererError && hovered && <div className="topology-hover-card" style={{ left: Math.min(hovered.x + 16, 480), top: Math.max(hovered.y - 52, 54) }} aria-hidden="true">
+          <span className={`health-band health-band--${nodes.find((node) => node.id === hovered.id)?.health ?? 'unknown'}`} />
+          <strong>{hovered.id}</strong>
+          <small>{nodes.find((node) => node.id === hovered.id)?.events.toLocaleString() ?? '—'} dataset events · {nodes.find((node) => node.id === hovered.id)?.health ?? 'health unavailable'}</small>
+        </div>}
+      </div>
+      {!rendererError && <div className="topology-three-tools" role="group" aria-label="3D camera controls">
+        <button className="btn btn-sm" type="button" onClick={() => stageRef.current?.dispatchEvent(new CustomEvent('topology-fit-view'))}>Fit graph</button>
+        <span>Drag to orbit · scroll to zoom</span>
+      </div>}
+      <p className="topology-three-note">Node size represents dataset event volume. Edges and moving signals represent observed request-trail weight; particle motion is illustrative, not a measured live request stream.</p>
+    </div>
+  );
+}

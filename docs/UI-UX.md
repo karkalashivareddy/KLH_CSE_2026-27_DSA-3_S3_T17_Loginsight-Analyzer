@@ -4,16 +4,9 @@ The current frontend is a React 18 + TypeScript + Vite single-page application w
 
 ## Navigation
 
-`Layout.tsx` groups navigation into:
+`Layout.tsx` prioritizes four daily-use groups—Operate, Investigate, Analyze and Algorithm Lab. Supporting Algorithms, Benchmarks, Run Sessions, Datasets, Ingestion, System and Documentation links live under a collapsible More section. The header shows backend, active dataset and dataset-replay status from the API; it does not surface algorithm counts as global runtime metrics.
 
-- Command Center.
-- Investigate: Log Explorer, Search, Patterns, Incidents and Demo Replay.
-- Analyze: Analytics and Services.
-- Algorithm Lab: Lab overview, Algorithms, Benchmarks and Run Sessions.
-- Data: Datasets and Ingestion.
-- System: System and Documentation.
-
-Aliases such as `/command-center`, `/analyze`, `/data`, `/lab`, `/algorithm-lab`, `/algorithms` and `/benchmarks` are routed to the same current pages. The header shows backend, dataset and replay status from the API. The `Investigate` entry for the replay screen is currently labelled `Live Replay` and points at `/live`; the feature is referred to as Demo Replay throughout these documents.
+Aliases such as `/command-center`, `/analyze`, `/data`, `/lab`, `/algorithm-lab`, `/algorithms` and `/benchmarks` are routed to the same current pages. `/live` remains explicitly labelled as dataset replay; it is not presented as an external production stream.
 
 ## Current screens
 
@@ -28,7 +21,7 @@ Aliases such as `/command-center`, `/analyze`, `/data`, `/lab`, `/algorithm-lab`
 - Analysis: catalogue, measured benchmark and recorded run sessions.
 - System/Docs: runtime registry and concise API guidance.
 
-Charts are hand-rolled SVG components. There is no chart library, no WebGL or 3D engine, no WebSocket client and no browser-generated data source.
+Charts are hand-rolled SVG components. The dependency graph has a default SVG view and an on-demand Three.js/WebGL view. There is no WebSocket client and no browser-generated telemetry source.
 
 ## Algorithm Lab surfaces
 
@@ -46,8 +39,9 @@ The `Algorithm Lab` navigation group contains Lab overview (`/analysis`, aliased
 - **Encoding**: node radius is `12 + sqrt(normalizedEvents) * 22`; the health dot color and CSS class follow the heuristic error-rate band; the label below the node shows observed events and error percentage.
 - **Edges**: quadratic Bézier paths with an arrowhead marker. Stroke width, opacity and curvature all scale with `weight / maxEdgeWeight`, so the picture is a pure function of the returned data.
 - **Particles**: `min(8, max(1, ceil(normalized * 7)))` circles per edge, positioned analytically on the path and staggered by a fixed per-particle offset. No randomness or time seeding, so the same payload renders identically each time. `prefers-reduced-motion: reduce` removes `animateMotion` and marks the particles `topology-particle--static`, with the CSS opacity drift animation disabled.
-- **Modes**: `2D` is a flat 760×440 SVG. `3D / depth` applies `rotateX(38deg) rotateZ(-5deg) scale(0.88)` to the same SVG inside a CSS `perspective: 1000px` stage, which is a 2.5D presentation rather than a 3D renderer. The panel renders a visible note — "2D SVG renderer · not WebGL" or "2.5D / SVG perspective · not WebGL" — in each mode. There is no WebGL context, shader, 3D engine or `three.js` dependency; the "3D / depth" label refers to the CSS transform.
-- **Controls**: mode switch, "Focus selected" (narrows the `viewBox` around the selected node) and "Reset view" (clears selection, restores the full viewBox). The panel is controlled or uncontrolled via `mode`/`onModeChange`, `selectedId`/`onSelect` and `defaultMode`.
+- **Modes**: `2D` is a flat 760×440 SVG. `3D WebGL` lazy-loads a Three.js scene with a perspective camera and OrbitControls. The 3D node positions are deterministically derived from the same service node list; node size follows dataset event volume, node color follows the existing heuristic health band and edges follow observed request-trail weight. Instanced moving markers show normalized edge intensity and are explicitly labelled illustrative rather than exact/live requests.
+- **Lifecycle and fallback**: the renderer caps device pixel ratio, renders only while its panel is visible and the tab is active, pauses animation for reduced motion, observes resize and visibility changes, and disposes the animation loop, controls, geometries, materials and listeners on unmount. WebGL initialization/context failure displays a recovery message; the SVG view and accessible service/edge lists remain available.
+- **Controls**: mode switch, `Focus selected`, `Fit graph` in 3D and `Reset view`. The panel is controlled or uncontrolled via `mode`/`onModeChange`, `selectedId`/`onSelect` and `defaultMode`.
 
 The card subtitle and the SVG `<desc>` both state that node size follows observed events and edge weight follows observed request-trail adjacency, not verified infrastructure.
 
@@ -72,6 +66,7 @@ The current source provides:
 - Text alternatives for SVG charts and heatmap cells.
 - Topology nodes exposed as `role="button"` with `tabIndex=0`, `aria-pressed` selection and an `aria-label` carrying service name, observed event count and health band. An accessible service list and an accessible edge list mirror the SVG, since the graph is not readable from the shapes alone.
 - `prefers-reduced-motion` handling in CSS and in the topology particle rendering.
+- The 3D canvas is hidden from assistive technology because the visible accessible service list and edge list carry the same semantic data; pointer hover is supplementary and not required to inspect services.
 - Responsive rules at 1120 px, 860 px and 680 px, including a mobile navigation drawer and stacked small-screen grids.
 
 This is a source-level review supported by focused Layout and TopologyPanel component tests. The repository has no configured automated axe, screen-reader or browser-test command, so those broader validations are not claimed as completed in this audit.

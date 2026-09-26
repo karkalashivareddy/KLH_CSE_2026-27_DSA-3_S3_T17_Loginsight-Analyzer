@@ -49,9 +49,9 @@ flowchart TB
 - One current in-memory dataset; no database.
 - Two SSE surfaces: `/api/live` replay and `/api/runs/{id}/events` recorded replay. One `ReplayProvider` subscription backs both Demo Replay views in the frontend.
 - `/api/overview` returns a selected window anchored on the newest event timestamp, with `windowStart`, `windowEnd`, `scope`, window-scoped counts and the unfiltered `datasetEvents` total.
-- `/api/analytics/dependencies` returns observed `requestId` adjacency over the full current dataset, not verified infrastructure topology and not scoped to the Command Center window. The frontend renders it as SVG, with an optional 2.5D CSS `perspective` + `rotateX` depth mode; there is no WebGL context or 3D engine.
+- `/api/analytics/dependencies` returns observed `requestId` adjacency over the full current dataset, not verified infrastructure topology and not scoped to the Command Center window. The frontend renders the same result through a default SVG view or an on-demand Three.js/WebGL view with an accessible HTML list fallback.
 - Runtime status comes from `/api/health/status`. The overview DTO's `systemStatus` is a hardcoded compatibility string.
 - Nginx proxies `/api/` and falls back unknown non-API paths to `index.html`.
 - Vite remains the local `/api` development proxy.
-- No WebGL/3D engine, WebSocket client, external research integration or production telemetry collector.
+- No WebSocket client, external research integration or production telemetry collector. The frontend's optional WebGL topology view is a renderer only; it does not add a telemetry source.
 - Container image builds and runtime smoke tests were never executed: the Docker daemon is unavailable in the audit environment.

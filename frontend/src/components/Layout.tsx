@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Activity,
   BarChart3,
   BookOpen,
   ChevronRight,
@@ -49,47 +48,42 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Command Center',
+    label: 'Operate',
     entries: [
-      { to: '/', label: 'Command Center', icon: LayoutDashboard, end: true, aliases: ['/command-center'], keywords: 'overview dashboard home' }
+      { to: '/', label: 'Overview', icon: LayoutDashboard, end: true, aliases: ['/command-center'], keywords: 'command center dashboard home' },
+      { to: '/live', label: 'Live Replay', icon: Radio, keywords: 'stream sse replay dataset' }
     ]
   },
   {
     label: 'Investigate',
     entries: [
-      { to: '/logs', label: 'Log Explorer', icon: FileSearch, keywords: 'events explorer query' },
-      { to: '/search', label: 'Search', icon: Search, keywords: 'query matcher fuzzy' },
-      { to: '/patterns', label: 'Patterns', icon: Workflow, keywords: 'templates recurrence' },
       { to: '/incidents', label: 'Incidents', icon: ShieldAlert, aliases: ['/investigate'], keywords: 'alerts investigation evidence' },
-      { to: '/live', label: 'Live Replay', icon: Radio, keywords: 'stream sse replay' }
+      { to: '/logs', label: 'Logs', icon: FileSearch, keywords: 'events explorer query' },
+      { to: '/services', label: 'Services', icon: Network, keywords: 'fleet dependencies hosts' }
     ]
   },
   {
     label: 'Analyze',
     entries: [
+      { to: '/patterns', label: 'Patterns', icon: Workflow, keywords: 'templates recurrence' },
       { to: '/analytics', label: 'Analytics', icon: BarChart3, aliases: ['/analyze'], keywords: 'charts traffic severity http hosts' },
-      { to: '/services', label: 'Services', icon: Network, keywords: 'fleet dependencies hosts' }
+      { to: '/search', label: 'Search', icon: Search, keywords: 'query matcher fuzzy' }
     ]
   },
   {
     label: 'Algorithm Lab',
     entries: [
-      { to: '/analysis', label: 'Lab overview', icon: CircleGauge, end: true, aliases: ['/lab', '/algorithm-lab'], keywords: 'engines laboratory' },
+      { to: '/analysis', label: 'Algorithm Lab', icon: CircleGauge, end: true, aliases: ['/lab', '/algorithm-lab'], keywords: 'engines laboratory' }
+    ]
+  },
+  {
+    label: 'More',
+    entries: [
       { to: '/algorithms', label: 'Algorithms', icon: Workflow, aliases: ['/analysis/algorithms'], keywords: 'catalogue dsa engines' },
       { to: '/benchmarks', label: 'Benchmarks', icon: Timer, aliases: ['/analysis/benchmarks'], keywords: 'search measured performance' },
-      { to: '/runs', label: 'Run Sessions', icon: History, keywords: 'trace replay sessions' }
-    ]
-  },
-  {
-    label: 'Data',
-    entries: [
+      { to: '/runs', label: 'Run Sessions', icon: History, keywords: 'trace replay sessions' },
       { to: '/datasets', label: 'Datasets', icon: Database, end: true, aliases: ['/data'], keywords: 'load dataset current' },
-      { to: '/ingestion', label: 'Ingestion', icon: FolderKanban, keywords: 'parser upload files' }
-    ]
-  },
-  {
-    label: 'System',
-    entries: [
+      { to: '/ingestion', label: 'Ingestion', icon: FolderKanban, keywords: 'parser upload files' },
       { to: '/system', label: 'System', icon: Server, aliases: ['/system/status'], keywords: 'health backend runtime modules' },
       { to: '/docs', label: 'Documentation', icon: BookOpen, keywords: 'guide api reference' }
     ]
@@ -119,6 +113,38 @@ function currentEntry(pathname: string): NavEntry | undefined {
   return [...ALL_ENTRIES]
     .sort((a, b) => Math.max(...entryPaths(b).map((value) => value.length)) - Math.max(...entryPaths(a).map((value) => value.length)))
     .find((entry) => entryIsActive(entry, pathname));
+}
+
+function NavGroupView({ group, pathname }: { group: NavGroup; pathname: string }) {
+  const active = group.entries.some((entry) => entryIsActive(entry, pathname));
+  const [expanded, setExpanded] = useState(active);
+  const open = group.label !== 'More' || expanded || active;
+  return (
+    <div className={`nav-group${group.label === 'More' ? ' nav-group--more' : ''}`}>
+      {group.label === 'More'
+        ? <button className="nav-group-label nav-group-toggle" type="button" aria-expanded={open} onClick={() => setExpanded((value) => !value)}><span>{group.label}</span><span className="nav-group-rule" aria-hidden="true" /><span aria-hidden="true">{open ? '−' : '+'}</span></button>
+        : <div className="nav-group-label"><span>{group.label}</span><span className="nav-group-rule" aria-hidden="true" /></div>}
+      {open && group.entries.map((entry) => {
+        const Icon = entry.icon;
+        const entryActive = entryIsActive(entry, pathname);
+        return (
+          <NavLink
+            key={entry.to}
+            to={entry.to}
+            end={entry.end}
+            className={`nav-item${entryActive ? ' nav-item--active' : ''}`}
+            aria-label={entry.label}
+            aria-current={entryActive ? 'page' : undefined}
+            title={entry.label}
+          >
+            <span className="nav-item-indicator" aria-hidden="true" />
+            <Icon className="nav-icon" size={17} strokeWidth={1.8} aria-hidden="true" />
+            <span className="nav-label">{entry.label}</span>
+          </NavLink>
+        );
+      })}
+    </div>
+  );
 }
 
 function readableSegment(value: string): string {
@@ -528,7 +554,7 @@ export default function Layout() {
         <aside ref={sidebarRef} id="primary-navigation" className="sidebar" aria-label="Primary navigation">
           <div className="sidebar-brand">
             <Link className="brand-link" to="/" aria-label="LogInsight Analyzer home">
-              <span className="brand-mark" aria-hidden="true"><Activity size={19} strokeWidth={2.2} /></span>
+              <span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36" focusable="false"><path d="M4 19h7l4-10 7 19 4-9h6" /><circle cx="27" cy="19" r="2.2" /></svg></span>
               <span className="brand-copy">
                 <span className="brand-text">LogInsight</span>
                 <span className="brand-tagline">Observability workspace</span>
@@ -553,30 +579,7 @@ export default function Layout() {
           </div>
 
           <nav className="sidebar-nav" aria-label="Workspace sections">
-            {NAV_GROUPS.map((group) => (
-              <div className="nav-group" key={group.label}>
-                <div className="nav-group-label"><span>{group.label}</span><span className="nav-group-rule" aria-hidden="true" /></div>
-                {group.entries.map((entry) => {
-                  const Icon = entry.icon;
-                  const active = entryIsActive(entry, location.pathname);
-                  return (
-                    <NavLink
-                      key={entry.to}
-                      to={entry.to}
-                      end={entry.end}
-                      className={`nav-item${active ? ' nav-item--active' : ''}`}
-                      aria-label={entry.label}
-                      aria-current={active ? 'page' : undefined}
-                      title={entry.label}
-                    >
-                      <span className="nav-item-indicator" aria-hidden="true" />
-                      <Icon className="nav-icon" size={17} strokeWidth={1.8} aria-hidden="true" />
-                      <span className="nav-label">{entry.label}</span>
-                    </NavLink>
-                  );
-                })}
-              </div>
-            ))}
+            {NAV_GROUPS.map((group) => <NavGroupView group={group} pathname={location.pathname} key={group.label} />)}
           </nav>
 
           <div className="sidebar-footer">
@@ -617,7 +620,7 @@ export default function Layout() {
               <div className="header-status-group" aria-label="Runtime status">
                 <StatusChip icon={Database} label="Dataset" value={datasetLabel} detail={datasetDetail} tone={datasetTone} to="/datasets" />
                 <StatusChip icon={Radio} label="Demo replay" value={liveLabel} detail={liveDetail} tone={liveTone} to="/live" />
-                <StatusChip icon={Server} label="Backend" value={systemLabel} detail={system.data?.engines ? `${system.data.engines} engines` : 'Runtime'} tone={systemTone} to="/system" />
+                <StatusChip icon={Server} label="Backend" value={systemLabel} detail="API status" tone={systemTone} to="/system" />
               </div>
               <button className="command-trigger" type="button" onClick={() => setPaletteOpen(true)} aria-label="Open command palette" title="Open command palette">
                 <Command size={15} aria-hidden="true" />

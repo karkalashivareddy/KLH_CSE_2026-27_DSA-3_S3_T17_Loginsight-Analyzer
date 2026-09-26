@@ -30,7 +30,7 @@ KMP drives product free-text search, Levenshtein drives zero-hit suggestions, to
 - Parallel reduce, scan and sort are checked against sequential results.
 - Trace and run responses expose the recorded result, step count and truncation flag.
 
-The course-lab compatibility facade is `POST /api/text-hack/query`; it routes to existing engines and is not an external research integration. The current system has no WebGL/3D engine, WebSocket transport or trained ML component. The Command Center topology's "3D / depth" mode is a 2.5D CSS transform over a flat SVG, not a 3D renderer. The course rule against `java.util` delegation in `dsa/**` is enforced by `EngineScopeGuardTest`, a frozen per-file `java.util` manifest that fails the build on any new import; see [13-testing.md](13-testing.md).
+The course-lab compatibility facade is `POST /api/text-hack/query`; it routes to existing engines and is not an external research integration. The frontend has an optional Three.js/WebGL topology renderer, but there is no WebSocket transport, trained ML component or production telemetry source. The course rule against `java.util` delegation in `dsa/**` is enforced by `EngineScopeGuardTest`, a frozen per-file `java.util` manifest that fails the build on any new import; see [13-testing.md](13-testing.md).
 
 Where algorithms reach the product:
 

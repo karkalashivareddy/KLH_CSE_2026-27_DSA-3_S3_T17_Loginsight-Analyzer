@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Activity, ArrowUpRight, Database, ExternalLink, RefreshCw, Search, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useApi, type UseApiResult } from '../hooks/useApi';
@@ -104,7 +104,7 @@ export default function OverviewPage() {
   const severityData = data ? Object.entries(data.severity).map(([label, value]) => ({ label, value, color: LEVEL_COLORS[label.toUpperCase()] ?? 'var(--severity-unknown)' })) : [];
   const timeline = data?.timeline.map((point) => ({ label: formatTs(point.start), value: point.count })) ?? [];
   const statusClasses = data ? httpClassBreakdown(data.statusCodes) : [];
-  const topologyNodes = data && dependencies.data
+  const topologyNodes = useMemo(() => data && dependencies.data
     ? dependencies.data.nodes.map((node) => {
       const service = data.topServices.find((candidate) => candidate.name === node.id);
       return {
@@ -113,8 +113,8 @@ export default function OverviewPage() {
         health: service ? healthBand(service.eventRate) : 'unknown' as const
       };
     })
-    : [];
-  const topologyEdges = dependencies.data?.edges ?? [];
+    : [], [data, dependencies.data]);
+  const topologyEdges = useMemo(() => dependencies.data?.edges ?? [], [dependencies.data]);
   const refreshing = overview.refreshing || dependencies.refreshing || incidents.refreshing || health.refreshing;
   const refreshAll = () => {
     overview.reload();

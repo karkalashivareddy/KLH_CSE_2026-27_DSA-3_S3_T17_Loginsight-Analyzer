@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { api } from '../api/client';
 import type { LiveStatus, SystemStatus } from '../api/types';
@@ -26,6 +26,7 @@ const liveStatus: LiveStatus = {
 
 describe('application shell', () => {
   afterEach(() => {
+    cleanup();
     vi.restoreAllMocks();
   });
 
@@ -47,7 +48,7 @@ describe('application shell', () => {
     const workspaceNavigation = screen.getByRole('navigation', { name: 'Workspace sections' });
     expect(workspaceNavigation).toBeInTheDocument();
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
-    expect(within(workspaceNavigation).getByRole('link', { name: 'Log Explorer' })).toHaveAttribute('aria-current', 'page');
+    expect(within(workspaceNavigation).getByRole('link', { name: 'Logs' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByText('Event #42')).toBeInTheDocument();
     await screen.findByText('Connected');
   });
@@ -72,5 +73,53 @@ describe('application shell', () => {
     expect(screen.queryByRole('link', { name: 'Demo replay: Standby' })).toBeNull();
     expect(screen.getAllByText('Checking status')).toHaveLength(2);
     expect(screen.getByText('Demo replay channel checking')).toBeInTheDocument();
+  });
+
+  it('keeps supporting routes under an accessible More control', async () => {
+    vi.spyOn(api, 'systemStatus').mockResolvedValue(systemStatus);
+    vi.spyOn(api, 'liveStatus').mockResolvedValue(liveStatus);
+
+    render(
+      <MemoryRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<div>Home</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const navigation = screen.getByRole('navigation', { name: 'Workspace sections' });
+    expect(within(navigation).getByRole('link', { name: 'Overview' })).toBeInTheDocument();
+    expect(within(navigation).getByRole('link', { name: 'Incidents' })).toBeInTheDocument();
+    expect(within(navigation).queryByRole('link', { name: 'Benchmarks' })).toBeNull();
+    fireEvent.click(within(navigation).getByRole('button', { name: /^More/ }));
+    expect(within(navigation).getByRole('link', { name: 'Benchmarks' })).toBeInTheDocument();
+    expect(within(navigation).getByRole('link', { name: 'Datasets' })).toBeInTheDocument();
+  });
+
+  it('opens the command palette with Ctrl+K and restores focus after Escape', async () => {
+    vi.spyOn(api, 'systemStatus').mockResolvedValue(systemStatus);
+    vi.spyOn(api, 'liveStatus').mockResolvedValue(liveStatus);
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<div>Home</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Open command palette' });
+    trigger.focus();
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    const dialog = screen.getByRole('dialog', { name: 'Move through LogInsight' });
+    expect(within(dialog).getByRole('option', { name: /Overview/ })).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Move through LogInsight' })).toBeNull());
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 });

@@ -47,21 +47,38 @@ describe('TopologyPanel', () => {
     expect(screen.getByText('6.3% window error rate')).toBeInTheDocument();
   });
 
-  it('supports controlled depth mode and reset controls', () => {
+  it('keeps dense graphs legible while retaining every returned edge for inspection', () => {
+    const denseNodes = [{ id: 'source', events: 100 }, ...Array.from({ length: 22 }, (_, index) => ({ id: `service-${index}`, events: 20 + index }))];
+    const denseEdges = denseNodes.slice(1).map((node, index) => ({ source: 'source', target: node.id, weight: index + 1 }));
+    const { container } = render(<TopologyPanel nodes={denseNodes} edges={denseEdges} />);
+
+    expect(container.querySelectorAll('[data-edge-weight]')).toHaveLength(18);
+    expect(screen.getByText(/18 of 22 observed dependencies shown/)).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Observed request-trail adjacency edges' }).querySelectorAll('li')).toHaveLength(22);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show all 22 edges' }));
+    expect(container.querySelectorAll('[data-edge-weight]')).toHaveLength(22);
+    expect(screen.getByRole('button', { name: 'Show strongest 18' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('loads an actual WebGL view on demand and reports the 2D fallback when WebGL is unavailable', async () => {
     function Harness() {
       const [mode, setMode] = useState<TopologyMode>('2d');
       return <TopologyPanel nodes={nodes} edges={edges} mode={mode} onModeChange={setMode} />;
     }
 
     const { container } = render(<Harness />);
-    fireEvent.click(screen.getByRole('button', { name: '3D / depth' }));
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+    fireEvent.click(screen.getByRole('button', { name: '3D WebGL' }));
 
     expect(container.querySelector('.topology-stage')).toHaveAttribute('data-mode', '3d');
-    expect(screen.getByRole('button', { name: '3D / depth' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('2.5D / SVG perspective · not WebGL')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '3D WebGL' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('THREE.JS · WEBGL')).toBeInTheDocument();
+    expect(await screen.findByText('3D visualization unavailable on this device.')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Accessible service list' })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Reset view' }));
-    expect(screen.getByRole('button', { name: '2D' })).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(screen.getByRole('button', { name: '2D' }));
+    expect(screen.getByRole('button', { name: '2D' })).toHaveAttribute('aria-pressed', 'true');
     expect(container.querySelector('.topology-svg')).toHaveAttribute('viewBox', '0 0 760 440');
   });
 

@@ -60,16 +60,16 @@ Particle positions are computed analytically on the quadratic Bézier control pa
 
 | Mode | Rendering |
 |---|---|
-| `2d` | Flat SVG on a 760×440 viewBox. Renderer note: "2D SVG renderer · not WebGL". |
-| `3d` / depth | The same flat SVG inside a CSS `perspective: 1000px` stage with `transform: rotateX(38deg) rotateZ(-5deg) scale(0.88)`. Renderer note: "2.5D / SVG perspective · not WebGL". |
+| `2d` | Default flat SVG on a 760×440 viewBox. The accessible service and edge lists remain visible beneath it. |
+| `3d` | Lazy-loaded Three.js/WebGL scene with perspective camera, orbit/zoom controls, hover details, selected-service focus and fit/reset camera actions. It uses the same API-derived nodes and edges as 2D. |
 
-The depth mode is a 2.5D CSS transform over a 2D SVG. There is no WebGL context, no shader, no `three.js`, no z-buffer and no real 3D projection. The button label says "3D / depth" and the panel note says 2.5D, because the underlying geometry is still flat.
+The 3D canvas is supplementary and lazy-loaded; if WebGL initialization or context is unavailable, the panel displays a fallback notice and the SVG view remains available. The canvas is hidden from assistive technology because the service/edge lists are the semantic view. The optional scene maps event volume to node size, heuristic health to node state, and observed adjacency weight to edge thickness and normalized moving marker density/speed. Those markers are representative visual signals, not exact request counts or a live external stream. The observed graph remains request-trail co-occurrence, not verified infrastructure or proven causality.
 
 ### Interaction and accessibility
 
 - Nodes are laid out on a ring by node count, not by a force or graph layout.
 - Nodes are keyboard-operable: `Enter` or `Space` selects, and each carries an `aria-label` with the service name, observed event count and health band.
-- "Focus selected" narrows the `viewBox` around the selected node; "Reset view" clears the selection and restores the full viewBox.
+- "Focus selected" narrows the 2D `viewBox` or eases the 3D camera toward the selected service; "Fit graph" frames the graph in 3D; "Reset view" clears selection and restores the initial camera/viewBox.
 - An accessible service list mirrors the node set, and a second list spells out every edge as `source -> target` with its observed weight. The SVG is decorative for assistive technology; the lists are the accessible representation.
 - The panel is controlled or uncontrolled: `mode`/`onModeChange` and `selectedId`/`onSelect` are used by the Command Center, while a standalone `defaultMode` is available for reuse.
 
@@ -122,4 +122,4 @@ The backend side of this stream is a bounded replay of the loaded dataset, sorte
 
 - It does not attribute cause. The investigation card states that the window and pattern are returned detector output.
 - It does not present a healthy band as an operational verdict.
-- It does not render a 3D scene, and it does not connect to any live external feed. The depth mode is a 2.5D CSS transform over a flat SVG.
+- The optional Three.js scene is a view of dataset-derived dependencies; it does not connect to an external live feed or prove the direction of causality.

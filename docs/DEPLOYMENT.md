@@ -76,7 +76,7 @@ There is no database or persistent volume. A backend restart clears the current 
 - Put the frontend behind a TLS-terminating reverse proxy or load balancer for any non-local deployment.
 - Add authentication, authorization, request-rate limits, secret management and durable storage before exposing the API beyond a trusted environment.
 - The 64 MB upload limit is enforced by Spring and mirrored by Nginx; larger datasets are not supported by this deployment shape.
-- The Demo Replay screen (route `/live`, navigation label `Live Replay`) is a bounded, oldest-first replay of the active dataset, not an external stream consumer. The Command Center topology and its 2.5D CSS depth mode are client-side SVG rendering and need no GPU, WebGL capability or extra container resource.
+- The Demo Replay screen (route `/live`, navigation label `Live Replay`) is a bounded, oldest-first replay of the active dataset, not an external stream consumer. The Command Center defaults to SVG and can lazy-load the optional Three.js/WebGL topology scene. The 2D view remains available if browser WebGL is disabled; no separate GPU service/container is required.
 - Container image builds and runtime smoke tests were not available in the audit environment because the Docker daemon was not running. `docker compose config` did validate the Compose model. That limitation still holds, so the images remain unbuilt and unverified on this branch.
 
 ## Useful commands

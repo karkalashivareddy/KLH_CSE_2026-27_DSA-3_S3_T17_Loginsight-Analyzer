@@ -64,7 +64,7 @@ DSA-3 forbids delegating core algorithm logic in `dsa/**` to `java.util` collect
 
 ## Frontend verification boundary
 
-The production build validates TypeScript and Vite bundling. Source-level review covers route wiring, API paths, error rendering, SSE cancellation, responsive CSS and accessibility affordances. Focused Vitest/Testing Library coverage verifies the shell landmarks, client helpers, topology rendering, Command Center states and the shared replay provider. It does not prove browser behavior, contrast against every rendered state, screen-reader usability, WebGL/3D rendering (none exists) or network behavior under production load.
+The production build validates TypeScript and Vite bundling. Source-level review covers route wiring, API paths, error rendering, SSE cancellation, responsive CSS and accessibility affordances. Focused Vitest/Testing Library coverage verifies the shell landmarks, client helpers, topology rendering and its WebGL-unavailable fallback, Command Center states and the shared replay provider. Unit tests do not prove successful hardware-accelerated WebGL rendering, contrast against every rendered state, screen-reader usability or network behavior under production load.
 
 No browser automation, axe run or visual-regression suite is configured in this checkout. A deployment smoke test should additionally verify:
 
@@ -73,7 +73,7 @@ No browser automation, axe run or visual-regression suite is configured in this 
 3. Demo load, dataset-backed search and a replay stream through Nginx.
 4. Direct navigation to a client-side route such as `/logs`, `/investigate/{id}` and `/runs/{id}`.
 5. Multipart upload size and error rendering.
-6. Command Center range switching, topology 2D/depth mode toggle and node selection, confirming the renderer note reads "not WebGL".
+6. Command Center range switching, SVG/WebGL mode switching, node selection and camera controls. On a device without WebGL, verify the explicit fallback and confirm the accessible service list remains available.
 
 ## Performance claims
 

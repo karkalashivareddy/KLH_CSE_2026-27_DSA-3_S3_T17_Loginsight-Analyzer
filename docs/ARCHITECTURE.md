@@ -28,7 +28,7 @@ React 18 + TypeScript + Vite SPA
 
 `replay/ReplayContext.tsx` owns the one Demo Replay SSE subscription for the whole app. Because the provider sits above the router, the Command Center and the Demo Replay page render the same stream state, progress and event buffer rather than each opening a connection. A generation counter invalidates callbacks from a superseded subscription, and `subscribeDatasetInvalidation` resets the stream when the dataset changes. The backend snapshot is sorted by `(timestamp, id)` and emitted oldest-first, so the "live" route name is a label on a finite ordered replay.
 
-Charts and graph views are local SVG components in `components/ui.tsx`. The Command Center service topology in `components/TopologyPanel.tsx` is also SVG, with an optional 2.5D CSS `perspective` + `rotateX` transform for its "3D / depth" mode; it is not a 3D renderer and no WebGL context exists. There is no chart library, no WebGL or 3D engine, no WebSocket client and no browser-side data generator.
+Charts remain local SVG components in `components/ui.tsx`. The Command Center service topology defaults to the accessible SVG renderer in `components/TopologyPanel.tsx`; its optional `Topology3D` chunk uses Three.js/WebGL and OrbitControls over the same observed dependency API response. The 3D scene is lazy-loaded, visibility-aware, bounded to instanced markers and disposable on unmount. SVG service and edge lists remain available independently of WebGL. There is no WebSocket client or browser-side telemetry generator.
 
 ## Backend
 

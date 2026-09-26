@@ -89,8 +89,8 @@ DSA-3 forbids delegating core algorithm logic in `dsa/**` to `java.util` collect
 
 ## Explicit non-features
 
-The current implementation does not include a WebGL or WebGPU 3D engine, WebSocket transport, external research integration, trained ML model, external live collector or production telemetry pipeline. Those are not part of the algorithm catalogue or product claims.
+The frontend uses Three.js/WebGL as an optional rendering layer for the observed service topology. That visualization does not add a DSA engine or alter the backend algorithm catalogue. There is still no WebSocket transport, external research integration, trained ML model, external live collector or production telemetry pipeline.
 
-The Command Center topology's "3D / depth" mode is a 2.5D CSS `perspective` and `rotateX` transform over a flat SVG in `components/TopologyPanel.tsx`. The panel prints "not WebGL" in both display modes. Describing it as a 2.5D SVG/CSS presentation, rather than a 3D renderer, is the accurate claim.
+The topology remains SVG-first. The 3D view is lazy-loaded and maps the same backend nodes and edges into a perspective scene; moving markers are a normalized visual encoding of observed edge weight, not an exact request count or live external traffic stream. See [UI-UX.md](UI-UX.md) and [design-system.md](design-system.md) for its lifecycle and limits.
 
 See [COMMAND_CENTER.md](COMMAND_CENTER.md) for the field-level window, topology and health semantics.

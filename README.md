@@ -12,7 +12,7 @@ The current shell is a dark observability workspace with:
 - An Algorithm Lab with the backend catalogue, measured search benchmark and recorded run sessions.
 - System and Documentation views.
 - A responsive navigation shell with a command palette, breadcrumbs, runtime status and dataset status.
-- Hand-rolled SVG visualizations. The Command Center service topology offers a 2D layout and a 2.5D "3D / depth" mode built from SVG plus CSS `transform` on a `perspective` stage. There is no chart library, no WebGL or WebGPU renderer, and no WebSocket client.
+- Hand-rolled SVG charts and an interactive service topology with a 2D SVG default plus an on-demand Three.js/WebGL 3D view. The graph is derived from observed dataset request trails, with an accessible service-list and 2D fallback. There is no WebSocket client.
 
 The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](docs/IMPLEMENTATION_AUDIT.md). The API contract is [docs/API.md](docs/API.md). See [docs/COMMAND_CENTER.md](docs/COMMAND_CENTER.md) for the Command Center semantics.
 
@@ -30,7 +30,7 @@ The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](d
 - **Pipeline story**: a Load → Observe → Detect → Investigate strip links each Command Center number to the page that produced it.
 - **Shared replay context**: Command Center and Demo Replay read one `ReplayProvider` subscription, so a replay started on either screen is visible on both.
 
-The topology panel renders in a 2D SVG layout or a 2.5D depth mode that applies `rotateX`/`rotateZ`/`scale` to the same SVG inside a CSS `perspective` stage. The renderer note in the panel states "not WebGL" in both modes. There is no WebGL context, shader, 3D engine or `three.js` dependency.
+The topology panel renders a 2D SVG by default. Its optional Three.js/WebGL view is lazy-loaded, uses bounded instanced traffic markers and OrbitControls, and cleans up its renderer, controls, geometry, listeners and animation loop on unmount. If WebGL is unavailable, it reports that and the user can switch back to the same 2D data view. Moving markers communicate normalized observed request-trail intensity, not exact request counts or a live production stream. See [docs/design-system.md](docs/design-system.md) for visual encodings and constraints.
 
 ## Run locally
 
@@ -120,7 +120,7 @@ The backend catalogue currently contains 42 descriptors across six modules, 35 r
 - The remaining catalogue entries are exposed algorithm engines, library-only implementations, or trace/run-session capabilities; they are not all claimed to drive a product panel.
 - The course rule against `java.util` delegation in `dsa/**` is enforced by `EngineScopeGuardTest`: it freezes today's exact `java.util` imports per `dsa` source file in a manifest, fails the build on any new `java.util` import under `dsa/`, and allows the ledger to shrink. `java.util.concurrent` (parallel) and `java.util.Random` (randomized) are course-licensed and recorded in that manifest.
 
-The implementation inventory and exposure rules are in [docs/ALGORITHMS.md](docs/ALGORITHMS.md). No WebGL/3D engine, WebSocket transport, external research integration, trained ML model, or production telemetry integration is implemented. The topology "3D / depth" mode is a 2.5D CSS transform over a flat SVG, not a 3D renderer.
+The implementation inventory and exposure rules are in [docs/ALGORITHMS.md](docs/ALGORITHMS.md). The frontend includes a Three.js/WebGL topology view; there is no WebSocket transport, external research integration, trained ML model, or production telemetry integration.
 
 ## Verification
 
@@ -148,7 +148,7 @@ Continuous integration runs the same three commands: `mvn -q verify` in the back
 - Service topology edges are observed request-trail adjacency inferred from `requestId` co-occurrence. They are not verified infrastructure, and a missing edge is not proof of a missing call.
 - Service health bands are error-rate thresholds (healthy <5%, watch 5–<10%, elevated ≥10%, unavailable when the rate is not finite). They are heuristics, not a health model.
 - Benchmarks are host- and input-dependent measurements, not universal performance claims.
-- No WebGL/3D engine, WebSocket transport, research integration, ML training or inference, or external log transport. The topology depth mode is 2.5D SVG plus CSS transforms.
+- No WebSocket transport, research integration, ML training or inference, or external log transport. The optional WebGL topology depends on device/browser support and has an SVG fallback.
 - Docker deployment is a practical single-node evaluation setup; TLS, secrets, durable storage and horizontal scaling belong in a production platform layer.
 - Docker image builds and container smoke tests were still not run: the Docker daemon is not available in this environment, so only `docker compose config` has been validated.
 
