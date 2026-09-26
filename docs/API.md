@@ -1,225 +1,265 @@
 # API Reference
 
-Base URL: `http://localhost:8080/api` (the Vite dev server proxies `/api` → `:8080`). All error
-responses use one envelope produced by `GlobalExceptionHandler`:
+Base path: `/api`.
 
-```json
-{ "status": 404, "error": "Not Found", "message": "No dataset loaded", "timestamp": "…", "path": "/api/overview" }
-```
+The Vite development server proxies `/api` to `http://localhost:8080`. The Compose deployment serves the SPA and proxies `/api/` to the backend service through Nginx. API responses are JSON except the two SSE endpoints.
 
-Semantics: `404 DatasetException` (no dataset / unknown id or service or incident), `400`
-`InvalidQueryException` / validation, `500` unexpected. Sections 1–10 cover the LogInsight product
-surface; sections 11–14 are the DSA laboratory/run surface.
+## Error contract
 
-## 1. Health
-
-| Method | Endpoint | Response |
-| --- | --- | --- |
-| `GET` | `/health` | `{ status, service, timestamp }` |
-| `GET` | `/health/status` | extends health with `uptimeMillis, datasetLoaded, datasetName, datasetSize, engines` |
-
-## 2. Overview (dashboard)
-
-`GET /overview?range=1h` — range one of `5m | 15m | 1h | 6h | 24h` (default `1h`). **404 when no
-dataset is loaded.**
+`GlobalExceptionHandler` normally returns:
 
 ```json
 {
-  "dataset": "Demo Dataset", "systemStatus": "operational", "range": "1h",
-  "events": 14000, "errors": 301, "warnings": 705, "services": 8, "hosts": 6,
-  "eventsPerMinute": 210.0, "activeIncidents": 3,
-  "timeline": [{ "start": "…", "end": "…", "count": 42 }],
-  "severity": { "INFO": 12800, "WARN": 705, "ERROR": 298, "FATAL": 3 },
-  "topServices": [/* ServiceStatsDto, §8 */],
-  "topPatterns": [/* PatternDto, §5 */],
-  "recentCritical": [/* LogEventDto */],
-  "heatmap": { "days": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], "columns": 24, "cells": [[…]] },
-  "statusCodes": { "200": 12000, "404": 42 }
+  "status": 404,
+  "error": "DatasetException",
+  "message": "No dataset loaded",
+  "timestamp": "2026-09-25T00:00:00Z",
+  "path": "/api/overview"
 }
 ```
 
-## 3. Logs, explorer and product search
+Stack traces are not returned. `error` is normally the exception class simple name.
 
-`GET /logs?limit=100&offset=0` returns `LogEventDto[]` (newest slice). `GET /logs/stats` returns
-dataset statistics. `GET /logs/{id}` returns one event or 404.
+| Status | Current meaning |
+|---:|---|
+| 400 | Invalid query/log input, illegal argument, malformed or missing body, invalid parameter/date, bounds failure, or upload over 64 MB |
+| 404 | Missing dataset, unknown event/service/incident/run/sample, or unknown endpoint/resource |
+| 405 | HTTP method not supported |
+| 406 | Request cannot accept the available representation |
+| 415 | Unsupported request content type |
+| 500 | Algorithm execution failure or unexpected server failure, with a sanitized message |
 
-**Explorer** — `GET /logs/explore?q=&from=&to=&page=1&size=25&sort=timestamp:desc` (ISO-8601
-`from`/`to`, `size ≤ 200`) returns the same `LogSearchResponse` as product search:
+There is no current dedicated `409` mapping. A client-side request timeout is normalized by the frontend as status `408`; it is not a backend response.
+
+Two presence endpoints intentionally use a small 404 body instead of the normal error envelope:
+
+- `GET /api/health/dataset` → `{ "loaded": false }`.
+- `GET /api/datasets/current` → `{ "loaded": false }`.
+
+`POST /api/datasets/{name}` also returns `{ "loaded": false, "error": "..." }` for an unknown bundled sample. `GET /api/live/status` returns `200` with `enabled: false` when no dataset is loaded.
+
+## Product endpoints
+
+### Health and runtime
+
+| Method | Endpoint | Behavior |
+|---|---|---|
+| GET | `/api/health` | Liveness: `status`, `service`, `timestamp` |
+| GET | `/api/health/ready` | Liveness plus `ready: true` |
+| GET | `/api/health/status` | Uptime, dataset presence/name/size and registered engine count |
+| GET | `/api/health/dataset` | Dataset presence, or the special 404 body above |
+
+`/api/health/status` is the real runtime status surface. Its fields are `status`, `service`, `timestamp`, `uptimeMillis`, `datasetLoaded`, `datasetName`, `datasetSize` and `engines`. The `systemStatus` string on `OverviewDto` is a separate compatibility field that the backend always sets to `"Operational"`; it is not derived from this endpoint and carries no runtime information. See [COMMAND_CENTER.md](COMMAND_CENTER.md).
+
+### Datasets and ingestion
+
+| Method | Endpoint | Body or parameters |
+|---|---|---|
+| GET | `/api/datasets` | Lists bundled sample filenames |
+| POST | `/api/datasets/demo` | Generates and installs the demo dataset |
+| POST | `/api/datasets` | Multipart `file`, optional `name` |
+| POST | `/api/datasets/{name}` | Loads one bundled sample |
+| GET | `/api/datasets/current` | Current summary or special 404 |
+| DELETE | `/api/datasets` | Clears the current dataset |
+| GET | `/api/ingestion/status` | Parser, replay label, available samples and current dataset |
+| POST | `/api/ingestion/demo` | Alias for demo loading |
+
+`POST /api/datasets/demo`, upload and ingestion-demo return `DatasetResultDto`; its `loaded` field is the string `"true"` in this record. The health/current presence endpoints return a boolean `loaded` field. Counts are real parse results: `size`, `totalLines` and `failedLines`.
+
+### Overview and logs
+
+| Method | Endpoint | Parameters and behavior |
+|---|---|---|
+| GET | `/api/overview` | `range=5m|15m|1h|6h|24h`, default `1h`; unknown values fall back to `1h` |
+| GET | `/api/logs` | `limit=1..1000`, `offset>=0`; ingestion-order slice |
+| GET | `/api/logs/first` | First event in the current dataset |
+| GET | `/api/logs/stats` | Dataset counts, levels, status codes, top services and time buckets |
+| GET | `/api/logs/{id}` | One dataset-assigned event; unknown ID is 404 |
+| GET | `/api/logs/explore` | `q`, optional ISO `from`/`to`, `page`, `size`, `sort` |
+
+`from` and `to` form a half-open `[from,to)` index window. `LogSearchRequest` defaults to page 1, size 25 and `timestamp:desc`; size must be 1–200 and page must be at least 1. `from` must not be after `to`.
+
+#### `/api/overview` selected-window semantics
+
+`/api/overview` is a **selected-window** snapshot, not a whole-dataset rollup.
+
+- `windowEnd` is the newest `timestamp` in the loaded dataset, or the current instant when no event carries one. `windowStart` is `windowEnd` minus the nominal range width, so the window is a trailing slice of the data rather than of the wall clock.
+- Window membership is inclusive at both ends: `timestamp >= windowStart && timestamp <= windowEnd`.
+- `scope` is the literal string `selected-window`.
+- `events`, `errors`, `warnings`, `services`, `hosts`, `severity`, `statusCodes`, `topServices`, `topPatterns`, `recentCritical`, `timeline` and `heatmap` are all computed over that window only. `recentCritical` is at most the 12 newest `ERROR`/`FATAL` window events.
+- `activeIncidents` is the number of heuristic windows returned by `IncidentDetector` over the window's events, subject to the detector's 200-window cap. It counts detected windows, not open or ongoing incidents.
+- `datasetEvents` is the **unfiltered** size of the loaded dataset. Clients should use it as the denominator for selected-window coverage, which is how the Command Center uses it.
+- `eventsPerMinute` is `window events / (range width in minutes)`. The denominator is the nominal range width, not the observed span between the first and last in-window event, so a clustered window reads low. It is a normalized window rate, not a measured inter-arrival rate.
+- `systemStatus` is a compatibility field that is always the string `"Operational"`. Real runtime status comes from `/api/health/status`.
+
+`OverviewDto` also has a shorter 18-argument constructor retained for compatibility. It sets `datasetEvents` to the window `events` value and leaves `windowStart`, `windowEnd` and `scope` null. The REST path always uses the full constructor.
+
+### Product search
+
+`POST /api/search` accepts:
 
 ```json
 {
-  "query": "payment", "strategy": "KMP", "algorithm": "KMP", "pattern": "payment",
-  "patternLength": 7, "textSize": 1234567, "durationNanos": 812000,
-  "total": 14, "page": 1, "size": 25, "sort": "timestamp:desc", "dataset": "Demo Dataset",
-  "matches": [
-    {
-      "event": { "id": 1, "timestamp": "…", "severityNumber": 1, "level": "ERROR",
-                 "service": "payment-service", "host": "host-1", "ipAddress": "10.0.0.1",
-                 "httpMethod": "POST", "endpoint": "/payments", "statusCode": 502,
-                 "responseTime": 2400000, "requestId": "req-…", "userId": "user-…",
-                 "message": "Connection timeout for payment 9900", "traceId": "…", "spanId": "…",
-                 "url": "…", "source": "…", "rawMessage": "…", "attributes": {} },
-      "snippet": "…Connection timeout for payment 9900…", "matchCount": 2
-    }
-  ],
-  "suggestion": null
+  "query": "level:ERROR service:auth payment",
+  "from": null,
+  "to": null,
+  "page": 1,
+  "size": 25,
+  "sort": "timestamp:desc"
 }
 ```
 
-**Product search** — `POST /search` with body
+Recognized query fields are `level:`, `service:`, `host:`, `source:`, `status:`, `trace:`, `request:` and `message:`. Other tokens are free text. Structured filters use index intersections; free text is matched by KMP over the rendered candidate text. A structured-only search can have `algorithm: null`.
 
-```json
-{ "query": "service:auth level:error", "from": null, "to": null, "page": 1, "size": 25, "sort": "timestamp:desc" }
-```
+A response contains `query`, `strategy`, `algorithm`, `pattern`, `patternLength`, `textSize`, measured `durationNanos`, `total`, paging fields, dataset name, `matches` and optional `suggestion`. A suggestion is computed with Levenshtein only after a free-text zero-hit result.
 
-returns the object above. Query grammar: `level:`, `service:`, `host:`, `source:`, `status:`,
-`trace:`, `request:`, `message:` prefixes; an unknown prefix is treated as free text. When a search
-misses, `suggestion` is populated:
+`GET /api/search/suggest?q=&limit=` returns dataset-derived field candidates. The backend caps the result at 50; the frontend requests a smaller bounded value.
 
-```json
-{ "suggestion": "payment", "similarityPct": 92, "matchCount": 14, "distance": 1, "algorithm": "Levenshtein" }
-```
+### Patterns, incidents and services
 
-**Typeahead** — `GET /search/suggest?q=pay&limit=12` →
+| Method | Endpoint | Parameters |
+|---|---|---|
+| GET | `/api/patterns` | `level=all` by default, `limit=1..200`; level must be a valid `LogLevel` or `all` |
+| GET | `/api/patterns/examples` | Required non-blank `template` up to 2,000 characters, `limit=1..200` |
+| GET | `/api/incidents` | `limit>=1`, capped at 200 internally |
+| GET | `/api/incidents/count` | Count from the same capped detection pass |
+| GET | `/api/incidents/{id}` | Optional `logs`, evidence capped at 1,000 |
+| GET | `/api/incidents/{id}/logs` | `limit>=1`, `offset>=0`, evidence capped at 1,000 |
+| GET | `/api/services` | `limit=1..200` |
+| GET | `/api/services/{name}` | Optional `recent=1..500`; unknown service is 404 |
 
-```json
-[{ "type": "query", "label": "payment", "value": "payment" },
- { "type": "service", "label": "payment-service", "value": "service:payment-service" }]
-```
+Patterns use deterministic token normalization and are not ML. Incidents use the documented five-minute baseline heuristic and expose the method plus supporting events.
 
-`type ∈ service | host | endpoint | level | source | status | query`.
-
-## 4. Datasets and ingestion
-
-| Method | Endpoint | Notes |
-| --- | --- | --- |
-| `GET` | `/datasets` | `string[]` of bundled samples |
-| `POST` | `/datasets/demo` | loads deterministic demo; returns `DatasetResult` |
-| `POST` | `/datasets?file=&name=` | multipart upload; `file` required, `name` optional |
-| `POST` | `/datasets/{name}` | loads a bundled sample; 404 body when unknown |
-| `GET` | `/datasets/current` | `{ loaded:boolean, datasetName?, size?, totalLines?, failedLines?, loadedAt? }`; 404 body when empty |
-| `DELETE` | `/datasets` | clears dataset |
-| `GET` | `/ingestion/status` | `{ dataset, parser, streaming, availableSamples, sampleCount }` |
-| `POST` | `/ingestion/demo` | same result as `/datasets/demo` |
-
-`DatasetResult`:
-
-```json
-{ "loaded": "true", "datasetName": "Demo Dataset", "size": 14000,
-  "totalLines": 14000, "failedLines": 0, "loadedAt": "…", "note": "…" }
-```
-
-## 5. Patterns
-
-`GET /patterns?level=all&limit=50` → `PatternDto[]`; `GET /patterns/examples?template=<t>&limit=50`
-→ `LogEventDto[]` for that template.
-
-```json
-{ "template": "Connection timeout for payment <*>", "count": 9,
-  "example": "Connection timeout for payment 9900", "level": "ERROR" }
-```
-
-Templates are produced by heuristic token normalisation — the UI labels them "heuristic, not ML".
-
-## 6. Incidents
-
-| Method | Endpoint | Notes |
-| --- | --- | --- |
-| `GET` | `/incidents?limit=20` | `IncidentDto[]`, newest first |
-| `GET` | `/incidents/count` | `long` active incidents |
-| `GET` | `/incidents/{id}?logs=100` | `IncidentDetail` |
-| `GET` | `/incidents/{id}/logs?limit=&offset=` | evidence events in the window |
-
-```json
-{ "id": 3, "start": "…", "end": "…", "services": ["payment-service"],
-  "eventCount": 42, "primaryPattern": "Connection timeout for payment <*>",
-  "status": "ACTIVE", "method": "Heuristic: 5-min windows vs dataset baseline" }
-```
-
-## 7. Analytics
+### Analytics
 
 | Method | Endpoint | Response |
-| --- | --- | --- |
-| `GET` | `/analytics/http` | `HttpStatsDto` |
-| `GET` | `/analytics/hosts?limit=25` | `[{ host, events, errors, warnings, errorRate }]` |
-| `GET` | `/analytics/heatmap` | `{ days, columns, cells }` (7×24, zeros included) |
-| `GET` | `/analytics/windows?buckets=` | time-window traffic series |
-| `GET` | `/analytics/top?dimension=&limit=` | top-K of service/endpoint/level/ip |
-| `GET` | `/analytics/errors?limit=` | top error patterns |
-| `GET` | `/analytics/dependencies` | service dependency graph (nodes/edges) |
+|---|---|---|
+| GET | `/api/analytics/http` | Status/method/endpoint counts and measured latency percentiles |
+| GET | `/api/analytics/hosts` | `limit=1..200`; host rows with events, errors, warnings and error rate |
+| GET | `/api/analytics/heatmap` | 7×24 UTC cells, including zero cells |
+| GET | `/api/analytics/windows` | `buckets=1..100`; time-bucket series |
+| GET | `/api/analytics/top` | `dimension=service|endpoint|level|ip`, `limit=1..50` |
+| GET | `/api/analytics/errors` | `limit=1..100`; top error and pattern counts |
+| GET | `/api/analytics/dependencies` | Service nodes and request-trail edges |
 
-`HttpStatsDto`:
+All analytics require the current dataset and are derived from it.
 
-```json
-{ "statusCodes": { "200": 12000 }, "methods": { "POST": 3000 },
-  "endpoints": [{ "endpoint": "/payments", "count": 900 }],
-  "latencyP50": 240000, "latencyP95": 1200000, "latencyMax": 9000000, "sampled": 13000 }
-```
+`/api/analytics/dependencies` returns `nodes`, `edges`, `nodeCount` and `edgeCount`. `ServiceGraphBuilder` groups events by `requestId`, sorts each group by `(timestamp, id)`, and creates a directed `source -> target` edge for each consecutive pair of distinct services. `weight` is how many times that ordered pair was observed; `events` is the node's event count.
 
-## 8. Services
+This is an observed request-trail adjacency inferred from log co-occurrence over the **full current dataset** (it is not scoped to the `/api/overview` window). It is not verified infrastructure topology, and a missing edge is not proof that a call did not happen.
 
-`GET /services?limit=50` → `ServiceStatsDto[]`:
+### Demo Replay
 
-```json
-{ "name": "payment-service", "events": 3200, "errors": 88, "warnings": 210,
-  "eventRate": 2.75, "hosts": 3, "latestAt": "…", "severity": { "INFO": 2800, "WARN": 210, "ERROR": 88 } }
-```
+`GET /api/live?batchSize=50&intervalMs=700` returns `text/event-stream`. This is the Demo Replay surface; the route and the navigation label both still read `live` / `Live Replay`, and the payload identifies itself as `source: "demo-replay"`.
 
-`GET /services/{name}?recent=50` → `{ summary, recentEvents, totalEvents, activity }` where
-`activity` is a 24-point `{ start, end, count }` series.
+- `batchSize` must be 1–200.
+- `intervalMs` must be 100–60,000 ms. Values outside either range return the normal 400 envelope.
+- `start` contains `source: "demo-replay"`, dataset, total, batch size, pace, the ordering key `timestamp,id` and a disclosure label.
+- `batch` contains sequence, source, dataset, emitted count, total and events.
+- `replay-complete` contains emitted and total counts, then the stream closes.
 
-## 9. Live stream
+Events are snapshotted at subscribe time and emitted **oldest-first**, ordered by `(timestamp, id)`. The stream is finite: it ends with `replay-complete` when the dataset is exhausted, and the emitter has a 6-hour ceiling. It is a replay of the current in-memory list, not external live ingestion.
 
-`GET /live?batchSize=50&intervalMs=700` — SSE with named events:
+### Analysis, catalogue and runs
 
-- `start`: `{ source: "demo-replay", dataset, total, batchSize, paceMs, label }`
-- `batch`: `{ sequence, source, dataset, emittedCount, total, events: LogEventDto[] }`
-- `replay-complete`: `{ emitted, total }` then the stream closes.
+| Method | Endpoint | Behavior |
+|---|---|---|
+| GET | `/api/analysis/algorithms` | Product-lab groups of catalogue metadata |
+| GET | `/api/analysis/benchmarks/search?pattern=` | One measured run for Naive, KMP, Z and Rabin-Karp |
+| GET | `/api/modules` | Six module descriptors with computed counts |
+| GET | `/api/modules/{id}` | One module; unknown ID is 400 |
+| GET | `/api/algorithms` | Flat 42-entry catalogue |
+| GET | `/api/algorithms/{key}` | One catalogue entry; unknown key is 400 |
+| POST | `/api/runs` | Execute a traceable algorithm and store a run record |
+| GET | `/api/runs` | Newest-first summaries, maximum 64 |
+| GET | `/api/runs/{id}` | Full run record; unknown ID is 400 |
+| GET | `/api/runs/{id}/result` | Result/status summary |
+| GET | `/api/runs/{id}/events` | SSE `meta`, repeated `step`, then `complete` |
 
-`GET /live/status` → `{ enabled, dataset, total, source, label }`. The source is always labelled
-honestly (`demo-replay`, "Demo replay stream — not real-time").
+`POST /api/runs` is the run-creation entry point used by the Algorithm Lab group: it executes the algorithm server-side, records its steps in the bounded `RunStore` and returns the record. `/api/runs` and `/api/runs/{id}/events` are what the Run Sessions page reads and streams.
 
-## 10. Analysis (catalogue + benchmark)
+## Algorithm laboratory endpoints
 
-`GET /analysis/algorithms` → exposed algorithms grouped by module:
+Algorithmic endpoints return the `AlgorithmResultDto` shape: `algorithm`, `queryType`, `inputSize`, optional `pattern`, `result`, `intermediateData`, `executionTimeNanos`, `memoryEstimateBytes`, time/space complexity and `notes`.
 
-```json
-[{ "module": "String Algorithms",
-   "algorithms": [{ "key": "kmp", "name": "Knuth-Morris-Pratt", "problem": "PATTERN_SEARCH",
-                    "queryType": "MATCH", "algorithmType": "single-pattern",
-                    "canonicalEndpoint": "POST /api/search/kmp", "traceEndpoint": "POST /api/trace/search/kmp",
-                    "timeComplexity": "O(n + m)", "spaceComplexity": "O(m)", "tracked": true,
-                    "description": "…" }] }]
-```
+### Search and string structures
 
-`GET /analysis/benchmarks/search?pattern=payment` → one **measured** run per matcher:
+- `POST /api/search/naive`
+- `POST /api/search/kmp`
+- `POST /api/search/z`
+- `POST /api/search/rabin-karp`
+- `POST /api/search/multi` — Aho-Corasick
+- `POST /api/string/suffix/build`
+- `POST /api/string/suffix/search`
+- `POST /api/fuzzy/search`
 
-```json
-{ "problem": "PATTERN_SEARCH", "dataset": "Demo Dataset", "pattern": "payment",
-  "textLength": 1234567, "textPreview": "…",
-  "results": [
-    { "algorithm": "KMP", "matchCount": 2, "timeNanos": 812000, "timeMs": 0.812,
-      "timeComplexity": "O(n + m)", "spaceComplexity": "O(m)" }
-  ],
-  "winner": "KMP",
-  "note": "Measured once per matcher over the loaded dataset haystack — no fabricated averages." }
-```
+### Dynamic programming
 
-## 11. DSA laboratory endpoints
+- `POST /api/dp/levenshtein`
+- `POST /api/dp/damerau`
+- `POST /api/dp/weighted-edit`
+- `POST /api/dp/global`
+- `POST /api/dp/local`
+- `POST /api/dp/matrix-chain`
+- `POST /api/dp/obst`
+- `POST /api/dp/tsp`
+- `POST /api/dp/hamiltonian`
+- `POST /api/dp/tree`
+- `POST /api/dp/rerooting`
+- `POST /api/dp/sos`
 
-Classic single-engine endpoints remain exposed: `POST /search/{naive|kmp|z|rabin-karp}`,
-`POST /search/multi`, `POST /string/suffix/build|search`, `POST /fuzzy/search`,
-`POST /dp/{…}`, `POST /flow/{…}`, `POST /approx/{…}`, `POST /random/{…}`,
-`POST /parallel/{reduce|scan|sort}`, `POST /benchmark/run`, `GET /trace/catalog`,
-`POST /trace/{category}/{algorithm}`.
+### Flow, approximation, randomized and parallel
 
-## 12. Run sessions (recorded traces)
+- `POST /api/flow` — Ford-Fulkerson implementation route.
+- `POST /api/flow/edmonds-karp`
+- `POST /api/flow/dinic`
+- `POST /api/flow/min-cut`
+- `POST /api/flow/matching`
+- `POST /api/flow/min-cost`
+- `POST /api/approx/vertex-cover`
+- `POST /api/approx/incident-cover`
+- `POST /api/approx/set-cover`
+- `POST /api/random/prime`
+- `POST /api/random/sample`
+- `POST /api/random/hash`
+- `POST /api/random/quicksort`
+- `POST /api/parallel/reduce`
+- `POST /api/parallel/scan`
+- `POST /api/parallel/sort`
+- `POST /api/benchmark/run`
 
-`POST /runs { algorithm, input }` → recorded `RunRecord`. `GET /runs` → summaries.
-`GET /runs/{id}` → full record. `GET /runs/{id}/result` → result. `GET /runs/{id}/events`
-→ SSE replay (`meta` → `step`×n → `complete`). History is capped at 64 runs.
+### Trace and compatibility facade
 
-## 13. Catalogue
+Trace endpoints are under `/api/trace`:
 
-`GET /modules`, `GET /modules/{id}`, `GET /algorithms`, `GET /algorithms/{key}` and
-`POST /text-hack/query` provide the 42-algorithm catalogue framing used by the Analysis screens.
+- `GET /api/trace/catalog`
+- `POST /api/trace/search/{naive|kmp|z|rabin-karp}`
+- `POST /api/trace/dp/{levenshtein|matrix-chain}`
+- `POST /api/trace/flow/{ford-fulkerson|edmonds-karp|dinic}`
+- `POST /api/trace/approx/vertex-cover`
+- `POST /api/trace/random/{quicksort|prime|sample}`
+
+`POST /api/text-hack/query` remains a compatibility laboratory facade for six query classes. It is not a separate product data source and does not imply a research integration.
+
+## Explicit limits
+
+| Surface | Limit |
+|---|---|
+| Multipart upload and service ingestion | 64 MB |
+| `GET /api/logs` | `limit` 1–1000; `offset` non-negative |
+| Product search | `page>=1`; `size` 1–200 |
+| Search suggestions | Backend maximum 50 |
+| Incident list/detail | Detection maximum 200; evidence maximum 1,000 |
+| Replay | Batch 1–200; interval 100–60,000 ms; invalid controls are 400 |
+| Run history | 64 records |
+| Recorded trace | 400 steps; truncation is flagged |
+| Text/pattern validators | Text up to 2,000,000 characters; pattern up to 100,000 characters |
+| Quadratic DP | Sequence length at most 5,000 per side and 25,000,000 cells |
+| Aho-Corasick | 1,024 patterns, 200,000 total pattern characters and 200,000 reported occurrences |
+| Miller-Rabin canonical request | `n>=2`, rounds 1–1,000 |
+| Canonical reservoir | Stream at most 2,000,000; `k` at most 100,000 and no larger than the stream |
+| Benchmark sweep | At most 12 sizes, each 1–2,000,000; repetitions 1–20 |
+| RequestFactory laboratory inputs | Arrays at most 4,096 entries, text at most 1,000,000 characters, interval dimensions at most 40 |
+| Parallel worker requests | Positive requests are capped at 64; `0` selects the machine-reported core count |
+
+Some legacy laboratory endpoints have additional shape-specific checks. Clients should send the documented body for the selected endpoint and treat a `400` envelope as a validation response.

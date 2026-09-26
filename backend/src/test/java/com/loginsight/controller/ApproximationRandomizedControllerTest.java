@@ -82,6 +82,40 @@ class ApproximationRandomizedControllerTest {
     }
 
     @Test
+    void reservoirFallsBackToTheSizeStreamWhenValuesAreMissing() throws Exception {
+        mockMvc.perform(post("/api/random/sample")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"k\":4,\"size\":50,\"values\":[]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.sample.length()").value(4))
+                .andExpect(jsonPath("$.result.seen").value(50));
+        mockMvc.perform(post("/api/random/sample")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"k\":3,\"size\":0,\"values\":[7,8,9,10]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.sample.length()").value(3))
+                .andExpect(jsonPath("$.result.seen").value(4));
+    }
+
+    @Test
+    void reservoirRejectsUnboundedStreams() throws Exception {
+        mockMvc.perform(post("/api/random/sample")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"k\":2,\"size\":100000000}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+    }
+
+    @Test
+    void millerRabinRejectsUnboundedRounds() throws Exception {
+        mockMvc.perform(post("/api/random/prime")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"n\":101,\"rounds\":100000000}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+    }
+
+    @Test
     void universalHash() throws Exception {
         mockMvc.perform(post("/api/random/hash")
                         .contentType(MediaType.APPLICATION_JSON)

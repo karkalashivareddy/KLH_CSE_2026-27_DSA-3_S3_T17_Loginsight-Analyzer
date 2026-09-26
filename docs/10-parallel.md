@@ -1,5 +1,7 @@
 # 10 - Parallel Algorithms Theory (Module 6B)
 
+> Theory supplement. Current parallel endpoints and benchmark methodology are in [API.md](API.md) and [14-benchmarking.md](14-benchmarking.md).
+
 This document records the theory behind the parallel algorithms implemented in
 `backend/src/main/java/com/loginsight/dsa/parallel/`. Every claim is stated honestly: speedups
 are empirical, correctness is proven by the equality of the parallel result with the sequential

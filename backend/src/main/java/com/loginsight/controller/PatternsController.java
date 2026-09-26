@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.loginsight.dto.response.LogEventDto;
 import com.loginsight.dto.response.PatternDto;
 import com.loginsight.exception.DatasetException;
+import com.loginsight.exception.InvalidQueryException;
 import com.loginsight.model.LogEvent;
 import com.loginsight.model.LogLevel;
 import com.loginsight.pattern.PatternExtractor;
+import com.loginsight.query.QueryValidator;
 import com.loginsight.service.DatasetService;
 
 /**
@@ -24,6 +26,9 @@ import com.loginsight.service.DatasetService;
 @RestController
 @RequestMapping("/api/patterns")
 public class PatternsController {
+
+    private static final int MAX_LIMIT = 200;
+    private static final int MAX_TEMPLATE_LENGTH = 2_000;
 
     private final DatasetService datasetService;
     private final PatternExtractor patternExtractor = new PatternExtractor();
@@ -36,12 +41,22 @@ public class PatternsController {
     @GetMapping
     public List<PatternDto> patterns(@RequestParam(value = "level", defaultValue = "all") String level,
                                      @RequestParam(defaultValue = "50") int limit) {
+        QueryValidator.requireBounds(1, limit, MAX_LIMIT, "limit");
+        if (level != null && level.length() > 32) {
+            throw new InvalidQueryException("level must be at most 32 characters");
+        }
         List<LogEvent> events = currentEvents();
         String wanted = (level == null || level.isBlank())
                 ? "ALL"
-                : level.toUpperCase(Locale.ROOT).trim();
+                : level.trim().toUpperCase(Locale.ROOT);
         if (!"ALL".equals(wanted)) {
-            LogLevel filter = LogLevel.valueOf(wanted);
+            LogLevel filter;
+            try {
+                filter = LogLevel.valueOf(wanted);
+            } catch (IllegalArgumentException e) {
+                throw new InvalidQueryException("level must be one of all, trace, debug, info, "
+                        + "warn, error, fatal");
+            }
             List<LogEvent> filtered = new ArrayList<>();
             for (LogEvent event : events) {
                 if (event.getLevel() == filter) {
@@ -57,6 +72,14 @@ public class PatternsController {
     @GetMapping("/examples")
     public List<LogEventDto> examples(@RequestParam("template") String template,
                                       @RequestParam(defaultValue = "50") int limit) {
+        QueryValidator.requireBounds(1, limit, MAX_LIMIT, "limit");
+        if (template == null || template.isBlank()) {
+            throw new InvalidQueryException("template must not be blank");
+        }
+        if (template.length() > MAX_TEMPLATE_LENGTH) {
+            throw new InvalidQueryException("template must be at most " + MAX_TEMPLATE_LENGTH
+                    + " characters");
+        }
         List<LogEventDto> out = new ArrayList<>();
         for (LogEvent event : currentEvents()) {
             String message = event.getMessage();

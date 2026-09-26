@@ -40,6 +40,7 @@ public final class FuzzySearchEngine implements QueryEngine {
         }
         String text = context.getText();
         String[] lines = text.split("\n", -1);
+        QueryValidator.requireFuzzyBudget(lines.length, request.query().length());
         LevenshteinDistance distance = new LevenshteinDistance();
 
         long start = System.nanoTime();

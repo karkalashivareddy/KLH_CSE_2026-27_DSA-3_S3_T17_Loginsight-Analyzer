@@ -1,5 +1,7 @@
 # 09 - Randomized Algorithms Theory (Module 6A)
 
+> Theory supplement. Current randomized routes and validator bounds are in [API.md](API.md); the product mapping is in [ALGORITHMS.md](ALGORITHMS.md).
+
 This document records the theory behind the randomized algorithms implemented in
 `backend/src/main/java/com/loginsight/dsa/randomized/`. Every claim below is stated honestly:
 probability statements are bounds over the randomness, never per-run guarantees.

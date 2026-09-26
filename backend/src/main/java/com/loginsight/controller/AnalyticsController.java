@@ -3,6 +3,7 @@ package com.loginsight.controller;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +16,12 @@ import com.loginsight.analytics.FleetAnalyzer;
 import com.loginsight.analytics.HeatmapAnalyzer;
 import com.loginsight.analytics.TimeWindowAnalyzer;
 import com.loginsight.dto.response.HttpStatsDto;
+import com.loginsight.exception.InvalidQueryException;
 import com.loginsight.graph.ServiceDependencyGraph;
 import com.loginsight.graph.ServiceGraphBuilder;
 import com.loginsight.graph.TopKFrequentAnalyzer;
 import com.loginsight.model.LogEvent;
+import com.loginsight.query.QueryValidator;
 import com.loginsight.service.LogService;
 
 /**
@@ -30,6 +33,11 @@ import com.loginsight.service.LogService;
 @RestController
 @RequestMapping("/api/analytics")
 public class AnalyticsController {
+
+    private static final int MAX_ERROR_LIMIT = 100;
+    private static final int MAX_TOP_LIMIT = 50;
+    private static final int MAX_WINDOW_BUCKETS = 100;
+    private static final int MAX_HOST_LIMIT = 200;
 
     private final LogService logService;
     private final ErrorPatternAnalyzer errorPatternAnalyzer = new ErrorPatternAnalyzer();
@@ -80,6 +88,7 @@ public class AnalyticsController {
     /** Top error and warning messages with their frequencies. */
     @GetMapping("/errors")
     public Map<String, Object> errors(@RequestParam(defaultValue = "10") int limit) {
+        QueryValidator.requireBounds(1, limit, MAX_ERROR_LIMIT, "limit");
         List<LogEvent> events = logService.events();
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("topError", errorPatternAnalyzer.topError(events));
@@ -91,11 +100,18 @@ public class AnalyticsController {
     @GetMapping("/top")
     public List<Map<String, Object>> top(@RequestParam(defaultValue = "service") String dimension,
                                          @RequestParam(defaultValue = "5") int limit) {
-        TopKFrequentAnalyzer.Dimension dim = switch (dimension.toLowerCase()) {
+        QueryValidator.requireBounds(1, limit, MAX_TOP_LIMIT, "limit");
+        if (dimension != null && dimension.length() > 32) {
+            throw new InvalidQueryException("dimension must be at most 32 characters");
+        }
+        String normalized = dimension == null ? "" : dimension.trim().toLowerCase(Locale.ROOT);
+        TopKFrequentAnalyzer.Dimension dim = switch (normalized) {
+            case "service" -> TopKFrequentAnalyzer.Dimension.SERVICE;
             case "endpoint" -> TopKFrequentAnalyzer.Dimension.ENDPOINT;
             case "level" -> TopKFrequentAnalyzer.Dimension.LEVEL;
             case "ip" -> TopKFrequentAnalyzer.Dimension.IP;
-            default -> TopKFrequentAnalyzer.Dimension.SERVICE;
+            default -> throw new InvalidQueryException(
+                    "dimension must be one of service, endpoint, level, ip");
         };
         return topKFrequentAnalyzer.asBuckets(
                 topKFrequentAnalyzer.topK(logService.events(), dim, limit));
@@ -104,6 +120,7 @@ public class AnalyticsController {
     /** Time-window traffic series for the existing charts. */
     @GetMapping("/windows")
     public List<Map<String, Object>> windows(@RequestParam(defaultValue = "10") int buckets) {
+        QueryValidator.requireBounds(1, buckets, MAX_WINDOW_BUCKETS, "buckets");
         return timeWindowAnalyzer.windows(logService.events(), buckets);
     }
 
@@ -116,6 +133,7 @@ public class AnalyticsController {
     /** Per-host rollups: events, errors, error rate (docs/API.md §8). */
     @GetMapping("/hosts")
     public List<Map<String, Object>> hosts(@RequestParam(defaultValue = "25") int limit) {
+        QueryValidator.requireBounds(1, limit, MAX_HOST_LIMIT, "limit");
         return fleetAnalyzer.hosts(logService.events(), limit);
     }
 

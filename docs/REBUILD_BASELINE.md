@@ -1,5 +1,9 @@
 # Rebuild Baseline — Forensic Repository Audit
 
+> Historical snapshot taken before the later rebuild. It intentionally records the old baseline and is not a current API or UI specification. See [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) for the current branch.
+
+> Counts, route lists and CI steps in this file describe the pre-rebuild tree. The current branch runs `mvn -q verify` (827 tests), `npm ci`, `npm test` (24 tests across 10 files) and `npm run build`; see [13-testing.md](13-testing.md).
+
 Date: 2026-09-23
 Scope: full checkout at `main` (HEAD after fast-forward to `ead2f86`).
 
@@ -19,8 +23,8 @@ output, not inferred from the README.
 | Backend | Spring Boot 3.5.16, Java 21 target, Maven (wrapper 3.9.9), JaCoCo 0.8.15 |
 | Frontend | React 18.3, TypeScript 5.6, Vite 6.4, React Router 6.30 — **no test/lint infra** |
 | Data | bundled `sample-data/` (text + JSONL); in-memory runtime, no database |
-| CI | `.github/workflows/ci.yml` → backend `mvn -q verify` (+ frontend `npm ci && npm run build`) |
-| Verified build | backend `clean verify`: **669 tests, 0 failures, 0 errors**; frontend `npm run build`: clean |
+| CI | `.github/workflows/ci.yml` → backend `mvn -q verify`; frontend `npm ci && npm run build` (at baseline; `npm test` was added later) |
+| Verified build | backend `clean verify`: **669 tests, 0 failures, 0 errors**; frontend `npm run build`: clean (no frontend test runner at baseline) |
 | Routed pages | 8 (Overview, Logs, Analytics, Datasets, Lab, Benchmarks, System, Docs) |
 
 ---
@@ -118,6 +122,9 @@ Engineering:
 6. **No scope guard.** `dsa/**` currently imports `java.util.*` in ~25 files
    (`ArrayList/List/Map/Random/concurrent.*`). The prohibition documented in the
    syllabus is not enforced, and previously-unmeasured licenses vary by class.
+   *(Resolved on the current branch: `EngineScopeGuardTest` freezes a per-file
+   `java.util` manifest, fails the build on any new `dsa/**` import, and lets the
+   ledger shrink. See [13-testing.md](13-testing.md).)*
 7. **Frontend has no tests, no lint, no a11y pass.**
 8. **Stale doc links**: `docs/04` cites `05-string-algorithms.md` and
    `07-network-flow.md`, which do not exist in the tree.

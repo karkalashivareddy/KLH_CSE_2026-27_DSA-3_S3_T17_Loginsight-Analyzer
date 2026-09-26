@@ -1,5 +1,7 @@
 # 05 - String Algorithms (theory supplement)
 
+> Theory and phase history. Current string endpoint names and exposure are in [API.md](API.md) and [ALGORITHMS.md](ALGORITHMS.md).
+
 This file documents the string-algorithm topics that are **conceptual only** in this project, stated
 honestly alongside the implemented machinery.
 

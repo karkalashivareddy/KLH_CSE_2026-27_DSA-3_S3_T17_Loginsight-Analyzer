@@ -32,6 +32,7 @@ import com.loginsight.dto.request.SearchRequest;
 import com.loginsight.dto.request.VertexCoverRequest;
 import com.loginsight.dto.response.TraceResponseDto;
 import com.loginsight.exception.InvalidQueryException;
+import com.loginsight.query.QueryValidator;
 import com.loginsight.query.engine.approximation.VertexCoverGraphBuilder;
 import com.loginsight.query.engine.flow.FlowGraphFactory;
 import com.loginsight.trace.AlgorithmStep;
@@ -130,9 +131,35 @@ public class TraceService {
 
     public TraceResponseDto reservoir(ReservoirRequest request) {
         int k = request.k() == null ? 10 : request.k();
-        long[] stream = request.values() == null ? new long[0] : request.values();
+        if (k < 0) {
+            throw new InvalidQueryException("k must be >= 0, got " + k);
+        }
+        k = Math.min(k, QueryValidator.MAX_RESERVOIR_K);
+        long[] stream = streamOf(request);
         return toDto("reservoir", "Randomized",
                 new ReservoirSampling(k, RandomSource.unseeded()).sampleTracked(stream));
+    }
+
+    /**
+     * The traced stream: the explicit {@code values} array when present, otherwise the
+     * {@code size}-token stream {@code [0, size)} the canonical endpoint samples from, so a run
+     * without {@code values} still shows a real Algorithm R trace instead of an empty one.
+     */
+    private static long[] streamOf(ReservoirRequest request) {
+        if (request.values() != null && request.values().length > 0) {
+            if (request.values().length > QueryValidator.MAX_RESERVOIR_VALUES) {
+                throw new InvalidQueryException("values must hold at most "
+                        + QueryValidator.MAX_RESERVOIR_VALUES + " elements");
+            }
+            return request.values();
+        }
+        int size = request.size() == null ? 0 : request.size();
+        int capped = Math.max(0, Math.min(size, QueryValidator.MAX_RESERVOIR_STREAM));
+        long[] stream = new long[capped];
+        for (int i = 0; i < capped; i++) {
+            stream[i] = i;
+        }
+        return stream;
     }
 
     private static boolean useDeterministic(MillerRabinRequest request) {

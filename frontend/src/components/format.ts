@@ -37,6 +37,13 @@ export function formatDuration(ms: number): string {
   return `${m}m ${(s - 60 * m).toFixed(1)}s`;
 }
 
+export function formatMillis(milliseconds: number): string {
+  if (!Number.isFinite(milliseconds) || milliseconds <= 0) return '0 ms';
+  if (milliseconds < 1) return `${Math.round(milliseconds * 1_000)} µs`;
+  if (milliseconds < 1_000) return `${milliseconds.toFixed(milliseconds < 10 ? 2 : 1)} ms`;
+  return `${(milliseconds / 1_000).toFixed(2)} s`;
+}
+
 /** Format bytes as human-readable. */
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -51,12 +58,12 @@ export function levelClass(level: string | null): string {
 
 /** Badge colour mapping for log levels. */
 export const LEVEL_COLORS: Record<string, string> = {
-  FATAL: '#c0392b',
-  ERROR: '#e74c3c',
-  WARN:  '#f1c40f',
-  INFO:  '#3498db',
-  DEBUG: '#95a5a6',
-  TRACE: '#9b59b6'
+  FATAL: 'var(--severity-fatal)',
+  ERROR: 'var(--severity-error)',
+  WARN:  'var(--severity-warn)',
+  INFO:  'var(--severity-info)',
+  DEBUG: 'var(--severity-debug)',
+  TRACE: 'var(--severity-trace)'
 };
 
 /** Derive a bar-chart normalised percentage list. */

@@ -37,10 +37,7 @@ public final class ReduceEngine implements QueryEngine {
         ParallelReduceRequest request = (ParallelReduceRequest) context.getRequest();
         int size = request.size() == null ? 0 : request.size();
         QueryValidator.requireSizes(size, 20_000_000);
-        int parallelism = request.parallelism() == null ? 0 : request.parallelism();
-        if (parallelism <= 0) {
-            parallelism = Runtime.getRuntime().availableProcessors();
-        }
+        int parallelism = QueryValidator.resolveParallelism(request.parallelism());
         ParallelReduce.ReduceOp op = ParallelReduce.ReduceOp.valueOf(request.op().toUpperCase());
         long marker = request.marker() == null ? 1L : request.marker();
 

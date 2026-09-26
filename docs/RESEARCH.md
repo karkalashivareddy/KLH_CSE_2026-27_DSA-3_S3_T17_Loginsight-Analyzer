@@ -1,5 +1,7 @@
 # Research — Comparable Algorithm Visualization & Learning Systems
 
+> Historical design research. The principles remain context for the trace/replay UI; current implementation facts and limitations are maintained in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md).
+
 How do serious algorithm-visualization products make execution legible? This
 document extracts engineering *principles* from the systems studied during the
 TextHack rebuild. Nothing is copied (no branding, layouts, code, or text); the

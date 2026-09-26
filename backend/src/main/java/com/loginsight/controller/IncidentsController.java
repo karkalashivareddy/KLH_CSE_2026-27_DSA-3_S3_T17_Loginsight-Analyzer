@@ -48,11 +48,7 @@ public class IncidentsController {
     public List<LogEventDto> logs(@PathVariable long id,
                                   @RequestParam(defaultValue = "100") int limit,
                                   @RequestParam(defaultValue = "0") int offset) {
-        IncidentDto incident = incidentsService.detect(20).stream()
-                .filter(i -> i.id() == id)
-                .findFirst()
-                .orElseThrow(() -> new com.loginsight.exception.DatasetException(
-                        "Incident not found in the current dataset: " + id));
+        IncidentDto incident = incidentsService.find(id);
         return incidentsService.eventsInWindow(incident.start(), incident.end(), limit, offset);
     }
 }

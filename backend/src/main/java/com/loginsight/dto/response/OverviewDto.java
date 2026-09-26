@@ -13,7 +13,19 @@ public record OverviewDto(String dataset, String systemStatus, long events, long
                           long activeIncidents, List<TimelinePoint> timeline, String range,
                           Map<String, Long> severity, List<ServiceStatsDto> topServices,
                           List<PatternDto> topPatterns, List<LogEventDto> recentCritical,
-                          Heatmap heatmap, Map<String, Long> statusCodes) {
+                          Heatmap heatmap, Map<String, Long> statusCodes,
+                          long datasetEvents, String windowStart, String windowEnd, String scope) {
+
+    public OverviewDto(String dataset, String systemStatus, long events, long errors,
+                       long warnings, long services, long hosts, double eventsPerMinute,
+                       long activeIncidents, List<TimelinePoint> timeline, String range,
+                       Map<String, Long> severity, List<ServiceStatsDto> topServices,
+                       List<PatternDto> topPatterns, List<LogEventDto> recentCritical,
+                       Heatmap heatmap, Map<String, Long> statusCodes) {
+        this(dataset, systemStatus, events, errors, warnings, services, hosts, eventsPerMinute,
+                activeIncidents, timeline, range, severity, topServices, topPatterns, recentCritical,
+                heatmap, statusCodes, events, null, null, null);
+    }
 
     public record TimelinePoint(String start, String end, long count) {
     }

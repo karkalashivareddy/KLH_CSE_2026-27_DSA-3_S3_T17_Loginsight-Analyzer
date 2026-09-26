@@ -1,5 +1,7 @@
 # 07 - Network Flow (theory supplement)
 
+> Theory and phase history. Current flow routes are listed in [API.md](API.md); the canonical product mapping is in [DSA_PRODUCT_MAPPING.md](DSA_PRODUCT_MAPPING.md).
+
 Honest register of flow topics — implemented vs conceptual.
 
 ## Implemented (real engines, trace-instrumented)

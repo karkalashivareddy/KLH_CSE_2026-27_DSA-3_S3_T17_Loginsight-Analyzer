@@ -1,5 +1,7 @@
 # 01 — Requirements Specification
 
+> Historical phase requirements. The current audited scope and non-features are in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md); do not use this file as the current endpoint contract.
+
 ## LogInsight Analyzer — DSA-3 Advanced Algorithmic Log Intelligence and Text Analytics System
 
 | Field | Value |

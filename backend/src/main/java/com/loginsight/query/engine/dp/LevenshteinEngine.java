@@ -36,6 +36,7 @@ public final class LevenshteinEngine implements QueryEngine {
         DistanceRequest request = (DistanceRequest) context.getRequest();
         String a = QueryValidator.requireNotBlank(request.a(), "a");
         String b = QueryValidator.requireNotBlank(request.b(), "b");
+        QueryValidator.requireQuadraticSequences(a, b);
         boolean showMatrix = Boolean.TRUE.equals(request.showMatrix());
 
         long start = System.nanoTime();

@@ -1,5 +1,9 @@
 # LogInsight Rebuild Report
 
+> Historical phase report. The route, count, QA and verification figures below describe the earlier rebuild snapshot. For the current branch, use [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) and [13-testing.md](13-testing.md).
+
+> The 732 backend count and the "no test runner configured in `frontend/`" note are historical. The current branch runs 827 backend tests and 24 frontend tests across 10 files, and `npm test` is a CI gate.
+
 Date: 2026-09-24. This report records the conversion of the "TextHack — Advanced Algorithms
 Laboratory" site into **LogInsight Analyzer**: a log-intelligence product whose internal search,
 patterns, incidents and analytics are powered by the same DSA-3 engines, re-framed as the product's
@@ -63,9 +67,9 @@ or incident. Everything the UI shows must trace to the loaded dataset or to a me
 
 | Check | Result |
 | --- | --- |
-| Backend: `.\mvnw.cmd -o test` | **732 tests, 0 failures, 0 errors** |
+| Backend: `.\mvnw.cmd -o test` | **732 tests, 0 failures, 0 errors** — historical count, see [13-testing.md](13-testing.md) |
 | Backend: `.\mvnw.cmd -o verify` | BUILD SUCCESS, jar `loginsight-analyzer-0.1.0-SNAPSHOT.jar` |
-| Frontend: `npm run build` (tsc + vite) | clean production build |
+| Frontend: `npm run build` (tsc + vite) | clean production build (no frontend test runner at that point) |
 
 ## Honesty rules enforced during the rebuild
 

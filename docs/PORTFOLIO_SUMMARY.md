@@ -1,64 +1,36 @@
-# LogInsight Analyzer — Portfolio Project Summary
+# LogInsight Analyzer — Portfolio Summary
 
-Three ready-to-paste summaries, all factually derived from the repository (commit `bbf5e45`). No
-deployment, users or production usage are claimed.
+Current branch: `rebuild/loginsight-v4`. These summaries use only the current implementation and the latest audit results.
 
----
+## One line
 
-## Version A — One line
+> LogInsight Analyzer is a full-stack, in-memory log investigation workspace that combines a React/TypeScript shell with a Spring Boot REST/SSE API, real classical algorithms, honest heuristic analysis, recorded traces and a 42-entry algorithm catalogue.
 
-> LogInsight Analyzer — a full-stack log analysis & investigation platform whose search, fuzzy
-> matching, pattern discovery, incident detection and benchmarking are powered by real, measurable
-> DSA algorithms (KMP, edit distance, flow, approximation, randomized, parallel), with 732 passing
-> backend tests.
+## Resume version
 
-## Version B — Three lines (resume/project section)
+> **LogInsight Analyzer — Algorithmic Log Intelligence Workspace** · Java 21 / Spring Boot 3.5 with React 18, TypeScript and Vite. KMP powers product search, Levenshtein powers zero-hit suggestions, and heuristic pattern extraction and evidence-backed incident grouping remain explicitly non-ML; a six-module catalogue exposes real algorithm engines and recorded runs, and a frozen `java.util` manifest keeps the `dsa` engines inside the course scope rule. The Command Center is a selected-window operations view: an observed request-trail topology derived from `requestId` co-occurrence over the full dataset (not verified infrastructure), a 2D SVG view with a CSS 2.5D depth mode that is not WebGL, error-rate health bands, and a pipeline story linking each number to the page that produced it. Current verification: 827 backend tests and 24 frontend tests across 10 files pass, with a clean production build, and both suites run in CI. The runtime is single-process and in-memory; Demo Replay is a bounded, labelled dataset replay shared by one `ReplayProvider` subscription, not production telemetry.
 
-> **LogInsight Analyzer — Algorithmic Log Intelligence Platform** · Spring Boot (Java 21) + React/TS
->
-> End-to-end log analysis product where every feature maps to an implemented algorithm: KMP-powered
-> search with measured duration, Levenshtein "did you mean", heuristic (not ML) pattern extraction,
-> and windowed baseline incident detection with inspectable evidence.
->
-> Engineered for transparency — 42-algorithm catalogue, single-run matcher benchmarks, and step-level
-> trace replay over SSE; 732 tests / 0 failures; zero chart libraries (hand-rolled SVG); in-memory,
-> deterministic demo dataset (14,000 events) with honest "not real-time" live replay.
+## Technical version
 
-## Version C — Technical paragraph (interviews / project discussions)
+> LogInsight parses canonical text and JSONL into one backend-owned in-memory dataset, indexes fields and time windows, serves product analytics over REST, and uses SSE for a bounded, oldest-first dataset replay and recorded run-step replay. The overview endpoint returns a selected window anchored on the newest event timestamp, reporting `windowStart`/`windowEnd`/`scope` alongside window-scoped counts and the unfiltered `datasetEvents` total; `eventsPerMinute` divides by the nominal range width, so it is a normalized window rate rather than a measured inter-arrival rate. Service topology edges are counted `requestId` adjacency, and the UI labels them as observed rather than verified. Health is read from the real `/api/health/status` endpoint; the overview DTO's `systemStatus` is a hardcoded compatibility string. Search responses expose the selected matcher and measured duration; patterns are deterministic token normalization; incidents are five-minute baseline heuristics with supporting events. Docker Compose provides multi-stage non-root images, healthchecks, an Nginx `/api` proxy and SPA fallback, while the Vite development proxy remains available on port 5173. There is no database, authentication, WebSocket transport, WebGL or 3D engine, external research integration or trained ML model.
 
-> LogInsight Analyzer is a full-stack, in-memory log analysis and investigation platform I built to
-> demonstrate that classical algorithm theory can be turned directly into product features. The stack
-> is Spring Boot 3.5 / Java 21 serving a typed REST + SSE API to a React 18 + TypeScript + Vite
-> frontend with hand-rolled SVG charts. Logs are parsed (JSONL or text), normalized into a domain
-> model, and indexed into sorted position lists with time-window lookups; a small query language
-> (`level:`, `service:`, `host:`, ranges) is parsed and resolved through index intersections, and
-> free-text search is executed by a real KMP matcher over a rendered haystack, reporting the algorithm,
-> pattern length, text size and measured duration in the response. Zero-match searches fall back to a
-> Levenshtein "did you mean" over the distinct message corpus. Patterns come from heuristic token
-> normalization (explicitly labelled not-ML), and incidents are detected by 5-minute windowed baseline
-> thresholding (`≥ max(3, 3×baseline)`) with exposeable supporting evidence. The same 42-algorithm DSA
-> engine (strings, DP, flow, approximation, randomized, parallel) is exposed through an Algorithm
-> Insights catalogue, a four-matcher measured benchmark (winner = smallest measured time, with a
-> single-run disclaimer) and run sessions replayed step by step over SSE — 13 algorithms are
-> traceable. The product is honest by design: the demo corpus is deterministic and in-memory, the live
-> stream is a labelled "demo replay — not real-time", and there is no database, fake telemetry or
-> marketing claim attached. Verification: 93 test classes / 732 tests / 0 failures, a clean production
-> build, and a headless-Chromium QA pass (59 views, 0 JS/console errors, responsive 1440→375 px).
+## Evidence table
 
----
-
-## Facts backing these summaries
-
-| Claim | Source |
-| --- | --- |
-| 42 algorithms / 6 modules / 36 exposed / 13 traceable / 35 engines | `catalog/AlgorithmCatalog`, `service/CatalogService`, System page |
-| Search uses KMP + reports method/algorithm/duration | `search/LogSearchService.java` (`algorithm = "KMP"`, `durationNanos`) |
-| "Did you mean" via Levenshtein | `search/LogSearchService.java` → `dsa/dp/editdistance/LevenshteinDistance.java` |
-| Patterns heuristic, not ML | `pattern/PatternExtractor.java`; UI label "Heuristic pattern extraction — Not ML" |
-| Incidents = 5-min windows, `≥ max(3, 3×baseline)` | `incident/IncidentDetector.java` |
-| Benchmark = Naive/KMP/Z/Rabin-Karp, single run, winner | `service/SearchBenchmarkService.java` |
-| Demo dataset = seed `20260913L`, 14,000 events | `datasets/DemoDatasetGenerator.java` |
-| Live = labelled `demo-replay`, "not real-time" | `service/LiveStreamService.java`, Live page |
-| 732 tests / 0 failures / 0 errors (93 suites) | `backend/target/surefire-reports` (run `.\mvnw.cmd -o verify`) |
-| QA 59 views, 0 blank/JS/console errors, responsive 1440→375 | `docs/LOGINSIGHT_REBUILD_REPORT.md`, Playwright run |
-| No database/state/chart libraries | `README.md` engineering notes, `package.json`/`pom.xml`
+| Claim | Current evidence |
+|---|---|
+| Product shell | `frontend/src/App.tsx`, `Layout.tsx`, typed API client and Vitest shell test |
+| Command Center selected-window semantics | `OverviewService.snapshot`, `OverviewDto`, `pages/OverviewPage.tsx`, [COMMAND_CENTER.md](COMMAND_CENTER.md) |
+| Real health vs compatibility `systemStatus` | `HealthController.status()`, `api/client.ts` `systemStatus` → `/health/status` |
+| Observed request-trail topology, 2D + CSS 2.5D depth, deterministic particles, no WebGL | `ServiceGraphBuilder`, `/api/analytics/dependencies`, `components/TopologyPanel.tsx`, `TopologyPanel.test.tsx` |
+| Shared replay context | `replay/ReplayContext.tsx`, `ReplayContext.test.tsx` |
+| Heuristic health bands | `pages/OverviewPage.tsx` `healthBand`, printed thresholds in the matrix subtitle |
+| 42 catalogue entries / 6 modules / 36 reachable / 13 traceable | `AlgorithmCatalog`, `CatalogService`, `/api/modules`, Algorithm Lab reading `/api/analysis/algorithms` |
+| 35 registered engines | `EngineRegistry` and `/api/health/status` |
+| KMP product search | `LogSearchService`, search response methodology |
+| Levenshtein suggestion | `LogSearchService` zero-hit path |
+| Heuristic patterns/incidents | `PatternExtractor`, `IncidentDetector`, evidence endpoints/UI |
+| Demo versus replay | `DemoDatasetGenerator`, `LiveStreamService`, `demo-replay` labels |
+| Academic `java.util` scope guard | `EngineScopeGuardTest` frozen manifest over `dsa/**` |
+| Deployment | `backend/Dockerfile`, `frontend/Dockerfile`, `frontend/nginx.conf`, `docker-compose.yml` |
+| Verification | `.\mvnw.cmd -o verify` (827), `npm test` (24 across 10 files), `npm run build`, `docker compose config`; CI runs all three |
+| Docker limitation | daemon still unreachable in the audit environment; image/runtime smoke not claimed |

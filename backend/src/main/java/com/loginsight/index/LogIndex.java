@@ -1,6 +1,7 @@
 package com.loginsight.index;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ public final class LogIndex {
     private final Map<String, int[]> byStatus = new LinkedHashMap<>();
     private final Map<String, int[]> bySource = new LinkedHashMap<>();
     private final Map<String, int[]> byTrace = new LinkedHashMap<>();
+    private final Map<String, int[]> byRequestId = new LinkedHashMap<>();
     private final Map<String, int[]> tokens = new LinkedHashMap<>();
     private final int[] sortedByTimestamp;
     private final long[] timestamps;
@@ -49,12 +51,13 @@ public final class LogIndex {
             bucket(byStatus, statusKey(event.getStatusCode()), i);
             bucket(bySource, event.getSource(), i);
             bucket(byTrace, event.getTraceId(), i);
-if (event.getTimestamp() != null) {
-            stampWindows.add(new long[]{event.getTimestamp().toEpochMilli(), i});
+            bucket(byRequestId, event.getRequestId(), i);
+            if (event.getTimestamp() != null) {
+                stampWindows.add(new long[]{event.getTimestamp().toEpochMilli(), i});
+            }
+            indexTokens(event, i);
         }
-        indexTokens(event, i);
-    }
-    java.util.List<Integer> sortedList = new ArrayList<>(size);
+        java.util.List<Integer> sortedList = new ArrayList<>(size);
         for (long[] w : stampWindows) {
             sortedList.add((int) w[1]);
         }
@@ -110,16 +113,24 @@ if (event.getTimestamp() != null) {
 
     /* ── Filters ─────────────────────────────────────────────────────────────────────────── */
 
-    /** Positions in the given list whose event has any of the provided levels. */
+    /**
+     * Positions whose event has any of the provided levels (OR semantics, as documented: repeating
+     * {@code level:} in a query widens the selection). Level names are case-insensitive and an
+     * unknown level simply contributes no positions.
+     */
     public int[] bySeverity(List<String> levels) {
-        int[] acc = null;
+        List<int[]> groups = new ArrayList<>(levels.size());
         for (String level : levels) {
-            int[] list = bySeverity.get(level == null ? null : level.toUpperCase(java.util.Locale.ROOT));
-            if (list != null) {
-                acc = acc == null ? list : intersect(acc, list);
+            int[] list = bySeverity.get(level == null
+                    ? null : level.toUpperCase(java.util.Locale.ROOT));
+            if (list != null && list.length > 0) {
+                groups.add(list);
             }
         }
-        return acc == null ? new int[0] : acc;
+        if (groups.isEmpty()) {
+            return new int[0];
+        }
+        return groups.size() == 1 ? groups.get(0) : unionAll(groups);
     }
 
     public int[] byService(String service) {
@@ -140,6 +151,10 @@ if (event.getTimestamp() != null) {
 
     public int[] byTrace(String traceId) {
         return lookup(byTrace, traceId);
+    }
+
+    public int[] byRequestId(String requestId) {
+        return lookup(byRequestId, requestId);
     }
 
     public int[] byToken(String token) {
@@ -235,16 +250,23 @@ if (event.getTimestamp() != null) {
         for (int[] g : groups) {
             total += g.length;
         }
+        if (total == 0) {
+            return new int[0];
+        }
         int[] out = new int[total];
         int k = 0;
         for (int[] g : groups) {
-            for (int v : g) {
-                if (k == 0 || out[k - 1] != v) {
-                    out[k++] = v;
-                }
+            System.arraycopy(g, 0, out, k, g.length);
+            k += g.length;
+        }
+        Arrays.sort(out);
+        int unique = 1;
+        for (int i = 1; i < out.length; i++) {
+            if (out[i] != out[unique - 1]) {
+                out[unique++] = out[i];
             }
         }
-        return trim(out, k);
+        return trim(out, unique);
     }
 
     public int size() {

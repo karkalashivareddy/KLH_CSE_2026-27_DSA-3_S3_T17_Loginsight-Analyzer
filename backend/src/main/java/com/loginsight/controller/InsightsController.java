@@ -53,6 +53,7 @@ public class InsightsController {
                 item.put("timeComplexity", info.timeComplexity());
                 item.put("spaceComplexity", info.spaceComplexity());
                 item.put("tracked", info.tracked());
+                item.put("defaultInput", info.defaultInput());
                 item.put("description", info.description());
                 items.add(item);
             }

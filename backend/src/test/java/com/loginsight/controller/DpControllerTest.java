@@ -104,7 +104,7 @@ class DpControllerTest {
                 .andExpect(jsonPath("$.result.exists").value(true));
         mockMvc.perform(post("/api/dp/tree")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"from\":[0,1,2],\"to\":[1,2,3]}"))
+                        .content("{\"from\":[0,0,1],\"to\":[1,2,3]}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.algorithm").value("TREE_DIAMETER"));
         mockMvc.perform(post("/api/dp/sos")
@@ -113,5 +113,30 @@ class DpControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.algorithm").value("SOS_DP"))
                 .andExpect(jsonPath("$.result.subsetSums[3]").value(10));
+    }
+
+    @Test
+    void quadraticDpRejectsOversizedSequences() throws Exception {
+        String huge = "x".repeat(6_000);
+        mockMvc.perform(post("/api/dp/levenshtein")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"a\":\"" + huge + "\",\"b\":\"" + huge + "\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+        mockMvc.perform(post("/api/dp/global")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"a\":\"" + huge + "\",\"b\":\"" + huge + "\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+        mockMvc.perform(post("/api/dp/local")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"a\":\"" + huge + "\",\"b\":\"" + huge + "\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+        mockMvc.perform(post("/api/dp/damerau")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"a\":\"" + huge + "\",\"b\":\"" + huge + "\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
     }
 }

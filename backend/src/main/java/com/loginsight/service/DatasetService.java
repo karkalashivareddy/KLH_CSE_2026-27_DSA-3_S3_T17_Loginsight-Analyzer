@@ -32,6 +32,9 @@ import com.loginsight.parser.LogParserFactory;
 @Service
 public class DatasetService {
 
+    /** Ceiling on a single ingested stream, whatever the multipart limit allows through. */
+    public static final int MAX_INGEST_BYTES = 64 * 1024 * 1024;
+
     private final LogParserFactory parserFactory = new LogParserFactory();
     private final DemoDatasetGenerator demoGenerator = new DemoDatasetGenerator();
     private final String sampleDataDir;
@@ -47,10 +50,10 @@ public class DatasetService {
      *
      * @param fileName e.g. {@code logs-medium.txt}
      * @return the freshly loaded dataset
-     * @throws DatasetException if the file is missing or unreadable
+     * @throws DatasetException if the name escapes the sample directory or the file is missing
      */
     public Dataset loadSample(String fileName) {
-        Path path = Paths.get(sampleDataDir, fileName);
+        Path path = resolveSample(fileName);
         if (!Files.exists(path)) {
             throw new DatasetException("Sample dataset not found: " + path.toAbsolutePath());
         }
@@ -66,6 +69,28 @@ public class DatasetService {
         return install(fileName, result);
     }
 
+    /**
+     * Resolves a requested sample name inside the sample directory. The name is a plain file name:
+     * absolute paths, {@code ..} segments and anything else that normalises outside the configured
+     * directory are rejected before the file is touched.
+     */
+    private Path resolveSample(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            throw new DatasetException("Sample dataset name must not be blank");
+        }
+        Path base = Paths.get(sampleDataDir).toAbsolutePath().normalize();
+        Path resolved;
+        try {
+            resolved = base.resolve(fileName).normalize();
+        } catch (java.nio.file.InvalidPathException e) {
+            throw new DatasetException("Invalid sample dataset name: " + fileName);
+        }
+        if (!resolved.startsWith(base) || resolved.equals(base)) {
+            throw new DatasetException("Invalid sample dataset name: " + fileName);
+        }
+        return resolved;
+    }
+
     /** Load the built-in deterministic demo dataset (docs/DATASET.md §5). */
     public Dataset loadDemo() {
         List<LogEvent> events = demoGenerator.generate();
@@ -78,15 +103,10 @@ public class DatasetService {
      * @param name human-readable dataset name
      * @param in   the raw stream, auto-detected as JSONL or canonical text
      * @return the freshly loaded dataset
-     * @throws DatasetException if the stream could not be parsed
+     * @throws DatasetException if the stream is empty, oversized or could not be parsed
      */
     public Dataset ingest(String name, InputStream in) {
-        byte[] raw;
-        try {
-            raw = in.readAllBytes();
-        } catch (IOException e) {
-            throw new DatasetException("Failed reading ingested logs", e);
-        }
+        byte[] raw = readBounded(in);
         if (!name.isEmpty() && raw.length == 0) {
             throw new DatasetException("Log ingestion produced no records");
         }
@@ -103,6 +123,20 @@ public class DatasetService {
             throw new DatasetException("Log ingestion produced no records");
         }
         return install(name == null || name.isBlank() ? "imported-logs" : name, result);
+    }
+
+    private static byte[] readBounded(InputStream in) {
+        byte[] raw;
+        try {
+            raw = in.readNBytes(MAX_INGEST_BYTES + 1);
+        } catch (IOException e) {
+            throw new DatasetException("Failed reading ingested logs", e);
+        }
+        if (raw.length > MAX_INGEST_BYTES) {
+            throw new DatasetException("Uploaded log stream exceeds the "
+                    + (MAX_INGEST_BYTES / (1024 * 1024)) + " MB limit");
+        }
+        return raw;
     }
 
     /** Names of the bundled sample datasets available for import (docs/12 §2). */
@@ -141,8 +175,12 @@ public class DatasetService {
         if (page < 1 || pageSize < 1) {
             throw new IllegalArgumentException("page and pageSize must both be positive");
         }
-        int from = Math.min((page - 1) * pageSize, dataset.size());
-        int to = Math.min(from + pageSize, dataset.size());
+        long offset = (long) (page - 1) * (long) pageSize;
+        if (offset >= dataset.size()) {
+            return List.of();
+        }
+        int from = (int) offset;
+        int to = (int) Math.min((long) from + pageSize, dataset.size());
         return new ArrayList<>(dataset.events().subList(from, to));
     }
 

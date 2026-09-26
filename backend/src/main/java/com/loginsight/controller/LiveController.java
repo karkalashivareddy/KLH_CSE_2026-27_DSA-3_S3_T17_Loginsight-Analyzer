@@ -28,7 +28,9 @@ public class LiveController {
     @GetMapping(produces = "text/event-stream")
     public SseEmitter stream(@RequestParam(defaultValue = "50") int batchSize,
                              @RequestParam(defaultValue = "700") long intervalMs) {
-        return liveStreamService.subscribe(batchSize, intervalMs);
+        return liveStreamService.subscribe(
+                LiveStreamService.requireBatchSize(batchSize),
+                LiveStreamService.requireIntervalMillis(intervalMs));
     }
 
     @GetMapping("/status")

@@ -1,6 +1,7 @@
 package com.loginsight.model;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -88,7 +89,8 @@ public final class LogEvent {
         this.source = builder.source;
         this.rawMessage = builder.rawMessage;
         this.attributes = builder.attributes == null || builder.attributes.isEmpty()
-                ? Map.of() : Map.copyOf(builder.attributes);
+                ? Map.of()
+                : Collections.unmodifiableMap(new LinkedHashMap<>(builder.attributes));
     }
 
     public static Builder builder() {
@@ -204,7 +206,11 @@ public final class LogEvent {
         return rawMessage;
     }
 
-    /** Additional untyped attributes picked up from structured input; never {@code null}. */
+    /**
+     * Additional untyped attributes picked up from structured input; never {@code null}, immutable
+     * and insertion-ordered. A value may be {@code null} when the source record carried an explicit
+     * JSON {@code null} for that attribute.
+     */
     public Map<String, String> getAttributes() {
         return attributes;
     }

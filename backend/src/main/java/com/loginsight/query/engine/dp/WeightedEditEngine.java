@@ -35,6 +35,7 @@ public final class WeightedEditEngine implements QueryEngine {
         WeightedEditRequest request = (WeightedEditRequest) context.getRequest();
         String a = QueryValidator.requireNotBlank(request.a(), "a");
         String b = QueryValidator.requireNotBlank(request.b(), "b");
+        QueryValidator.requireQuadraticSequences(a, b);
 
         WeightedEditDistance weighted = new WeightedEditDistance(request.insertCost(),
                 request.deleteCost(), request.substituteCost());

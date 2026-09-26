@@ -1,55 +1,48 @@
-# TextHack Course Map — DSA-3 Modules 1–6
+# Algorithm Course Map
 
-The frontend **Course Map** page renders this matrix live from `GET /api/algorithms`. This file is
-the written contract: every syllabus topic in `docs/04-dsa-mapping.md` maps to a row here, and every
-row has a real implementation, latency, and (for traceable keys) a step recorder.
+The frontend Algorithm Lab renders the grouped backend catalogue at `GET /api/analysis/algorithms`. The canonical catalogue and module metadata remain available at `GET /api/algorithms` and `GET /api/modules`, and those are the source of truth for the counts below.
 
-## Modules and accents
+| Module id | Module | Entries | Reachable | Traceable | Library-only examples |
+|---|---|---:|---:|---:|---|
+| `strings` | String Algorithms | 9 | 8 | 4 | Kasai LCP |
+| `dp` | Dynamic Programming | 12 | 12 | 2 | — |
+| `flow` | Graph and Flow | 6 | 6 | 3 | — |
+| `approximation` | Approximation | 7 | 3 | 1 | Bounded VC, kernelization, FPTAS, VC/IS reduction |
+| `randomized` | Randomized | 5 | 4 | 3 | Perfect hashing |
+| `parallel` | Parallel | 3 | 3 | 0 | — |
+| **Total** | | **42** | **36** | **13** | |
 
-| Module | Title | Accent | Traceable | Exposed | Library-only |
-|---|---|---|---|---|---|
-| strings | String Algorithms | `#22d3ee` | 4 | 8 | suffix array / Kasai LCP |
-| dp | Dynamic Programming | `#a78bfa` | 2 | 12 | — |
-| flow | Graph & Flow | `#fbbf24` | 3 | 6 | — |
-| approximation | Approximation | `#34d399` | 1 | 3 | bounded vertex cover, kernelization, knapsack FPTAS, VC⇄IS reduction |
-| randomized | Randomized | `#f472b6` | 3 | 4 | FKS perfect hash |
-| parallel | Parallel | `#60a5fa` | 0 | 3 | — |
+## Status meanings
 
-Totals: **42 catalogue entries** · 9 trace-instrumented algorithms used by runs · 0 fabricated data.
+- **Traceable**: the implementation records ordered steps and can be used through the trace/run surfaces.
+- **Reachable**: the catalogue has a canonical or trace REST endpoint.
+- **Library-only**: implemented and tested but no standalone endpoint is advertised.
+- **Engine**: the dispatcher implementation; 35 engines back the 42 catalogue entries.
 
-## Reading the status marks
+## Product mapping
 
-- **trace** — `tracked=true`: the engine records every operation through `StepRecorder`; replayable
-  in the Laboratory and as SSE run sessions.
-- **api** — `exposed=true, tracked=false`: canonical REST endpoint, no recorder.
-- **lib** — `exposed=false`: implemented library algorithm surfaced only through the catalogue (and
-  via TextHack recommendations where relevant).
+KMP drives product free-text search, Levenshtein drives zero-hit suggestions, token normalization drives Patterns, and five-minute baseline thresholding drives Incidents. The other entries remain honest algorithm-engine, benchmark, trace or laboratory capabilities; they are not all product-panel claims.
 
-## Key chains / cross-verification
+## Cross-checks
 
-- String-search chain: `naive == kmp == z == rabinkarp` (same match sets).
-- Flow chain: `fordfulkerson == edmondskarp == dinic` (same max-flow).
-- Parallel chain: parallel reduce/scan/sort == sequential results.
-- Approximation honesty: vertex cover declares its 2-approximation ratio + matching lower bound;
-  library-only FPT/kernelization/FPTAS algorithms are labeled with their exact parameterized/EPS
-  complexity, never advertised as polynomial.
+- Naive, KMP, Z and Rabin-Karp match sets are compared in tests.
+- Ford-Fulkerson, Edmonds-Karp and Dinic flow values are compared on shared graphs.
+- Parallel reduce, scan and sort are checked against sequential results.
+- Trace and run responses expose the recorded result, step count and truncation flag.
 
-## TextHack query-class routing
+The course-lab compatibility facade is `POST /api/text-hack/query`; it routes to existing engines and is not an external research integration. The current system has no WebGL/3D engine, WebSocket transport or trained ML component. The Command Center topology's "3D / depth" mode is a 2.5D CSS transform over a flat SVG, not a 3D renderer. The course rule against `java.util` delegation in `dsa/**` is enforced by `EngineScopeGuardTest`, a frozen per-file `java.util` manifest that fails the build on any new import; see [13-testing.md](13-testing.md).
 
-Each of the six query classes resolves to exactly one executed engine and a recommended lab journey:
+Where algorithms reach the product:
 
-| Query class | Executed engine | Lab jumps (`recommended`) |
-|---|---|---|
-| PATTERN_SEARCH → KMP | `kmp` | kmp · z · rabinkarp · naive |
-| FUZZY_MATCH → Levenshtein | `levenshtein` | fuzzy_search · levenshtein |
-| DOCUMENT_SIMILARITY → Needleman-Wunsch | `global_alignment` | global_alignment · levenshtein |
-| CITATION_FLOW → Dinic | `dinic` | dinic · edmondskarp · fordfulkerson · min_cut |
-| PROJECT_SCHEDULING → Vertex Cover | `vertexcover` | vertexcover · bounded_vertex_cover · vertex_cover_kernelization |
-| PRIME_TESTING → Miller-Rabin | `millerrabin` | millerrabin |
+| Product surface | Algorithm behind it |
+|---|---|
+| Product search free text | KMP over the rendered candidate text |
+| Zero-hit "Did you mean?" | Bounded Levenshtein over distinct messages |
+| Patterns | Deterministic token normalization (not ML) |
+| Incidents | Five-minute baseline thresholding, rule-based |
+| Command Center topology | Group-by-`requestId` ordered adjacency fold over the full dataset, not a catalogue entry |
+| Service health bands | Fixed error-rate thresholds |
+| Search benchmark | Naive / KMP / Z / Rabin-Karp, one measured run each |
+| Run sessions | Recorded execution of a trace-instrumented algorithm, created by `POST /api/runs` and streamed over `GET /api/runs/{id}/events` |
 
-## NP-completeness & parallel notes
-
-- Module 5 exercises (Bounded Vertex Cover, kernelization, Knapsack FPTAS, VC⇄Independent Set) are
-  implemented and catalogued; see `docs/np-completeness.md` for the theory body.
-- Module 6 exercises measure real speedups; benchmark rows carry `work`, `span`, and
-  `parallelism = work / span` from actual runs (`docs/14-benchmarking.md`).
+See [COMMAND_CENTER.md](COMMAND_CENTER.md) and [ALGORITHMS.md](ALGORITHMS.md).

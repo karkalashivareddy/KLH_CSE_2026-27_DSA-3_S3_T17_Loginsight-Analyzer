@@ -1,0 +1,8 @@
+target
+.mvn
+.idea
+.vscode
+*.log
+.env
+.env.*
+!.env.example

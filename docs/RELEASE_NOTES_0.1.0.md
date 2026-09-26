@@ -1,66 +1,54 @@
-# LogInsight Analyzer 0.1.0
+# LogInsight Analyzer 0.1.0 — rebuild/loginsight-v4
 
-## Release status
+## Status
 
-**Verified local release.** This release has not been deployed publicly; it is a self-contained
-academic/portfolio build verified locally (backend test suite + frontend production build + browser
-QA). See [README.md](../README.md) for how to run it.
+This is the current single-node release shape for the academic/portfolio project. It is not a public or production deployment. The backend, frontend and Compose artifacts are present in the repository; the audit environment did not have a running Docker daemon, so image build/runtime smoke tests remain a local follow-up.
 
-## Product transformation
+## Current capabilities
 
-The repository evolved from the academic **"TextHack — Advanced Algorithms Laboratory"** presentation
-into a product-facing surface — **LogInsight Analyzer, an Intelligent Log Analysis & Investigation
-Platform**:
-
-- Removed TextHack-, Laboratory- and Course-Map-branded pages; replaced with product pages:
-  Command Center, Log Explorer, Search, Analytics, Patterns, Incidents, Services, Live, Datasets,
-  Ingestion, Analysis, Algorithms, Benchmarks, Run Sessions, System, Docs.
-- DSA algorithms (unchanged in substance) are now the **engineering machinery underneath** the
-  product: exposed via search/fuzzy/patterns/incidents and, transparently, via the Algorithm Insights
-  catalogue, measured benchmarks and step replay.
-- Historical academic records remain in `docs/` (e.g. `REBUILD_BASELINE.md`, `COURSE_MAP.md`,
-  `FINAL_REBUILD_REPORT.md`) for compatibility; they are not part of the current product surface.
-
-## Major capabilities
-
-- **Command Center** — dashboard computed live from the loaded dataset (totals, timeline, severity,
-  HTTP, patterns, 7×24 heatmap, recent critical events; 5 time ranges).
-- **Log Explorer** — structured filters, time window, paging, and per-event detail with raw log and
-  trace/span IDs.
-- **Search** — query language (`level:`, `service:`, `host:`, `source:`, `status:`, `trace:`,
-  ranges); free text executed by a real KMP engine with measured duration; Levenshtein
-  "did you mean" on zero hits; dataset-driven typeahead.
-- **Patterns** — heuristic token-normalized message templates with sample events, labelled "not ML".
-- **Incidents** — 5-minute windowed baseline thresholding (`≥ max(3, 3×baseline)`) with inspectable
-  supporting evidence.
-- **Analytics** — timeline / severity / heatmap / HTTP / hosts tabs plus service dependencies.
-- **Services** — rollups and per-service 24-hour drill-down.
-- **Live** — bounded SSE replay of the dataset, labelled `demo-replay` / "not real-time".
-- **Datasets / Ingestion** — deterministic demo corpus (14,000 events, seed `20260913L`), bundled
-  samples, file upload with honest parse results, Clear.
-- **Algorithm Insights** — catalogue of 42 algorithms across 6 modules (36 exposed, 13 traceable);
-  four-matcher measured search benchmark (Naive/KMP/Z/Rabin-Karp, winner = smallest measured time);
-  run sessions recorded and replayed step-by-step over SSE.
+- Rebuilt React/TypeScript observability shell with Command Center, explorer, search, analytics, patterns, incidents, services, datasets, ingestion, Algorithm Lab, run replay, system and docs routes. Incident evidence is also reachable at `/investigate/:id`.
+- Command Center selected-window view: `range` selects the window, `windowStart`/`windowEnd` anchor it on the newest event timestamp, `scope` is `selected-window`, and window-scoped counts are reported alongside the unfiltered `datasetEvents` total. `eventsPerMinute` divides by the nominal range width, so it is a normalized window rate rather than a measured inter-arrival rate.
+- Observed request-trail topology from `requestId` co-occurrence, with a 2D SVG mode and a 2.5D "3D / depth" mode implemented as a CSS `perspective` + `rotateX` transform over the same SVG. The panel states "not WebGL" in both modes; no WebGL context, shader or 3D engine exists.
+- Deterministic edge-weight encoding: stroke width, opacity, curvature and a bounded particle count per edge are pure functions of the observed weight, with `prefers-reduced-motion` support.
+- Heuristic service health bands (healthy <5%, watch 5–<10%, elevated ≥10%, unavailable when the rate is not finite), with the thresholds printed in the UI.
+- Pipeline story strip linking each Command Center figure to the page that produced it.
+- One shared `ReplayProvider` subscription backing both the Command Center replay card and the Demo Replay screen (route `/live`, navigation label `Live Replay`).
+- Runtime health read from the real `GET /api/health/status`; the overview DTO's `systemStatus` is a hardcoded compatibility field used only as a pre-resolution fallback.
+- Spring Boot REST/SSE API over one in-memory current dataset.
+- Deterministic 14,000-event demo generator, bundled text/JSONL samples and multipart upload parsing.
+- 42-entry, six-module algorithm catalogue; 35 registered query engines; 13 trace-instrumented algorithms.
+- An academic `java.util` scope guard (`EngineScopeGuardTest`) that freezes a per-file manifest over `dsa/**` and fails the build on any new `java.util` import.
+- KMP product search, Levenshtein zero-hit suggestions, heuristic patterns, five-minute incident evidence, measured matcher comparison and recorded run sessions.
+- Multi-stage, non-root Docker images, Nginx `/api/` proxy, SSE buffering settings, SPA fallback, healthchecks and Compose service ordering.
+- Vite development proxy preserved at `/api` → `localhost:8080`.
 
 ## Verification
 
 | Check | Result |
-| --- | --- |
-| Backend `.\mvnw.cmd -o verify` | 93 test classes · **732 tests · 0 failures · 0 errors** |
-| Frontend `npm run build` (tsc + vite) | clean production build (54 modules) |
-| Browser QA (Playwright/Chromium) | 59 views · 0 blank routes · 0 JS errors · 0 console errors · 0 network 404/500 |
-| Responsive | no horizontal overflow at 1440 / 1280 / 1024 / 768 / 480 / 375 px |
-| API contract | exercised against the live app (overview, logs, search, patterns, incidents, services, analytics, live, datasets, ingestion, benchmarks, runs/SSE) |
+|---|---|
+| `cd backend; .\mvnw.cmd -o verify` | 827 tests, 0 failures, 0 errors |
+| `cd frontend; npm test` | 24 tests across 10 files passed |
+| `cd frontend; npm run build` | Clean TypeScript/Vite production build |
+| `docker compose config --quiet` | Passed |
+| Docker image build/runtime | Not run: Docker daemon unavailable in the audit environment |
+
+All three build commands are also the CI gates: the backend job runs `mvn -q verify`, and the frontend job runs `npm ci`, `npm test` and `npm run build`.
+
+The Docker daemon limitation still holds on this branch; `docker info` cannot reach the engine, so no image build or container smoke test has been run.
+
+The old browser-QA figures and the smaller backend test counts in earlier rebuild reports are historical and are not claims for this branch; see [13-testing.md](13-testing.md).
+
+## Data honesty
+
+Demo data is synthetic. Demo Replay is a bounded, oldest-first replay labelled `demo-replay` / “not real-time”; the route is `/live` and the navigation and page label is `Live Replay`, which is a navigation label, not a real-time capture claim. Topology edges are observed log co-occurrence over the full loaded dataset, not verified infrastructure. Health bands are error-rate thresholds, not a health model. There is no external collector, WebSocket transport, trained ML model, WebGL or 3D engine, or research integration.
 
 ## Known limitations
 
-- In-memory, single-current-dataset design; run history capped at 64 sessions; no persistence.
-- Live screen is a labelled **demo replay**, not production telemetry.
-- Patterns and incidents are deterministic heuristics with exposed evidence — not trained models.
-- Benchmarks are single measured runs; the winner is per-run on the host machine.
-- No database, auth, durability, or observability-scale ingestion is claimed.
-- Trace replay lives on the Run Sessions page (in-page selection); no deep-link `:runId` route yet.
+- One backend process and one in-memory dataset; no persistence, authentication, authorization or multi-tenancy.
+- Run history is capped at 64; recorded traces are capped at 400 steps.
+- Uploads are capped at 64 MB and algorithm requests have endpoint-specific bounds.
+- The topology depth mode is a 2.5D CSS transform over a flat SVG, not a 3D renderer.
+- Benchmarks are host- and input-dependent measurements.
+- Compose is a practical evaluation deployment, not a durable or horizontally scalable platform. Image builds were never executed because no Docker daemon was available.
 
-## Commit
-
-`bbf5e45` — `feat: finalize LogInsight Analyzer product`
+See [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md), [COMMAND_CENTER.md](COMMAND_CENTER.md), [API.md](API.md) and [DEPLOYMENT.md](DEPLOYMENT.md) for the current contract.

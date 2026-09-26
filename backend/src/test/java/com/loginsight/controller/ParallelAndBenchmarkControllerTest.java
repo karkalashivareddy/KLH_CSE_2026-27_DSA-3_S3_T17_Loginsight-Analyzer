@@ -88,4 +88,38 @@ class ParallelAndBenchmarkControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("InvalidQueryException"));
     }
+
+    @Test
+    void benchmarkRejectsAnUnboundedSweep() throws Exception {
+        StringBuilder sizes = new StringBuilder("[");
+        for (int i = 0; i < 40; i++) {
+            sizes.append(i == 0 ? "" : ",").append(1000);
+        }
+        sizes.append("]");
+        mockMvc.perform(post("/api/benchmark/run")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"scenario\":\"reduce\",\"sizes\":" + sizes + ",\"repetitions\":1}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+        mockMvc.perform(post("/api/benchmark/run")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"scenario\":\"reduce\",\"sizes\":[5000000],\"repetitions\":1}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+    }
+
+    @Test
+    void parallelismIsClampedToTheMachineCap() throws Exception {
+        mockMvc.perform(post("/api/parallel/scan")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"size\":512,\"parallelism\":1000000}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.verified").value(true))
+                .andExpect(jsonPath("$.result.size").value(512));
+        mockMvc.perform(post("/api/parallel/reduce")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"op\":\"SUM\",\"size\":256,\"parallelism\":-1}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+    }
 }

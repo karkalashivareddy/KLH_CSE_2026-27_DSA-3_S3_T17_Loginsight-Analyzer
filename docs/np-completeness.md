@@ -1,5 +1,7 @@
 # 04b — NP-Completeness & Approximation (Module 5 theory)
 
+> Theory supplement. Current implementation exposure and endpoint boundaries are maintained in [ALGORITHMS.md](ALGORITHMS.md) and [API.md](API.md).
+
 Companion to `docs/04-dsa-mapping.md` and the `com.loginsight.dsa.approximation` package. This
 document covers the conceptual Module 5 body; executable counterparts are implemented and tested in
 Phase 6 and marked below with their class name.

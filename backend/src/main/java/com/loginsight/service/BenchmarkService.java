@@ -28,13 +28,7 @@ public class BenchmarkService {
         if (repetitions < 1 || repetitions > 20) {
             throw new InvalidQueryException("repetitions must be between 1 and 20");
         }
-        int parallelism = request.parallelism() == null ? 0 : request.parallelism();
-        if (parallelism < 0) {
-            throw new InvalidQueryException("parallelism must be >= 0");
-        }
-        if (parallelism == 0) {
-            parallelism = Runtime.getRuntime().availableProcessors();
-        }
+        int parallelism = QueryValidator.resolveParallelism(request.parallelism());
 
         return switch (scenario) {
             case "dataset", "reduce" -> map(ParallelBenchmark.benchmarkReduce(sizes,
@@ -48,12 +42,9 @@ public class BenchmarkService {
 
     private static int[] sanitize(int[] sizes) {
         if (sizes == null || sizes.length == 0) {
-            return BenchmarkRequest.DEFAULT_SIZES;
+            return QueryValidator.requireSweep(BenchmarkRequest.DEFAULT_SIZES);
         }
-        for (int size : sizes) {
-            QueryValidator.requireSizes(size, 10_000_000);
-        }
-        return sizes.clone();
+        return QueryValidator.requireSweep(sizes);
     }
 
     private static List<BenchmarkResultDto> map(List<BenchmarkResult> rows) {

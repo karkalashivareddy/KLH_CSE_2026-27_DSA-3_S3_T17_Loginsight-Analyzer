@@ -26,10 +26,10 @@ public final class ParallelBenchmark {
     /** Benchmarks {@link ParallelReduce} over the given sizes. */
     public static List<BenchmarkResult> benchmarkReduce(int[] sizes, ParallelReduce.ReduceOp op,
                                                         int parallelism, int repetitions) {
-        requireParams(sizes, parallelism, repetitions);
-        List<BenchmarkResult> results = new ArrayList<>(sizes.length);
-        long[] data = fillData(sizes[sizes.length - 1]);
-        for (int size : sizes) {
+        int[] sweep = requireParams(sizes, parallelism, repetitions);
+        List<BenchmarkResult> results = new ArrayList<>(sweep.length);
+        long[] data = fillData(maxOf(sweep));
+        for (int size : sweep) {
             long seq = medianNanos(repetitions,
                     () -> ParallelReduce.reduceSequential(sub(data, size), op));
             long par = medianNanos(repetitions,
@@ -41,10 +41,10 @@ public final class ParallelBenchmark {
 
     /** Benchmarks {@link ParallelPrefixScan} (inclusive) over the given sizes. */
     public static List<BenchmarkResult> benchmarkScan(int[] sizes, int parallelism, int repetitions) {
-        requireParams(sizes, parallelism, repetitions);
-        List<BenchmarkResult> results = new ArrayList<>(sizes.length);
-        long[] data = fillData(sizes[sizes.length - 1]);
-        for (int size : sizes) {
+        int[] sweep = requireParams(sizes, parallelism, repetitions);
+        List<BenchmarkResult> results = new ArrayList<>(sweep.length);
+        long[] data = fillData(maxOf(sweep));
+        for (int size : sweep) {
             long seq = medianNanos(repetitions,
                     () -> ParallelPrefixScan.inclusiveSequential(sub(data, size)));
             long par = medianNanos(repetitions,
@@ -56,10 +56,10 @@ public final class ParallelBenchmark {
 
     /** Benchmarks {@link ParallelSort} over the given sizes. */
     public static List<BenchmarkResult> benchmarkSort(int[] sizes, int parallelism, int repetitions) {
-        requireParams(sizes, parallelism, repetitions);
-        List<BenchmarkResult> results = new ArrayList<>(sizes.length);
-        long[] data = fillData(sizes[sizes.length - 1]);
-        for (int size : sizes) {
+        int[] sweep = requireParams(sizes, parallelism, repetitions);
+        List<BenchmarkResult> results = new ArrayList<>(sweep.length);
+        long[] data = fillData(maxOf(sweep));
+        for (int size : sweep) {
             long seq = medianNanos(repetitions,
                     () -> ParallelSort.sortSequential(sub(data, size)));
             long par = medianNanos(repetitions,
@@ -155,7 +155,7 @@ public final class ParallelBenchmark {
         return WorkSpanAnalyzer.Task.sequentialNode("ParallelSort", 0, arr);
     }
 
-    private static void requireParams(int[] sizes, int parallelism, int repetitions) {
+    private static int[] requireParams(int[] sizes, int parallelism, int repetitions) {
         if (sizes == null || sizes.length == 0) {
             throw new IllegalArgumentException("sizes must be a non-empty array");
         }
@@ -167,6 +167,31 @@ public final class ParallelBenchmark {
         ParallelSupport.requireParallelism(parallelism);
         if (repetitions < 1) {
             throw new IllegalArgumentException("repetitions must be >= 1, got " + repetitions);
+        }
+        int[] sweep = sizes.clone();
+        insertionSort(sweep);
+        return sweep;
+    }
+
+    private static int maxOf(int[] sweep) {
+        int max = sweep[0];
+        for (int s : sweep) {
+            if (s > max) {
+                max = s;
+            }
+        }
+        return max;
+    }
+
+    private static void insertionSort(int[] xs) {
+        for (int i = 1; i < xs.length; i++) {
+            int key = xs[i];
+            int j = i - 1;
+            while (j >= 0 && xs[j] > key) {
+                xs[j + 1] = xs[j];
+                j--;
+            }
+            xs[j + 1] = key;
         }
     }
 }

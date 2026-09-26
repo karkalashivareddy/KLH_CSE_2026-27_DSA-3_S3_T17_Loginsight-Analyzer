@@ -10,5 +10,8 @@ public record ReservoirRequest(Integer k, Integer size, long[] values) {
     public ReservoirRequest {
         k = k == null ? 10 : k;
         size = size == null ? 0 : size;
+        if (values != null && values.length == 0) {
+            values = null;
+        }
     }
 }

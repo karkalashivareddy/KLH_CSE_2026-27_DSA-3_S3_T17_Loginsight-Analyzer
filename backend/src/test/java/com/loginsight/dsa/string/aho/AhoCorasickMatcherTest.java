@@ -125,6 +125,15 @@ class AhoCorasickMatcherTest {
                 () -> new AhoCorasick(new String[]{"a"}).search(null));
     }
 
+    @Test
+    void occurrenceBudgetAbortsAnUnboundedScan() {
+        AhoCorasick ac = new AhoCorasick(new String[]{"a", "b"});
+        assertThrows(IllegalArgumentException.class, () -> ac.search("abababab", 4));
+        assertEquals(8, ac.search("abababab", 8).length, "an exact budget is accepted");
+        assertEquals(8, ac.search("abababab").length, "the uncapped overload is unchanged");
+        assertThrows(IllegalArgumentException.class, () -> ac.search("abab", -1));
+    }
+
     private static String[] buildDeterministicTexts(int count) {
         Random rng = new Random(42L);
         String[] texts = new String[count];

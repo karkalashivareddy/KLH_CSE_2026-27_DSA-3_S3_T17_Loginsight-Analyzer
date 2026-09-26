@@ -35,10 +35,7 @@ public final class ScanEngine implements QueryEngine {
         ParallelScanRequest request = (ParallelScanRequest) context.getRequest();
         int size = request.size() == null ? 0 : request.size();
         QueryValidator.requireSizes(size, 20_000_000);
-        int parallelism = request.parallelism() == null ? 0 : request.parallelism();
-        if (parallelism <= 0) {
-            parallelism = Runtime.getRuntime().availableProcessors();
-        }
+        int parallelism = QueryValidator.resolveParallelism(request.parallelism());
 
         Random random = new Random(11L);
         long[] input = new long[size];

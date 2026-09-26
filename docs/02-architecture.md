@@ -1,5 +1,7 @@
 # 02 — System Architecture
 
+> Historical phase architecture. The current runtime and deployment topology is in [ARCHITECTURE.md](ARCHITECTURE.md) and [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## LogInsight Analyzer — Technical Architecture
 
 ---

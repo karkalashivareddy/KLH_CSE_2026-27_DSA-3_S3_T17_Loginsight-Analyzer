@@ -45,12 +45,57 @@ class LogIndexTest {
                 .build();
     }
 
+    private static LogEvent eventWithRequestId(long id, String iso, String requestId) {
+        return LogEvent.builder()
+                .id(id)
+                .timestamp(Instant.parse(iso))
+                .requestId(requestId)
+                .message("event " + id)
+                .build();
+    }
+
+    private List<LogEvent> requestFixtures() {
+        return List.of(
+                eventWithRequestId(0, "2026-09-13T00:00:00Z", "req-a"),
+                eventWithRequestId(1, "2026-09-13T00:01:00Z", "req-b"),
+                eventWithRequestId(2, "2026-09-13T00:02:00Z", "req-a"));
+    }
+
     @Test
     void severityAndServiceFiltersReturnPositions() {
         LogIndex index = new LogIndex(fixtures());
         assertArrayEquals(new int[]{1, 3}, index.bySeverity(List.of("ERROR")));
         assertArrayEquals(new int[]{0, 2}, index.byService("api-gateway"));
         assertArrayEquals(new int[]{3}, index.byHost("auth-1"));
+    }
+
+    @Test
+    void repeatedLevelsWidenTheSelection() {
+        LogIndex index = new LogIndex(fixtures());
+        assertArrayEquals(new int[]{1, 2, 3}, index.bySeverity(List.of("ERROR", "WARN")),
+                "levels are OR-ed, so repeating level: widens instead of emptying");
+        assertArrayEquals(new int[]{1, 3}, index.bySeverity(List.of("error")),
+                "level names are case-insensitive");
+        assertArrayEquals(new int[]{1, 3}, index.bySeverity(List.of("ERROR", "NOT_A_LEVEL")),
+                "an unknown level contributes no positions");
+        assertArrayEquals(new int[0], index.bySeverity(List.of("NOT_A_LEVEL")));
+    }
+
+    @Test
+    void requestIdPositionsAreIndexed() {
+        LogIndex index = new LogIndex(requestFixtures());
+        assertArrayEquals(new int[]{0, 2}, index.byRequestId("req-a"));
+        assertArrayEquals(new int[]{1}, index.byRequestId("req-b"));
+        assertArrayEquals(new int[0], index.byRequestId("nope"));
+    }
+
+    @Test
+    void unionAllMergesDisjointAscendingLists() {
+        assertArrayEquals(new int[]{1, 2, 3, 4},
+                LogIndex.unionAll(List.of(new int[]{1, 3}, new int[]{2, 4})));
+        assertArrayEquals(new int[]{1, 2, 3},
+                LogIndex.unionAll(List.of(new int[]{1, 2}, new int[]{2, 3})));
+        assertArrayEquals(new int[0], LogIndex.unionAll(List.of()));
     }
 
     @Test

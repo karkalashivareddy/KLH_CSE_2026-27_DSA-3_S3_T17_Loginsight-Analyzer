@@ -1,193 +1,87 @@
-# 13 - Testing Strategy
+# Testing and Verification
 
-## 1. Objectives
+## Current gates
 
-- Prove every implemented algorithm is **correct**, not just executable.
-- Prove **independent implementations agree** (cross-checks) - the strongest evidence of correctness.
-- Cover edge cases from the syllabus and adversarial inputs.
-- Keep the suite fast and deterministic; live measurements stay out of unit tests (they belong to
-  the benchmark suite in `docs/14-benchmarking.md`).
+The current checkout was verified on 2026-09-25 with:
 
-## 2. Stack
+```powershell
+cd backend
+.\mvnw.cmd -o verify
 
-- JUnit 5 (Jupiter) via `spring-boot-starter-test`; AssertJ for fluent assertions.
-- MockMvc for controller tests.
-- Tests run with `mvnw test` (and `mvnw verify` runs checkstyle/spotbugs if configured in Phase 1).
+cd ..\frontend
+npm test
+npm run build
+```
 
-## 3. Test Pyramid
+Results:
 
-| Layer | Location | What |
-|---|---|---|
-| Algorithm unit tests | `src/test/java/com/loginsight/dsa/**` | correctness, edge cases, intermediate structures |
-| Cross-check tests | same tree (`*CrossCheckTest`) | independent-implementation agreement |
-| Parser tests | `.../parser/` | text, JSONL, malformed inputs, partial failures |
-| Service tests | `.../service/` | dataset lifecycle, graph building |
-| Query tests | `.../query/` | dispatcher routing, validation |
-| Controller tests | `.../controller/` | MockMvc: endpoint contract, 400s, envelope shape |
+- Backend: **827 tests, 0 failures, 0 errors**; Spring Boot jar packaged successfully.
+- Frontend: **24 tests across 10 files passed** with Vitest.
+- Frontend build: TypeScript compilation and Vite production build passed.
+- JaCoCo: report generated under `backend/target/site/jacoco/`; no numeric coverage threshold is configured in the POM.
+- Compose syntax: `docker compose config --quiet` passed.
+- Container image build/runtime: not executed because the Docker daemon was unavailable. That limitation still holds; `docker info` cannot reach the Docker engine in this environment, so no image build or container smoke test has been run on this branch.
 
-## 4. Algorithm Unit-Test Catalogue (normal + edge cases)
+The checked-in CI workflow runs `mvn -q verify` in the backend job, then `npm ci`, `npm test` and `npm run build` in the frontend job, so the Vitest suite is a merge gate rather than a local-only check. The frontend job pins Node 22 because Vitest 5 declares `engines: ^22.12.0 || ^24.0.0 || >=26.0.0`; the frontend still has no configured browser-test or lint command.
 
-### String (`dsa/string`)
-- `NaiveMatcherTest` - basic matches, no match, pattern == text, pattern longer than text,
-  repeated-char text, overlapping matches.
-- `KMPMatcherTest` - LPS correctness for `ABABC`, `AAAAB`, single-char; match sets; empty pattern
-  rejected; boundary n=1/m=1.
-- `ZAlgorithmTest` - Z-array correctness; search equivalence with KMP.
-- `RabinKarpTest` - rolling hash updates; collision candidates produce wrong-hash but verify step
-  rejects; double-hash path; hash equality edge cases.
-- `AhoCorasickTest` - single/multiple patterns, overlapping patterns, duplicates, patterns that are
-  prefixes of each other, empty text, trie failure links on `he/she/his/hers`, output links.
-- `SuffixArrayTest` - naive cross-check of suffix array on small random strings (rank property),
-  single-char strings, empty string.
-- `KasaiLCPTest` - LCP correctness on known strings, longest common substring extraction.
-- `StringCrossCheckTest` - for property strings (hand-built + small random): Naive == KMP == Z ==
-  Rabin-Karp match sets.
+## Frontend test inventory
 
-### DP (`dsa/dp`)
-- `LevenshteinTest` - 0/1 distances, empty strings, transpose case (=2 without Damerau), matrix
-  reconstruction, weighted variants.
-- `DamerauTest` - transposition gives 1 where Levenshtein gives 2 (`authentication` typos),
-  mixed operations.
-- `NeedlemanWunschTest` - global alignment score, gap penalties, traceback paths, one-track tests.
-- `SmithWatermanTest` - local alignment zero-clamping, the USER-DB-PAYMENT example, empty overlap.
-- `MatrixChainTest` - classic `A(10x30) B(30x5) C(5x60)` = 4500, n=1/2, descending sizes.
-- `BitmaskTSPTest` - brute-force cross-check on n<=8 distance matrices, asymmetry, unreachable.
-- `HamiltonianPathTest` - existence/non-existence, cycle variant, single node.
-- `TreeDpTest` - diameter on path/star/interior-weighted trees, rerooting consistency (values
-  independent of root).
-- `SosDpTest` - F for all masks vs naive subset loop, n=1..10.
+| File | Tests | Coverage |
+|---|---:|---|
+| `src/api/client.test.ts` | 3 | SSE frame parsing — chunked frames, comment lines, event ids, multiline `data:`, and flushing an unterminated final frame. Plus multipart boundary handling. |
+| `src/components/format.test.ts` | 3 | Duration formatting: values treated as milliseconds, values treated as nanoseconds, and fractional millisecond output. |
+| `src/components/Layout.test.tsx` | 2 | Skip link plus grouped navigation entries with active route state. |
+| `src/components/TopologyPanel.test.tsx` | 4 | Accessible service/edge lists; data-driven node radius and edge particle count; controlled depth mode, renderer note and reset view; reduced-motion static particles. |
+| `src/pages/AlgorithmsPage.test.tsx` | 3 | Algorithm Lab posts the catalogue `defaultInput` to the runs API and navigates to the created session; the run input is displayed; a rejected run surfaces an error instead of navigating. |
+| `src/pages/AnalyticsPage.test.tsx` | 1 | Analytics tablist semantics: `aria-selected`, `aria-controls`, and a tabpanel whose `id`/`aria-labelledby` follow the selected tab. |
+| `src/pages/LivePage.test.tsx` | 2 | Demo replay disclosure and shared `Replay state:` label; start and "Replay again" both open one SSE stream with the selected batch size and pace. |
+| `src/pages/OverviewPage.test.tsx` | 3 | Command Center selected-window metrics, dataset coverage, detected-investigation state and the explicit no-dataset state. |
+| `src/pages/PatternsPage.test.tsx` | 1 | Pattern evidence links search the returned example message, not the wildcard template. |
+| `src/replay/ReplayContext.test.tsx` | 2 | One shared SSE subscription, replay state transitions, progress counters and stop/restart behavior. |
+| **Total** | **24** | |
 
-### Flow (`dsa/flow`)
-- `FordFulkersonTest`, `EdmondsKarpTest`, `DinicTest` - the shared **standard test graph**
-  (S-A-B-T, S-C-D-T, cross edges, zero-capacity edges), disconnected graphs, cycles, sink
-  unreachable (flow 0), multiple parallel edges forbidden at parse layer, big-ish chain graph.
-- `MinCutTest` - source side + cut capacity == max flow (validated by all three engines).
-- `BipartiteMatchingTest` - incidents-to-resources, empty side, perfect vs imperfect matching.
-- `MinCostMaxFlowTest` - min-cost vs brute-force on small networks, negative-cost avoidance,
-  infeasible demand.
-- `FlowCrossCheckTest` - **FF == EK == Dinic** on a battery of graphs (including random small
-  graphs, forced bad FF cases on integers).
+These are focused component tests over client helpers, the shell, the topology renderer, the Command Center, Algorithm Lab, analytics tabs, patterns, the Demo Replay screen and the replay provider. They are not browser QA and do not exercise real network, real SSE timing or real backend responses.
 
-### Approximation (`dsa/approximation`)
-- `MaximalMatchingTest` - greedy matching is valid (endpoint-disjoint) and maximal (no strictly larger
-  matching extends it on small graphs).
-- `VertexCoverApproximationTest` - cover is valid (every edge covered), size <= 2*OPT on small graphs
-  solved by subset-enumeration oracle, determinism, self-loops force their vertex, duplicates per the
-  simple-graph contract, isolated vertices, empty graph, disconnected graphs.
-- `SetCoverDemoTest` - greedy covers universe, empty family/universe, duplicates inside a set,
-  H(n) bound reporting.
-- `ReductionsTest` - S is a cover iff V-S is independent; clique in G iff independent set in complement(G),
-  on tiny graphs by direct definition.
-- `BoundedVertexCoverTest` - FPT decision/certificate matches the brute-force oracle on seeded small
-  graphs, k=0, edgeless, disconnected, k too small.
-- `KernelizationTest` - reduction preserves tau(G) <= k (oracle on original vs reduced + forced),
-  high-degree correctness, infeasible cases.
-- `KnapsackFPTASTest` - vs independent exact DP on seeded random instances; A >= (1-eps)*OPT; empty/one
-  item/capacity edge cases; varying eps.
-- `ApproximationExperimentTest` - deterministic exact-vs-approx-vs-FPT comparison demo (OPT, approximate
-  cover, ratio, FPT decision for selected k) on fixed graphs.
+## Backend coverage map
 
-### Randomized (`dsa/randomized`)
-- `MillerRabinTest` - small primes/composites, Carmichael numbers (561, 1105, 1729, 2465, 2821,
-  6601, 8911), Mersenne primes (2^31-1, 2^61-1), Long.MAX_VALUE (composite), 2^63-25 (prime),
-  pseudoprimes (341550071728321, 3825123056546413051), negative n rejected, deterministic verdicts
-  cross-checked against `BigInteger.isProbablePrime` (test-only oracle), Monte Carlo rounds
-  behavior, rng/rounds validation.
-- `ReservoirSamplingTest` - size N <= K (whole stream), uniform distribution sanity over 40k seeded
-  trials (statistical, tolerance-based, n=10 k=3 each item within 3/10 ± 0.015), K=1, K=0 always
-  empty, defensive-copy checks, deterministic same-seed reproducibility, large stream (100k).
-- `RandomHashTest` - same key + same seed reproducible, different seeds spread, collision count vs
-  the birthday bound n(n-1)/(2m) on random keys (consecutive keys are a known invalid check for a
-  linear universal hash), pairwise independence on small universe (empirical ≈ 1/m, labeled a demo,
-  not a proof), RandomizedHash demo statistics, parameter validation.
-- `RandomizedQuicksortTest` - sorted output == `Arrays.sort` oracle (test-only), empty/single/
-  sorted/reverse-sorted/all-equal/duplicates/negative/5000-random, input never mutated,
-  deterministic same-seed output, null rejected.
-- `RandomSourceTest` - same-seed reproducibility, different seeds differ, bounds respected,
-  unseeded factory reports no seed, invalid bounds rejected.
-- `ModularArithmeticTest` - normalize/add/subtract semantics, wraparound, `5*3 mod 7 = 1`,
-  overflow-safety (2^62 * 2^62 mod (2^61-1) = 4), 200 random multiplyMod and 30 random powMod
-  checks against a `BigInteger` oracle (test-only), mod = 1 and invalid-mod rejection.
-- `PerfectHashTest` - membership for all inserted keys, absence for non-keys, empty/single/large
-  (200), negative keys, deterministic same seed, different seeds still valid, sentinel never equals
-  a key, structural accessors, insert/remove throw `UnsupportedOperationException`.
+The Maven suite covers:
 
-### Parallel (`dsa/parallel`)
-- `ParallelReduceTest` - each operator (SUM, COUNT, MAX, ERROR_COUNT) equals its sequential fold
-  on small n (below the 1024 sequential threshold) and large n (4096-divisible, 200k) at several
-  worker counts (2/4/8); result independent of worker count; empty/single/all-negative/overflow-
-  wrapping inputs; MAX-on-empty rejected; input never mutated; null/invalid-parallelism rejected.
-- `ParallelPrefixScanTest` - inclusive/exclusive scan equals the sequential fold on small n and
-  large n (4096/5000/8192), power-of-two and non-power-of-two sizes; hand-computed manual
-  baselines; inclusive == exclusive + input elementwise; empty/single/two-element/negative/
-  overflow inputs; input never mutated; deterministic across runs; null/invalid-parallelism
-  rejected.
-- `ParallelSortTest` - output equals the gold-standard sorted array (`Arrays.sort` oracle,
-  test-only) and the same-schedule sequential sort on empty/single/pairs/sorted/reverse/all-equal/
-  duplicate-heavy/negative inputs; below-threshold fallback (n=500); 4096 and 50k random; input
-  never mutated; deterministic; null/invalid-parallelism rejected.
-- `ParallelCrossCheckTest` - reduce/scan/sort parallel == sequential on the same shared datasets
-  covering n = 0, 1, 2, 15, 100, 1024, 1025, 4096, 10 000, 50 001 (straddling the sequential
-  threshold); sort == `Arrays.sort` on 8192; WorkSpanAnalyzer work/span/parallelism on leaf,
-  parallel-take-max, sequential-sum, binaryReduceTree (work = 2n-1), and the full Blelloch
-  up+down sweep schedule; benchmark rows are sane (size-ordered, positive times/speedup/
-  throughput, reduce work = 2n-1); benchmark parameter validation.
+- String matchers, Aho-Corasick, suffix structures and cross-implementation match-set checks.
+- DP edit distances, alignment, interval, bitmask, tree and SOS algorithms.
+- Flow algorithms, min-cut, matching, min-cost flow and shared flow cross-checks.
+- Approximation, FPT, kernelization, reductions, FPTAS and their independent test oracles.
+- Randomized sorting, Miller-Rabin, hashing, reservoir sampling and modular arithmetic.
+- Parallel reduce, scan, sort, work/span analysis and sequential/parallel witnesses.
+- Parsers, malformed-line handling, sample data, datasets, indexing, search, analytics, patterns and incidents.
+- Catalogue metadata, query validation, request conversion, trace/run endpoints and MockMvc error contracts.
+- The academic `java.util` scope guard (`EngineScopeGuardTest`), described below.
 
-## 5. Explicit Edge-Case Catalogue (required coverage)
+Cross-checks compare independent implementations or explicit sequential or brute-force oracles where applicable. Live timing is kept out of correctness assertions; benchmark endpoints measure at runtime.
 
-- Empty input (text, pattern, arrays, stream).
-- Single-element input (1-char patterns, n=1 matrices, 1-node graphs).
-- Repeated characters / repeated patterns / overlapping matches.
-- Pattern longer than text (0 matches, no crash).
-- Collision candidates in Rabin-Karp (constructed collisions where feasible; verified-step rejects).
-- Duplicate patterns in Aho-Corasick (reported once per occurrence set, no double/lost matches).
-- Disconnected graphs, zero-capacity edges, cycles, unreachable sink (flow = 0).
-- DP boundaries: strings of length 1 and 2, alignment of empty sequence, matrix chain of size 2,
-  TSP on 2 and 3 vertices, SOS with n=1.
-- Invalid parameters: empty pattern, negative capacities/costs, k out of range, invalid source/sink,
-  n out of range - all `InvalidQueryException` -> HTTP 400 at controller level.
-- Large inputs: string search on ~1M chars (bounded check), stream of 100k for reservoir, parallel
-  n = 1M (best-effort, machine-dependent).
+### Academic `java.util` scope guard
 
-## 6. Property / Cross-Check Testing (the core evidence)
+DSA-3 forbids delegating core algorithm logic in `dsa/**` to `java.util` collections. The pre-rebuild code already imported a bounded set of `java.util` types, so the guard is a frozen ledger rather than a refactor: `EngineScopeGuardTest` records today's exact `java.util` import suffixes per `dsa` source file, walks every `.java` file under `backend/src/main/java/com/loginsight/dsa` (and asserts it scanned at least 30 files), and fails the build if any file imports a `java.util` type that is not in the manifest. Removing recorded usage is always allowed, so the ledger can only shrink. `java.util.concurrent` under `dsa/parallel` and `java.util.Random` under `dsa/randomized` are course-licensed and are therefore listed in the manifest. Non-`dsa` packages are unrestricted.
 
-Independent implementations MUST agree:
+## Frontend verification boundary
 
-| Property | Check |
-|---|---|
-| Match sets | Naive == KMP == Z == Rabin-Karp (locations identical) |
-| Hash integrity | RK verified matches == naive matches; collisions counted when measurable |
-| LCP vs brute force | LCP array cross-verified against naive suffix comparison on small strings |
-| Max flow | Ford-Fulkerson == Edmonds-Karp == Dinic values on the same graphs |
-| Min cut | cut capacity == max flow for every engine |
-| Matching | bipartite matching size == max-flow value in the constructed network |
-| DP vs brute force | TSP and Hamiltonian cross-checked against exhaustive search (n <= 8) |
-| Edit distance | Levenshtein brute force (recursive memoised, n <= 6) == DP result |
-| Sorted results | randomized quicksort and parallel sort == gold-standard sorted array |
-| Sampling | reservoir sample membership subset-of-stream and uniformity tolerance |
-| Reduction | every parallel reduce operator == its sequential fold on shared datasets incl. below-threshold n |
-| Prefix scan | inclusive/exclusive parallel scan == sequential scan on shared datasets incl. below-threshold n |
+The production build validates TypeScript and Vite bundling. Source-level review covers route wiring, API paths, error rendering, SSE cancellation, responsive CSS and accessibility affordances. Focused Vitest/Testing Library coverage verifies the shell landmarks, client helpers, topology rendering, Command Center states and the shared replay provider. It does not prove browser behavior, contrast against every rendered state, screen-reader usability, WebGL/3D rendering (none exists) or network behavior under production load.
 
-## 7. Controller Tests (MockMvc)
+No browser automation, axe run or visual-regression suite is configured in this checkout. A deployment smoke test should additionally verify:
 
-- Health returns 200 + expected body.
-- Upload valid text + malformed file -> mixed result with per-line errors, import continues.
-- `POST /api/search/kmp` with empty pattern -> 400; unknown dataset id -> 404.
-- Envelope contract test: every algorithm endpoint returns `algorithm`, `queryType`, `inputSize`,
-  `result`, `intermediateData`, `executionTimeNanos`, `timeComplexity`, `spaceComplexity`.
-- Flow invalid source/sink -> 400; negative capacity -> 400.
-- CORS preflight from dev origin returns allowed headers.
+1. `GET /healthz` on the frontend container.
+2. `GET /api/health` and `GET /api/health/status` through the frontend origin.
+3. Demo load, dataset-backed search and a replay stream through Nginx.
+4. Direct navigation to a client-side route such as `/logs`, `/investigate/{id}` and `/runs/{id}`.
+5. Multipart upload size and error rendering.
+6. Command Center range switching, topology 2D/depth mode toggle and node selection, confirming the renderer note reads "not WebGL".
 
-## 8. Coverage Targets and Tracking
+## Performance claims
 
-- Target: >= 80% line coverage on `dsa/**` (measured by jacoco plugin configured in Phase 1).
-- Every class in the `docs/04` mapping table is covered by at least one test class.
-- CI-less but reproducible: `mvnw clean verify` from a clean checkout must pass (documented run
-  order and JDK requirement in README).
+The search benchmark runs one measured execution per matcher over the same loaded haystack. Parallel benchmark endpoints report actual sequential/parallel timings and work/span values for the executed schedule. Results depend on the host, JVM, input and concurrent load; no universal speedup is claimed.
 
-## 9. Where Results Are Recorded
+## Reproducibility notes
 
-- Test report: `backend/target/surefire-reports`.
-- Cross-check results logged at INFO in test output for review.
-- Long-running/large-parameter tests are tagged `@Tag("slow")` and excluded from the default run;
-  they run explicitly in a `verify` profile or Perf phase to keep the demo loop fast.
+- Demo content uses a fixed seed; only its time anchor follows the current hour.
+- Run history and trace steps are bounded and process-local.
+- The sample-data files are committed and parser-tested.
+- A clean checkout must provide Java 21+ and Node.js 22.12+ for the local test command. The checked-in CI jobs use Temurin 21 and Node 22, so the same commands run unchanged in CI.

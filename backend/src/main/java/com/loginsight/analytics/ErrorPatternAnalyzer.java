@@ -1,6 +1,7 @@
 package com.loginsight.analytics;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,16 +36,17 @@ public final class ErrorPatternAnalyzer {
 
     /** Top {@code limit} error messages as {message → count}. */
     public Map<String, Integer> topErrors(List<LogEvent> events, int limit) {
-        Map<String, Integer> messageFrequency = new HashMap<>();
+        Map<String, Integer> messageFrequency = new LinkedHashMap<>();
         for (LogEvent event : events) {
             if ((event.getLevel() == LogLevel.ERROR || event.getLevel() == LogLevel.WARN)
                     && event.getMessage() != null) {
                 messageFrequency.merge(event.getMessage(), 1, Integer::sum);
             }
         }
-        Map<String, Integer> top = new HashMap<>();
+        Map<String, Integer> top = new LinkedHashMap<>();
         List<Map.Entry<String, Integer>> sorted = messageFrequency.entrySet().stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed()
+                        .thenComparing(Map.Entry.comparingByKey()))
                 .toList();
         for (int i = 0; i < Math.min(limit, sorted.size()); i++) {
             top.put(sorted.get(i).getKey(), sorted.get(i).getValue());

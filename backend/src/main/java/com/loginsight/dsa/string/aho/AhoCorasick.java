@@ -121,8 +121,20 @@ public final class AhoCorasick {
      * patterns end at the same position are ordered by depth, deepest first).
      */
     public PatternMatch[] search(String text) {
+        return search(text, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Occurrence-capped scan: aborts as soon as more than {@code maxMatches} occurrences would be
+     * reported, so a pathological pattern set over a large text cannot build an unbounded result
+     * list. The caller's {@code match} call is unaffected.
+     */
+    public PatternMatch[] search(String text, int maxMatches) {
         if (text == null) {
             throw new IllegalArgumentException("text must not be null");
+        }
+        if (maxMatches < 0) {
+            throw new IllegalArgumentException("maxMatches must be >= 0, got " + maxMatches);
         }
         char[] chars = text.toCharArray();
         int[] ids = new int[16];
@@ -142,6 +154,11 @@ public final class AhoCorasick {
             for (int v = state; v != 0 && v != -1; v = nodes[v].getDictSuffix()) {
                 int id = nodes[v].getOutput();
                 if (id != -1) {
+                    if (matchCount >= maxMatches) {
+                        throw new IllegalArgumentException(
+                                "the scan reports more than " + maxMatches
+                                        + " occurrences; narrow the pattern set or the text");
+                    }
                     ids = ensureCapacity(ids, matchCount);
                     starts = ensureCapacity(starts, matchCount);
                     ids[matchCount] = id;

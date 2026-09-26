@@ -1,5 +1,9 @@
 # Post-Rebuild Hardening Audit
 
+> Historical audit of an earlier phase. It is not the current verification record. See [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) for the current branch and [DEPLOYMENT.md](DEPLOYMENT.md) for the container validation boundary.
+
+> **Stale figures in this file.** Test counts, surefire file counts and bundle sizes below are the snapshot this pass measured. The current branch runs **827 backend tests** and **24 frontend tests across 10 files**; see [13-testing.md](13-testing.md). The `LabPage`, `TextHackPage` and `/labs/:module/:key` surfaces named here no longer exist; the current Algorithm Lab is a catalogue browser, documented in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md).
+
 > Scope: verify the complete TextHack rebuild (phases 1-13, commits `f014e5a` → `cf76458` → `b711d94`)
 > on branch `main`, then fix anything that fails the bar, and re-verify. No feature creep - this pass
 > hardens and proves the existing baseline.
@@ -10,7 +14,7 @@
 | --- | --- |
 | `git status` | Clean; only untracked `docs/screenshots/` (8 stale pre-rebuild PNGs, unreferenced in any markdown) |
 | Branch | `main` (8 commits ahead of `origin/main`) |
-| Backend tests | **696 tests / 0 failures / 0 errors** across 85 surefire files (`mvn -q verify`, exit 0) |
+| Backend tests | **696 tests / 0 failures / 0 errors** across 85 surefire files (`mvn -q verify`, exit 0) — historical count, see [13-testing.md](13-testing.md) |
 | Frontend build | Clean (`npm run build`; JS ~233 kB / gzip ~72 kB, CSS ~22 kB) |
 | Live smoke | Boot jar on `:8099`: health UP, catalog, TextHack, runs, SSE replay, failure path all exercised |
 
@@ -105,7 +109,7 @@ application route); not reachable from the UI.
 
 1. Fix P1-01..04 + material P2 (listed above).
 2. Re-run the full smoke matrix + TextHack + runs/SSE.
-3. `mvn -q verify` (must stay ≥696/0) and `npm run build`.
+3. `mvn -q verify` (must stay ≥696/0, the count this pass recorded) and `npm run build`.
 4. Source-level responsive/accessibility review at 1440/1280/1024/768/480 widths (no browser automation available in this environment; media-query + grid audit done by construction).
 5. Refresh docs: `POST_REBUILD_AUDIT.md` (this file), `FINAL_REBUILD_REPORT.md`, `README.md`, API §1 (search scope semantics).
 6. Commit as logical units.
@@ -126,5 +130,5 @@ application route); not reachable from the UI.
 | P3-01 CourseMap copy | Done | Intro legend rewritten without stray `<strong>` fragments. |
 | P3-04 stale screenshots | Done | `docs/screenshots/` (8 unreferenced pre-rebuild PNGs) removed; README links to the live app instead of stale images. |
 
-Final state: `mvn -q verify` **696 tests / 0 failures / 0 errors** (85 surefire files), `npm run build` clean
-(JS 235.8 kB / gzip 73.5 kB, CSS 22.8 kB). All live smoke checks green against the rebuilt jar.
+Final state for that pass: `mvn -q verify` **696 tests / 0 failures / 0 errors** (85 surefire files), `npm run build` clean
+(JS 235.8 kB / gzip 73.5 kB, CSS 22.8 kB). All live smoke checks green against the rebuilt jar. The current branch gate is 827 backend tests plus 24 frontend tests across 10 files; see [13-testing.md](13-testing.md).

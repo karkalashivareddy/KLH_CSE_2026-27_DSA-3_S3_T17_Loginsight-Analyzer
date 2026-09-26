@@ -41,17 +41,20 @@ public final class AhoCorasickEngine implements QueryEngine {
         if (patterns == null || patterns.length == 0) {
             throw new InvalidQueryException("at least one pattern is required");
         }
-        for (String pattern : patterns) {
-            QueryValidator.requirePattern(pattern);
-        }
+        QueryValidator.requirePatternSet(patterns);
         QueryValidator.requireText(context.getText());
 
         long start = System.nanoTime();
         AhoCorasick automaton = new AhoCorasick(patterns);
+        PatternMatch[] occurrences;
+        try {
+            occurrences = automaton.search(context.getText(), QueryValidator.MAX_OCCURRENCES);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidQueryException(e.getMessage());
+        }
         StringSearchResult matched = automaton.match(context.getText());
         long elapsed = System.nanoTime() - start;
 
-        PatternMatch[] occurrences = automaton.search(context.getText());
         List<Map<String, Object>> occurrenceList = new ArrayList<>(occurrences.length);
         for (PatternMatch match : occurrences) {
             occurrenceList.add(Map.of("pattern", match.getPattern(), "start", match.getStart(),

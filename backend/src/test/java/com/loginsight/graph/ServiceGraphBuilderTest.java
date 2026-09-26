@@ -52,6 +52,60 @@ class ServiceGraphBuilderTest {
         assertTrue(graph.successors("API_GATEWAY").contains("AUTH"));
     }
 
+    private static LogEvent orderedEvent(long id, String timestamp, String requestId,
+                                         String service) {
+        return LogEvent.builder()
+                .id(id)
+                .timestamp(Instant.parse(timestamp))
+                .level(LogLevel.INFO)
+                .service(service)
+                .message("event " + id)
+                .requestId(requestId)
+                .build();
+    }
+
+    @Test
+    void buildDoesNotGroupNullRequestIdsTogether() {
+        ServiceGraphBuilder builder = new ServiceGraphBuilder();
+        ServiceDependencyGraph graph = builder.build(List.of(
+                orderedEvent(1, "2026-09-13T10:03:00Z", null, "A"),
+                orderedEvent(2, "2026-09-13T10:01:00Z", null, "B"),
+                orderedEvent(3, "2026-09-13T10:02:00Z", null, "C")));
+
+        assertEquals(3, graph.nodeCount());
+        assertEquals(0, graph.edgeCount());
+        assertTrue(builder.requestTrailCounts().isEmpty());
+    }
+
+    @Test
+    void buildOrdersRequestGroupsByTimestampThenId() {
+        ServiceGraphBuilder builder = new ServiceGraphBuilder();
+        ServiceDependencyGraph graph = builder.build(List.of(
+                orderedEvent(4, "2026-09-13T10:01:00Z", "req-1", "D"),
+                orderedEvent(1, "2026-09-13T10:02:00Z", "req-1", "C"),
+                orderedEvent(3, "2026-09-13T10:00:00Z", "req-1", "B"),
+                orderedEvent(2, "2026-09-13T10:00:00Z", "req-1", "A")));
+
+        assertEquals(Map.of("A->B", 1, "B->D", 1, "D->C", 1),
+                builder.requestTrailCounts());
+        assertEquals(3, graph.edgeCount());
+        assertTrue(graph.successors("A").contains("B"));
+        assertTrue(graph.successors("B").contains("D"));
+        assertTrue(graph.successors("D").contains("C"));
+    }
+
+    @Test
+    void buildDoesNotEmitSelfTransitions() {
+        ServiceGraphBuilder builder = new ServiceGraphBuilder();
+        ServiceDependencyGraph graph = builder.build(List.of(
+                orderedEvent(1, "2026-09-13T10:00:00Z", "req-1", "A"),
+                orderedEvent(2, "2026-09-13T10:01:00Z", "req-1", "A"),
+                orderedEvent(3, "2026-09-13T10:02:00Z", "req-1", "B")));
+
+        assertEquals(1, graph.edgeCount());
+        assertEquals(Map.of("A->B", 1), builder.requestTrailCounts());
+    }
+
     @Test
     void buildIgnoresNullService() {
         ServiceGraphBuilder builder = new ServiceGraphBuilder();

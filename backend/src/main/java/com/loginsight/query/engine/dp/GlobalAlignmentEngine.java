@@ -45,6 +45,7 @@ public final class GlobalAlignmentEngine implements QueryEngine {
         if (a != null || b != null) {
             String textA = QueryValidator.requireNotBlank(a, "a");
             String textB = QueryValidator.requireNotBlank(b, "b");
+            QueryValidator.requireQuadraticSequences(textA, textB);
             aligned = new NeedlemanWunsch().align(textA, textB, request.match(), request.mismatch(),
                     request.gap());
             inputSize = textA.length() + textB.length();
@@ -55,6 +56,7 @@ public final class GlobalAlignmentEngine implements QueryEngine {
             if (seqB == null || seqB.length == 0) {
                 throw new InvalidQueryException("seqB must not be empty");
             }
+            QueryValidator.requireQuadraticSequences(seqA.length, seqB.length);
             aligned = new NeedlemanWunsch().align(seqA, seqB, request.match(), request.mismatch(),
                     request.gap());
             inputSize = seqA.length + seqB.length;

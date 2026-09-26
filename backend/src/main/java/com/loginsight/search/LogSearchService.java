@@ -17,6 +17,7 @@ import com.loginsight.dsa.dp.editdistance.LevenshteinDistance;
 import com.loginsight.dsa.string.KMPMatcher;
 import com.loginsight.dsa.string.StringSearchResult;
 import com.loginsight.exception.DatasetException;
+import com.loginsight.exception.InvalidQueryException;
 import com.loginsight.index.LogIndex;
 import com.loginsight.index.LogIndexService;
 import com.loginsight.model.LogEvent;
@@ -36,6 +37,9 @@ import com.loginsight.service.DatasetService;
 @Service
 public class LogSearchService {
 
+    /** Ceiling on the typeahead payload, whatever {@code limit} the client asks for. */
+    public static final int MAX_SUGGESTIONS = 50;
+
     private final DatasetService datasetService;
     private final LogIndexService indexService;
     private final SearchQueryParser queryParser = new SearchQueryParser();
@@ -51,6 +55,10 @@ public class LogSearchService {
     public LogSearchResponse search(LogSearchRequest request) {
         Dataset dataset = datasetService.currentDataset()
                 .orElseThrow(() -> new DatasetException("No dataset loaded"));
+        if (request.from() != null && request.to() != null
+                && request.from().isAfter(request.to())) {
+            throw new InvalidQueryException("from must be earlier than or equal to 'to'");
+        }
         List<LogEvent> events = dataset.events();
         LogIndex index = indexService.current();
         long start = System.nanoTime();
@@ -71,9 +79,8 @@ public class LogSearchService {
 
         if (pattern.isBlank()) {
             total = candidates.size();
-            int from = (request.page() - 1) * request.size();
-            int to = Math.min(from + request.size(), candidates.size());
-            for (int i = from; i < to; i++) {
+            int[] window = pageWindow(candidates.size(), request.page(), request.size());
+            for (int i = window[0]; i < window[1]; i++) {
                 hits.add(new LogSearchResponse.SearchHit(LogEventDto.from(events.get(candidates.get(i))),
                         null, 0));
             }
@@ -117,9 +124,8 @@ public class LogSearchService {
             }
             total = matchedLines.size();
             List<Integer> ordered = new ArrayList<>(matchedLines);
-            int from = (request.page() - 1) * request.size();
-            int to = Math.min(from + request.size(), ordered.size());
-            for (int i = from; i < to; i++) {
+            int[] window = pageWindow(ordered.size(), request.page(), request.size());
+            for (int i = window[0]; i < window[1]; i++) {
                 int candidateIndex = ordered.get(i);
                 int position = candidates.get(candidateIndex);
                 String lineText = originalLines.get(candidateIndex);
@@ -140,6 +146,19 @@ public class LogSearchService {
                 dataset.name(), hits, suggestion);
     }
 
+    /**
+     * Half-open {@code [from, to)} page window in 64-bit arithmetic, so a large {@code page} with a
+     * large {@code size} cannot overflow into a negative offset and silently re-serve page 1.
+     */
+    private static int[] pageWindow(int total, int page, int size) {
+        long offset = (long) (page - 1) * (long) size;
+        if (offset >= total || offset < 0) {
+            return new int[]{0, 0};
+        }
+        int from = (int) offset;
+        return new int[]{from, (int) Math.min((long) from + size, total)};
+    }
+
     /** Resolve structured filters to candidate positions and sort by the requested order. */
     private List<Integer> candidatePositions(LogIndex index, SearchQuery query) {
         List<int[]> groups = new ArrayList<>();
@@ -150,11 +169,14 @@ public class LogSearchService {
             }
             groups.add(byLevel);
         }
-        addIfPresent(groups, index.byService(query.service()));
-        addIfPresent(groups, index.byHost(query.host()));
-        addIfPresent(groups, index.bySource(query.source()));
-        addIfPresent(groups, index.byStatus(query.status()));
-        addIfPresent(groups, index.byTrace(query.traceId()));
+        if (!narrow(groups, query.service(), index.byService(query.service()))
+                || !narrow(groups, query.host(), index.byHost(query.host()))
+                || !narrow(groups, query.source(), index.bySource(query.source()))
+                || !narrow(groups, query.status(), index.byStatus(query.status()))
+                || !narrow(groups, query.traceId(), index.byTrace(query.traceId()))
+                || !narrow(groups, query.requestId(), index.byRequestId(query.requestId()))) {
+            return List.of();
+        }
         if (query.from() != null || query.to() != null) {
             long from = query.from() == null ? Long.MIN_VALUE : query.from().toEpochMilli();
             long to = query.to() == null ? Long.MAX_VALUE : query.to().toEpochMilli();
@@ -185,10 +207,20 @@ public class LogSearchService {
         return result;
     }
 
-    private static void addIfPresent(List<int[]> groups, int[] list) {
-        if (list.length > 0) {
-            groups.add(list);
+    /**
+     * Adds a specified filter's positions to the intersection. A filter that is present but matches
+     * no event empties the candidate set instead of being dropped, so {@code service:typo} returns
+     * nothing rather than the whole dataset.
+     */
+    private static boolean narrow(List<int[]> groups, String specified, int[] positions) {
+        if (specified == null) {
+            return true;
         }
+        if (positions.length == 0) {
+            return false;
+        }
+        groups.add(positions);
+        return true;
     }
 
     /** Stable ordering of positions by a requestable event field (timestamp, level, service). */
@@ -315,7 +347,7 @@ public class LogSearchService {
         Set<String> statuses = new LinkedHashSet<>();
         Set<String> levels = new LinkedHashSet<>();
         List<SuggestionDto> out = new ArrayList<>();
-        int budget = limit;
+        int budget = Math.max(1, Math.min(MAX_SUGGESTIONS, limit));
 
         for (LogEvent event : events) {
             if (event.getService() != null && event.getService().toLowerCase(java.util.Locale.ROOT)

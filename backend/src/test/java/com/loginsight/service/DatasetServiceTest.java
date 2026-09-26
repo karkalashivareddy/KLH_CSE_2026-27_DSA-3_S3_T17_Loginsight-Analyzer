@@ -55,6 +55,40 @@ class DatasetServiceTest {
     }
 
     @Test
+    void loadSampleRejectsPathTraversal() {
+        DatasetService service = service();
+        assertThrows(DatasetException.class, () -> service.loadSample("../pom.xml"));
+        assertThrows(DatasetException.class, () -> service.loadSample("a/../../pom.xml"));
+        assertThrows(DatasetException.class, () -> service.loadSample("..\\pom.xml"));
+        assertThrows(DatasetException.class, () -> service.loadSample(sampleDataDir + "/../pom.xml"),
+                "an absolute path that normalises outside the directory is rejected");
+        assertThrows(DatasetException.class, () -> service.loadSample(sampleDataDir),
+                "the directory itself is not a sample file");
+        assertThrows(DatasetException.class, () -> service.loadSample(""));
+        assertThrows(DatasetException.class, () -> service.loadSample(null));
+        assertTrue(service.currentDataset().isEmpty(), "a rejected name must not install a dataset");
+    }
+
+    @Test
+    void ingestRejectsAnOversizedStream() {
+        DatasetService service = service();
+        byte[] tooBig = new byte[DatasetService.MAX_INGEST_BYTES + 1];
+        java.util.Arrays.fill(tooBig, (byte) '\n');
+        assertThrows(DatasetException.class, () -> service.ingest("huge",
+                new java.io.ByteArrayInputStream(tooBig)));
+    }
+
+    @Test
+    void ingestStillAcceptsARegularStream() {
+        DatasetService service = service();
+        String jsonl = "{\"timestamp\":\"2026-09-13T10:00:01Z\",\"level\":\"ERROR\","
+                + "\"message\":\"boom\"}\n";
+        Dataset dataset = service.ingest("inline", new java.io.ByteArrayInputStream(
+                jsonl.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        assertEquals(1, dataset.size());
+    }
+
+    @Test
     void clearDropsCurrentDataset() {
         DatasetService service = service();
         service.loadSample(SampleDataGenerator.LOGS_SMALL);

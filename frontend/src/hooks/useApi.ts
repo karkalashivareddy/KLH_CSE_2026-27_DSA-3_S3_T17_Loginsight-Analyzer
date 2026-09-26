@@ -1,46 +1,73 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { subscribeDatasetInvalidation } from '../api/client';
 
-/**
- * Minimal data-fetching hook shared by every page. Exposes loading / error / data plus a
- * manual `reload`. Errors are normalised into the documented ApiError envelope when available.
- */
 export interface UseApiResult<T> {
   data: T | null;
   loading: boolean;
+  refreshing: boolean;
   error: Error | null;
   reload: () => void;
+  lastUpdated: number | null;
 }
 
-/**
- * Call with a `loader` and an optional `key` (any serialisable value). When the key changes or
- * `reload()` is invoked the request fires automatically.
- */
-export function useApi<T>(loader: () => Promise<T>, key?: string): UseApiResult<T> {
+export type ApiLoader<T> = (signal: AbortSignal) => Promise<T>;
+
+function asError(value: unknown): Error {
+  if (value instanceof Error) return value;
+  return new Error(String(value));
+}
+
+export function useApi<T>(loader: ApiLoader<T>, key?: string): UseApiResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
+  const [trigger, setTrigger] = useState(0);
   const loaderRef = useRef(loader);
+  const generationRef = useRef(0);
+  const dataRef = useRef<T | null>(null);
+  const keyRef = useRef(key);
   loaderRef.current = loader;
 
-  const [trigger, setTrigger] = useState(0);
-  const reload = useCallback(() => setTrigger((t) => t + 1), []);
+  const reload = useCallback(() => setTrigger((value) => value + 1), []);
+
+  useEffect(() => subscribeDatasetInvalidation(reload), [reload]);
 
   useEffect(() => {
-    let cancelled = false;
+    const generation = ++generationRef.current;
+    const controller = new AbortController();
+    const changedKey = keyRef.current !== key;
+    keyRef.current = key;
+    if (changedKey) {
+      dataRef.current = null;
+      setData(null);
+      setLastUpdated(null);
+    }
     setLoading(true);
+    setRefreshing(!changedKey && dataRef.current !== null);
     setError(null);
-    loaderRef.current()
+
+    Promise.resolve()
+      .then(() => loaderRef.current(controller.signal))
       .then((value) => {
-        if (!cancelled) setData(value);
+        if (generation !== generationRef.current || controller.signal.aborted) return;
+        dataRef.current = value;
+        setData(value);
+        setLastUpdated(Date.now());
       })
       .catch((reason: unknown) => {
-        if (!cancelled) setError(reason instanceof Error ? reason : new Error(String(reason)));
+        if (generation !== generationRef.current || controller.signal.aborted) return;
+        setError(asError(reason));
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (generation !== generationRef.current || controller.signal.aborted) return;
+        setLoading(false);
+        setRefreshing(false);
       });
-    return () => { cancelled = true; };
-  }, [trigger, key]);
 
-  return { data, loading, error, reload };
+    return () => controller.abort();
+  }, [key, trigger]);
+
+  return { data, loading, refreshing, error, reload, lastUpdated };
 }

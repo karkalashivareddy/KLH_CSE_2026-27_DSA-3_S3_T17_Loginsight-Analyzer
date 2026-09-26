@@ -1,5 +1,7 @@
 # 04 - DSA Syllabus to Implementation Mapping
 
+> Historical phase mapping. Current endpoint names, exposure counts and product labels are maintained in [DSA_PRODUCT_MAPPING.md](DSA_PRODUCT_MAPPING.md) and [ALGORITHMS.md](ALGORITHMS.md).
+
 Single source of truth: every curriculum topic implemented in LogInsight Analyzer, with its Java
 class, application feature, REST endpoint, UI page, complexity, and test.
 

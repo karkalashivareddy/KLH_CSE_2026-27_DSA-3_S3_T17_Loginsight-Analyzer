@@ -2,8 +2,10 @@ package com.loginsight.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import com.loginsight.dto.request.LogSearchRequest;
 import com.loginsight.dto.response.LogSearchResponse;
 import com.loginsight.dto.response.SuggestionDto;
+import com.loginsight.exception.InvalidQueryException;
 import com.loginsight.index.LogIndexService;
 import com.loginsight.service.DatasetService;
 
@@ -85,5 +88,73 @@ class LogSearchServiceTest {
                 && "service:auth-service".equals(s.value())));
         List<SuggestionDto> levelSuggestions = searchService.suggest("error", 12);
         assertTrue(levelSuggestions.stream().anyMatch(s -> "level".equals(s.type())));
+    }
+
+    @Test
+    void repeatedLevelsWidenTheSearch() {
+        LogSearchResponse both = searchService.search(
+                new LogSearchRequest("level:ERROR level:WARN", null, null, 1, 200, null));
+        LogSearchResponse errorsOnly = searchService.search(
+                new LogSearchRequest("level:ERROR", null, null, 1, 200, null));
+        assertTrue(both.total() > errorsOnly.total(),
+                "OR semantics: adding level:WARN must not narrow the result");
+        for (LogSearchResponse.SearchHit hit : both.matches()) {
+            assertTrue("ERROR".equals(hit.event().level()) || "WARN".equals(hit.event().level()));
+        }
+    }
+
+    @Test
+    void requestIdFilterNarrowsResults() {
+        String requestId = datasetService.currentDataset().orElseThrow().events().stream()
+                .map(com.loginsight.model.LogEvent::getRequestId)
+                .filter(id -> id != null && !id.isBlank())
+                .findFirst()
+                .orElseThrow();
+        LogSearchResponse response = searchService.search(
+                new LogSearchRequest("request:" + requestId, null, null, 1, 25, null));
+        assertTrue(response.total() > 0, "the indexed request id must match at least one event");
+        for (LogSearchResponse.SearchHit hit : response.matches()) {
+            assertEquals(requestId, hit.event().requestId());
+        }
+    }
+
+    @Test
+    void aFilterValueThatMatchesNothingYieldsNoResults() {
+        LogSearchResponse response = searchService.search(
+                new LogSearchRequest("request:definitely-not-present", null, null, 1, 25, null));
+        assertEquals(0, response.total());
+        assertTrue(response.matches().isEmpty());
+        assertEquals(0, searchService.search(
+                new LogSearchRequest("service:no-such-service", null, null, 1, 25, null)).total());
+    }
+
+    @Test
+    void hugePageDoesNotOverflowBackToTheFirstPage() {
+        LogSearchResponse response = searchService.search(
+                new LogSearchRequest("service:api-gateway", null, null, Integer.MAX_VALUE, 25, null));
+        assertTrue(response.matches().isEmpty(),
+                "page * size must be computed in 64-bit arithmetic");
+        assertEquals(Integer.MAX_VALUE, response.page());
+    }
+
+    @Test
+    void oversizedPageYieldsNoHitsButKeepsTheTotal() {
+        LogSearchResponse response = searchService.search(
+                new LogSearchRequest("connection refused", null, null, 100_000, 25, null));
+        assertTrue(response.total() > 0);
+        assertTrue(response.matches().isEmpty());
+    }
+
+    @Test
+    void invertedDateRangeIsRejected() {
+        assertThrows(InvalidQueryException.class, () -> searchService.search(
+                new LogSearchRequest("error", Instant.parse("2026-09-13T12:00:00Z"),
+                        Instant.parse("2026-09-13T10:00:00Z"), 1, 25, null)));
+    }
+
+    @Test
+    void suggestLimitIsClamped() {
+        assertTrue(searchService.suggest("a", 0).size() >= 1);
+        assertTrue(searchService.suggest("a", 100_000).size() <= LogSearchService.MAX_SUGGESTIONS);
     }
 }

@@ -1,5 +1,7 @@
 # 03 — Proposed Project Structure
 
+> Historical proposed tree. The current repository layout is represented by [ARCHITECTURE.md](ARCHITECTURE.md); this file is retained for phase traceability.
+
 ## Full proposed tree for `LogInsight Analyzer`
 
 Phase 0 creates this document and the documentation/scaffolding directories only. Backend and

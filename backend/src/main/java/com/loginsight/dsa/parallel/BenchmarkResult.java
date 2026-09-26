@@ -75,10 +75,30 @@ public final class BenchmarkResult {
 
     @Override
     public String toString() {
-        return String.format(java.util.Locale.ROOT,
-                "BenchmarkResult{algorithm='%s', inputSize=%d, seq=%d ns, par=%d ns, "
-                        + "speedup=%.2f, throughput=%.0f/s, work=%d, span=%d, parallelism=%d}",
-                algorithm, inputSize, sequentialNanos, parallelNanos, speedup,
-                throughputPerSecond, work, span, parallelism);
+        return "BenchmarkResult{algorithm='" + algorithm + "', inputSize=" + inputSize
+                + ", seq=" + sequentialNanos + " ns, par=" + parallelNanos + " ns, speedup="
+                + fixed(speedup, 2) + ", throughput=" + fixed(throughputPerSecond, 2)
+                + "/s, work=" + work + ", span=" + span + ", parallelism=" + parallelism + "}";
+    }
+
+    /**
+     * Locale-independent fixed-point rendering built from {@link Math} and {@link String} only, so
+     * the benchmark row never depends on a {@code java.util} formatter that would hide the
+     * measurement it prints.
+     */
+    private static String fixed(double value, int decimals) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            return Double.toString(value);
+        }
+        long scale = 1L;
+        for (int i = 0; i < decimals; i++) {
+            scale *= 10L;
+        }
+        long scaled = Math.round(Math.abs(value) * scale);
+        StringBuilder fraction = new StringBuilder(Long.toString(scaled % scale));
+        while (fraction.length() < decimals) {
+            fraction.insert(0, '0');
+        }
+        return (value < 0 ? "-" : "") + (scaled / scale) + "." + fraction;
     }
 }

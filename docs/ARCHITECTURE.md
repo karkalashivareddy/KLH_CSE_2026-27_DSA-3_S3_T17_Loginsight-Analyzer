@@ -1,106 +1,83 @@
 # Architecture
 
-LogInsight Analyzer is a three-layer application: a typed React SPA, a Spring Boot REST/SSE API,
-and a pure-Java analysis/algorithm layer over one in-memory log dataset.
+## Runtime topology
 
-```
-┌──────────────────────────────┐
-│  React SPA (Vite, :5173)    │
-│  pages → api/client.ts (TS) │  api/types.ts mirrors backend DTOs
-│  components → ui.tsx, charts │  hand-rolled SVG charts, no chart libs
-│  hooks/useApi.ts (fetch)    │  SSE parsed manually in client.ts
-└──────────────┬───────────────┘
-               │  /api (Vite proxy)
-┌──────────────▼───────────────┐
-│  Spring Boot API (:8080)     │
-│  controllers → services      │
-│  GlobalExceptionHandler      │
-└──────────────┬───────────────┘
-               │  pure-Java layer, in-memory only
-┌──────────────▼───────────────┐
-│  DatasetService (1 dataset)  │
-│  LogIndex · LogSearchService │
-│  PatternExtractor            │
-│  IncidentDetector            │
-│  Analytics analyzers         │
-│  DemoDatasetGenerator        │
-└──────────────────────────────┘
+```text
+Browser
+  │
+  ▼
+React 18 + TypeScript + Vite SPA
+  │  relative /api REST and SSE
+  ├── development: Vite proxy ──► Spring Boot :8080
+  └── deployment: Nginx :8080 ──► backend:8080
+                                      │
+                         Spring Boot REST/SSE API
+                                      │
+                 DatasetService ── one current in-memory Dataset
+                                      │
+       ┌──────────────┬──────────────┼──────────────┐
+       ▼              ▼              ▼              ▼
+     parsers       LogIndex      analytics     algorithms
+                                      │
+                             controllers → services
 ```
 
-## 1. Web layer (`frontend/src`)
+## Frontend
 
-- **`api/types.ts`** — one interface per backend DTO (LogEventDto, LogSearchResponse, PatternDto,
-  IncidentDto, ServiceStatsDto, HttpStatsDto, OverviewDto, LiveBatch, SuggestionDto, DatasetResult,
-  AlgorithmGroup, SearchBenchmarkResponse, …).
-- **`api/client.ts`** — one method per endpoint; JSON errors are normalised through the documented
-  `ApiError` envelope; two fetch-reader-based **SSE clients** (run replay and the live stream).
-- **`pages/`** — screen per feature; `hooks/useApi` handles load/error/reload with a serialisable
-  cache key so filters produce fresh requests without manual plumbing.
-- **`styles/global.css`** — dark control-room palette (`#0B0F17` background family), card/sidebar
-  layout, table, chart, pattern, incident and heatmap styles.
+`frontend/src/App.tsx` defines the current route tree and wraps it in `ReplayProvider`. `Layout.tsx` supplies grouped navigation, breadcrumbs, status indicators, a command palette, a mobile drawer and the skip link. Pages fetch through `api/client.ts`, which uses the `/api` base path, request timeouts, cancellation, error-envelope normalization and manual SSE parsing. `useApi.ts` handles loading, refresh, cancellation and dataset-change invalidation.
 
-## 2. API layer (`backend/src/main/java/com/loginsight/controller`, `service`, `dto`)
+`replay/ReplayContext.tsx` owns the one Demo Replay SSE subscription for the whole app. Because the provider sits above the router, the Command Center and the Demo Replay page render the same stream state, progress and event buffer rather than each opening a connection. A generation counter invalidates callbacks from a superseded subscription, and `subscribeDatasetInvalidation` resets the stream when the dataset changes. The backend snapshot is sorted by `(timestamp, id)` and emitted oldest-first, so the "live" route name is a label on a finite ordered replay.
 
-Controllers are thin: they map to a service and return DTO records. `DatasetException` → 404 body,
-`IllegalArgumentException`/`InvalidQueryException` → 400, other runtime errors → 500 via
-`GlobalExceptionHandler` producing the `ApiError` shape (`status/error/message/timestamp/path`).
+Charts and graph views are local SVG components in `components/ui.tsx`. The Command Center service topology in `components/TopologyPanel.tsx` is also SVG, with an optional 2.5D CSS `perspective` + `rotateX` transform for its "3D / depth" mode; it is not a 3D renderer and no WebGL context exists. There is no chart library, no WebGL or 3D engine, no WebSocket client and no browser-side data generator.
 
-| Concern | Controllers / services |
-| --- | --- |
-| Dashboard | `OverviewController` → `OverviewService` |
-| Logs | `LogController` → `LogService`, `LogSearchService` |
-| Search | `SearchController` → `LogSearchService`, legacy `SearchService` |
-| Analytics | `AnalyticsController` → `FleetAnalyzer`, `HeatmapAnalyzer`, … |
-| Patterns | `PatternsController` → `PatternExtractor` |
-| Incidents | `IncidentsController` → `IncidentsService`, `IncidentDetector` |
-| Services | `ServicesController` → `FleetAnalyzer`, `TimelineAnalyzer` |
-| Live | `LiveController` → `LiveStreamService` (SseEmitter) |
-| Datasets | `DatasetController`, `IngestionController` → `DatasetService` |
-| Catalogue / benchmark | `InsightsController` → `AlgorithmCatalog`, `SearchBenchmarkService` |
-| Runs / trace / labs | `RunController`, `TraceController`, `TextHackController`, `CatalogController`, module controllers |
+## Backend
 
-## 3. Analysis layer
+The backend is Java 21 with Spring Boot 3.5.16 and Spring Web. Controllers are thin and map HTTP requests to services. `GlobalExceptionHandler` provides the JSON error contract. `QueryDispatcher` routes resolved `QueryContext` objects to the registered `QueryEngine` implementations.
 
-All analysis is **pure Java over the current dataset snapshot**. Readers iterate the in-memory
-`List<LogEvent>`; `LogIndex` additionally keeps per-field sorted position lists for ranged lookups.
+The main layers are:
 
-- **`index/LogIndex`** — field positions sorted by timestamp; `inTimeWindow(from, to)` is a
-  half-open binary search `[from, to)`. Built per-dataset-instance and cached by `LogIndexService`
-  keyed on the dataset instance (no manual invalidation).
-- **`search/LogSearchService`** — parses a query (`level:`, `service:`, `host:`, `source:`,
-  `status:`, `trace:`, `request:`, `message:`, other → free text), filters via the index, then runs
-  the chosen DSA matcher (KMP by default; the strategy/algorithm is reported to the client) over the
-  lowercased rendered haystack. Renders per-match snippets, computes an exact match count, and on a
-  miss produces a Levenshtein "did you mean" suggestion. `suggest()` returns typed typeahead
-  candidates.
-- **`pattern/PatternExtractor`** — rule-based token normalisation (`normalizeMessage`): numeric,
-  hex-ish, hash, IP, `#`/`{`/`}`/`$` tokens become `<*>`; punctuation stripped from static tokens.
-  Counts occurrences and keeps a representative example and level per template.
-- **`incident/IncidentDetector`** — fixed 5-minute windows over the span (capped); each window's
-  ERROR/FATAL volume compared to a baseline-derived threshold
-  `max(3, ceil(3 × baselineRate))`; adjacent/one-window-apart elevated windows are merged.
-- **`analytics/`** — `TimelineAnalyzer` (range bucket counts), `SeverityAnalyzer`, `HeatmapAnalyzer`
-  (7×24 UTC grid), `FleetAnalyzer` (service/http/host rollups and measured latency percentiles).
-- **`datasets/DemoDatasetGenerator`** — deterministic 14,000-event corpus (seed fixed), 8 services,
-  correlated error bursts, timestamps re-anchored to the current hour; `generate()` is cached.
-- **`service/SearchBenchmarkService`** — four matchers over one shared
-  `QueryContext.renderDataset` haystack; a single measured run per matcher; the winner is simply
-  the smallest measured time.
+- `controller`: REST, multipart and SSE transport.
+- `service`: dataset lifecycle, product analysis, benchmark orchestration, run lifecycle and trace mapping.
+- `search`, `index`, `parser`, `analytics`, `pattern`, `incident`, `graph`: product analysis over the active dataset.
+- `query`, `catalog`, `trace`, `run`: algorithm dispatch, catalogue metadata, recorded execution and replay.
+- `dsa`: hand-written algorithm implementations and supporting data structures.
 
-## 4. Data life-cycle
+`DatasetService` holds one volatile current dataset. `LogIndex` keeps sorted field and timestamp position lists for that dataset. There is no database, JPA layer or external cache.
 
-1. App starts with no dataset. `DatasetService.currentDataset()` is empty; product endpoints answer
-   404 so the UI shows first-run states.
-2. User loads the demo (`POST /api/datasets/demo`), a bundled sample (`POST /api/datasets/{name}`)
-   or uploads a file (`POST /api/datasets`, multipart). `TextLogParser`/`JsonLogParser` parse each
-   line, recording failures; the dataset instance + its summary are stored.
-3. Analysis is recomputed per request/cached keyed on dataset instance; the live stream and run
-   sessions read whatever dataset/run is current.
+## Deployment topology
 
-## 5. Integrity rules
+The Compose deployment adds an Nginx runtime in front of the API. Nginx serves the Vite build, preserves `/api` paths, disables proxy buffering for SSE and uses `try_files` for client-side routes. The backend image includes the bundled sample directory and runs as a non-root Java user. Both containers have healthchecks.
 
-- No fabricated numbers: all counts, latencies, percentiles, benchmark timings and incidents come
-  from the loaded data. Demo data is explicitly labelled; the live stream is `demo-replay` /
-  "not real-time".
-- `java.util.*` is only forbidden inside the `com.loginsight.dsa` package (scope-guard tested).
-- Every DSA complexity string exposed by the API is a real bound from `AlgorithmCatalog`.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for commands and [nginx.conf](../frontend/nginx.conf) for the routing details.
+
+## Data flow
+
+1. The user chooses a bundled sample, generated demo or uploaded file.
+2. The parser detects canonical text or JSONL and reports per-line failures.
+3. The service assigns event IDs and installs one current dataset.
+4. The index and analyzers derive counts, rollups, search results, patterns and incidents from that snapshot.
+5. The frontend receives DTOs and renders them; it does not synthesize missing dataset values.
+6. A replay request reads the same in-memory event list, sorts it oldest-first, and emits it over SSE with a `demo-replay` disclosure.
+
+### Command Center aggregation
+
+The Command Center issues four independent requests and composes them without cross-checking them:
+
+| Request | Scope | Used for |
+|---|---|---|
+| `GET /api/overview?range=` | Selected window | Metric strip, timeline, severity, heatmap, patterns, critical events, window context |
+| `GET /api/analytics/dependencies` | Full current dataset | Observed request-trail topology |
+| `GET /api/incidents?limit=20` | Full current dataset | Detected investigation card, filtered client-side against the overview window |
+| `GET /api/health/status` | Process | Real runtime status pill |
+
+Because the two scopes differ, topology node/edge counts do not reconcile with the window-scoped metric strip by construction, and the incident card filters the returned list against `windowStart`/`windowEnd` in the browser. The page surfaces `windowStart`, `windowEnd` and `scope` on the timeline and window-context cards so the selected scope is visible rather than assumed.
+
+Two honesty details are load-bearing here. `OverviewDto.systemStatus` is a hardcoded compatibility string, so the header prefers the real `/api/health/status` value. And the topology edges are `requestId` co-occurrence, not verified infrastructure, so the panel labels them as observed request-trail adjacency.
+
+See [COMMAND_CENTER.md](COMMAND_CENTER.md) for the field-level semantics.
+
+## Trust boundaries and limitations
+
+The API has no authentication or authorization. The local Vite proxy and Nginx same-origin route avoid browser cross-origin requests, but they are not security controls. Runtime state is not durable, and the design is not a multi-instance architecture.
+
+The dependency graph is derived from log content, so it inherits the dataset's coverage gaps and naming inconsistencies. The CSS depth mode is a presentation transform over a flat SVG, not a projection. Neither should be read as an authoritative view of the deployment.

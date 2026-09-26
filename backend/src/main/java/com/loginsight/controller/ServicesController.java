@@ -1,6 +1,7 @@
 package com.loginsight.controller;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import com.loginsight.dto.response.LogEventDto;
 import com.loginsight.dto.response.ServiceStatsDto;
 import com.loginsight.exception.DatasetException;
 import com.loginsight.model.LogEvent;
+import com.loginsight.query.QueryValidator;
 import com.loginsight.service.DatasetService;
 
 /**
@@ -28,6 +30,10 @@ import com.loginsight.service.DatasetService;
 @RequestMapping("/api/services")
 public class ServicesController {
 
+    private static final int MAX_SERVICE_LIMIT = 200;
+    private static final int MAX_RECENT_EVENTS = 500;
+    private static final int ACTIVITY_BUCKETS = 24;
+
     private final DatasetService datasetService;
     private final FleetAnalyzer fleetAnalyzer = new FleetAnalyzer();
     private final TimelineAnalyzer timelineAnalyzer = new TimelineAnalyzer();
@@ -38,23 +44,19 @@ public class ServicesController {
 
     @GetMapping
     public List<ServiceStatsDto> services(@RequestParam(defaultValue = "50") int limit) {
+        QueryValidator.requireBounds(1, limit, MAX_SERVICE_LIMIT, "limit");
         return fleetAnalyzer.services(currentEvents(), limit);
     }
 
     @GetMapping("/{name}")
     public ServiceStatsDto.ServiceDetail service(@PathVariable String name,
                                                  @RequestParam(defaultValue = "50") int recent) {
+        QueryValidator.requireNotBlank(name, "name");
+        QueryValidator.requireBounds(1, recent, MAX_RECENT_EVENTS, "recent");
         List<LogEvent> events = currentEvents();
         ServiceStatsDto summary = fleetAnalyzer.service(events, name);
         if (summary == null) {
             throw new DatasetException("Service not found in the current dataset: " + name);
-        }
-        List<LogEventDto> recentEvents = new ArrayList<>();
-        long total = 0;
-        for (LogEvent event : events) {
-            if (name.equals(event.getService())) {
-                total++;
-            }
         }
         List<LogEvent> serviceEvents = new ArrayList<>();
         for (LogEvent event : events) {
@@ -62,25 +64,27 @@ public class ServicesController {
                 serviceEvents.add(event);
             }
         }
-        serviceEvents.sort((a, b) -> {
-            if (a.getTimestamp() == null) {
-                return 1;
-            }
-            if (b.getTimestamp() == null) {
-                return -1;
-            }
-            return Long.compare(b.getTimestamp().toEpochMilli(), a.getTimestamp().toEpochMilli());
-        });
+        long total = serviceEvents.size();
+        serviceEvents.sort(Comparator
+                .comparing(LogEvent::getTimestamp, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparingLong(LogEvent::getId));
+        List<LogEventDto> recentEvents = new ArrayList<>();
         for (int i = 0; i < serviceEvents.size() && recentEvents.size() < recent; i++) {
             recentEvents.add(LogEventDto.from(serviceEvents.get(i)));
         }
 
-        long end = System.currentTimeMillis();
+        long latest = Long.MIN_VALUE;
+        for (LogEvent event : events) {
+            if (event.getTimestamp() != null) {
+                latest = Math.max(latest, event.getTimestamp().toEpochMilli());
+            }
+        }
+        long end = latest == Long.MIN_VALUE ? System.currentTimeMillis()
+                : latest == Long.MAX_VALUE ? latest : latest + 1;
         long start = end - TimelineAnalyzer.Range.H24.millis();
         List<Map<String, Object>> activity = new ArrayList<>();
         for (TimelineAnalyzer.Point point : timelineAnalyzer
-                .rangeBuckets(events.stream().filter(e -> name.equals(e.getService())).toList(),
-                        start, end, 24)) {
+                .rangeBuckets(serviceEvents, start, end, ACTIVITY_BUCKETS)) {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("start", point.start());
             row.put("end", point.end());

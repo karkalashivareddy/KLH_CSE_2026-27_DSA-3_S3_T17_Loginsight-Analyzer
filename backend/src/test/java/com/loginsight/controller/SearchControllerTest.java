@@ -107,4 +107,27 @@ class SearchControllerTest {
                 .andExpect(jsonPath("$.algorithm").value("LEVENSHTEIN"))
                 .andExpect(jsonPath("$.result.totalMatches").isNumber());
     }
+
+    @Test
+    void multiPatternRejectsAnUnboundedPatternSet() throws Exception {
+        StringBuilder tooMany = new StringBuilder("[");
+        for (int i = 0; i < 2_000; i++) {
+            tooMany.append(i == 0 ? "" : ",").append("\"p").append(i).append("\"");
+        }
+        tooMany.append("]");
+        mockMvc.perform(post("/api/search/multi")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"patterns\":" + tooMany + ",\"text\":\"abc\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+    }
+
+    @Test
+    void multiPatternRejectsAnOversizedSinglePattern() throws Exception {
+        mockMvc.perform(post("/api/search/multi")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"patterns\":[\"" + "x".repeat(150_000) + "\"],\"text\":\"abc\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("InvalidQueryException"));
+    }
 }

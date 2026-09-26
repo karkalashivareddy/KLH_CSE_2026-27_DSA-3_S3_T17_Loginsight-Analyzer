@@ -227,4 +227,32 @@ class ParallelCrossCheckTest {
         assertThrows(IllegalArgumentException.class,
                 () -> ParallelBenchmark.benchmarkReduce(new int[]{10}, ParallelReduce.ReduceOp.SUM, 4, 0));
     }
+
+    @Test
+    void benchmarkSortsAnUnorderedSweepAndSizesTheBufferFromTheMaximum() {
+        List<BenchmarkResult> rows =
+                ParallelBenchmark.benchmarkSort(new int[]{8000, 2000, 4000}, 4, 1);
+        assertEquals(3, rows.size());
+        assertEquals(2000, rows.get(0).getInputSize());
+        assertEquals(4000, rows.get(1).getInputSize());
+        assertEquals(8000, rows.get(2).getInputSize());
+    }
+
+    @Test
+    void benchmarkReduceHandlesAnUnorderedSweep() {
+        List<BenchmarkResult> rows =
+                ParallelBenchmark.benchmarkReduce(new int[]{4000, 2000}, ParallelReduce.ReduceOp.SUM,
+                        4, 1);
+        assertEquals(2, rows.size());
+        assertEquals(2000, rows.get(0).getInputSize());
+        assertEquals(4000, rows.get(1).getInputSize());
+    }
+
+    @Test
+    void benchmarkScanHandlesAnUnorderedSweep() {
+        List<BenchmarkResult> rows = ParallelBenchmark.benchmarkScan(new int[]{4000, 2000}, 4, 1);
+        assertEquals(2, rows.size());
+        assertEquals(2000, rows.get(0).getInputSize());
+        assertEquals(4000, rows.get(1).getInputSize());
+    }
 }

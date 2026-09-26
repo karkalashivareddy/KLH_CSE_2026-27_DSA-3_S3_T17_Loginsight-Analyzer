@@ -102,6 +102,28 @@ class JsonLogParserTest {
     }
 
     @Test
+    void explicitNullAttributeKeepsTheRecord() {
+        String line = "{\"timestamp\":\"2026-09-13T10:00:01Z\",\"message\":\"hello\","
+                + "\"region\":null,\"retries\":2}";
+        LogParseResult result = parse(line);
+        assertEquals(0, result.failureCount(), "a JSON null attribute must not fail the line");
+        assertEquals(1, result.successCount());
+        LogEvent event = result.successfulEvents().get(0);
+        assertTrue(event.getAttributes().containsKey("region"));
+        assertNull(event.getAttributes().get("region"));
+        assertEquals("2", event.getAttributes().get("retries"));
+    }
+
+    @Test
+    void nullRequiredFieldIsTreatedAsAbsent() {
+        String line = "{\"timestamp\":\"2026-09-13T10:00:01Z\",\"message\":\"hello\","
+                + "\"level\":null}";
+        LogParseResult result = parse(line);
+        assertEquals(1, result.successCount());
+        assertNull(result.successfulEvents().get(0).getLevel());
+    }
+
+    @Test
     void reportsSupportedFormat() {
         assertEquals(LogFormat.JSONL, parser.supportedFormat());
     }

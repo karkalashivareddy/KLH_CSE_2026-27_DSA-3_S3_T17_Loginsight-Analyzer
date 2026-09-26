@@ -17,6 +17,8 @@ public final class ServiceGraphBuilder {
 
     private final ServiceDependencyGraph graph = new ServiceDependencyGraph();
     private final Map<String, Integer> requestTrail = new LinkedHashMap<>();
+    private static final Comparator<LogEvent> EVENT_ORDER =
+            Comparator.comparing(LogEvent::getTimestamp).thenComparingLong(LogEvent::getId);
 
     /**
      * Fold one dataset into the graph: for every requestId, consecutive distinct services become a
@@ -28,15 +30,19 @@ public final class ServiceGraphBuilder {
             if (event.getService() == null) {
                 continue;
             }
-            String requestId = event.getRequestId() == null ? "\u0000" : event.getRequestId();
-            grouped.computeIfAbsent(requestId, k -> new ArrayList<>()).add(event);
+            if (event.getRequestId() == null) {
+                graph.addNode(event.getService());
+                continue;
+            }
+            grouped.computeIfAbsent(event.getRequestId(), k -> new ArrayList<>()).add(event);
         }
         for (Map.Entry<String, List<LogEvent>> entry : grouped.entrySet()) {
+            entry.getValue().sort(EVENT_ORDER);
             String previous = null;
             for (LogEvent event : entry.getValue()) {
                 String service = event.getService();
                 graph.addNode(service);
-                if (previous != null) {
+                if (previous != null && !previous.equals(service)) {
                     graph.addDependency(previous, service);
                     requestTrail.merge(previous + "->" + service, 1, Integer::sum);
                 }

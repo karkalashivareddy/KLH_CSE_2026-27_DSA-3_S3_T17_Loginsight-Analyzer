@@ -1,9 +1,13 @@
 # FINAL REBUILD REPORT — TextHack: Advanced Algorithms Laboratory
 
+> Historical phase report. It is retained for traceability and is not the current product contract. For the audited `rebuild/loginsight-v4` implementation, see [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md), [API.md](API.md) and [README.md](../README.md).
+
+> **Stale figures in this file.** Every test count, route name and Lab behaviour below is a snapshot of the phase this report describes. The current suite is **827 backend tests** plus **24 frontend tests across 10 files**, and the current UI surface is documented in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md). Do not read the counts, `/labs/:module/:key` deep links, `TextHackPage`, `LabPage`, `CourseMapPage` or the run-launching Lab described here as current.
+
 Transforms **LogInsight Analyzer** into a DSA-3 lab where real algorithms, real traces, and real
 benchmarks are surfaced through a six-module catalogue, a natural-style query facade, and recorded
-run sessions. Verification: **696 backend tests / 0 failures**, `mvn -q verify` green, `npm run
-build` green, live smoke test of modules/text-hack/runs/SSE passed.
+run sessions. Verification at that phase: **696 backend tests / 0 failures**, `mvn -q verify` green,
+`npm run build` green, live smoke test of modules/text-hack/runs/SSE passed.
 
 ## Phase log
 
@@ -21,7 +25,7 @@ build` green, live smoke test of modules/text-hack/runs/SSE passed.
 | 10 | Course Map page; Run Sessions with live SSE replay; benchmarks speedup charts; system/docs updated | `pages/CourseMapPage.tsx`, `pages/RunsPage.tsx`, `pages/BenchmarksPage.tsx` |
 | 11 | Accessibility polish (focus rings, ARIA on nav/query selectors, `prefers-reduced-motion`) | in shell + CSS |
 | 12 | Docs: README rewrite, `COURSE_MAP.md`, `TRACE_ENGINE.md`, API §12, new theory supplements 05/07 (stale-link fix) | this report |
-| 13 | Final verification | `mvn -q verify` (696 tests), `npm run build`, boot-jar smoke test |
+| 13 | Final verification | `mvn -q verify` (696 tests at that phase), `npm run build`, boot-jar smoke test |
 
 ## What changed conceptually
 
@@ -72,13 +76,16 @@ rebuild and fixed all findings:
 - **Stale assets**: the 8 unreferenced pre-rebuild `docs/screenshots/*.png` were removed (README links
   to the live app).
 
-Result: unchanged verification — **696 tests / 0 failures** (`mvn -q verify`), `npm run build` clean,
-and the rebuilt jar passed the live smoke matrix (catalogue, searches without scope, TextHack, runs/SSE).
+Result: verification unchanged for that phase — **696 tests / 0 failures** (`mvn -q verify`),
+`npm run build` clean, and the rebuilt jar passed the live smoke matrix (catalogue, searches without
+scope, TextHack, runs/SSE). The current gate is 827 backend tests plus the 24-test frontend suite across 10 files;
+see [13-testing.md](13-testing.md).
 
-## How to verify
+## How to verify (current branch)
 
 ```powershell
-.\mvnw.cmd -q verify          # backend: 696 tests, 0 failures
+.\mvnw.cmd -q verify          # backend: 827 tests, 0 failures
+cd frontend ; npm test        # frontend: 24 tests across 10 files
 cd frontend ; npm run build   # tsc + vite production build
 .\mvnw.cmd -q spring-boot:run # then open http://localhost:8080 (or `npm run dev` in frontend/)
 curl http://localhost:8080/api/modules

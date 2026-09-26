@@ -306,15 +306,15 @@ export type LabStatus = 'implemented' | 'exposed' | 'traceable' | 'extra';
 
 /* ── LogInsight Analyzer product surface (backend dto/response, docs/API.md) ───────────────── */
 
-/** POST /api/datasets/demo · POST /api/datasets (upload) — the `loaded` flag arrives as text. */
 export interface DatasetResult {
-  loaded: string;
+  loaded: boolean | string;
   datasetName: string | null;
   size: number;
   totalLines: number;
   failedLines: number;
   loadedAt: string | null;
-  note: string;
+  note?: string;
+  error?: string;
 }
 
 /** GET /api/ingestion/status */
@@ -454,6 +454,10 @@ export interface Heatmap {
 /** GET /api/overview (backend OverviewDto) — 404 when no dataset is loaded. */
 export interface OverviewDto {
   dataset: string;
+  datasetEvents: number;
+  windowStart: string;
+  windowEnd: string;
+  scope: string;
   systemStatus: string;
   events: number;
   errors: number;
@@ -519,6 +523,7 @@ export interface AlgorithmGroupItem {
   timeComplexity: string;
   spaceComplexity: string;
   tracked: boolean;
+  defaultInput: Record<string, unknown> | null;
   description: string;
 }
 

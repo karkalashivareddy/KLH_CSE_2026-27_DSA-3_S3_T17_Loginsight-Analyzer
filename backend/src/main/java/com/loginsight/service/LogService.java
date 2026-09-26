@@ -35,7 +35,8 @@ public class LogService {
 
     /** First log event of the current dataset (bootstrap widget). */
     public LogEventDto first() {
-        return LogEventDto.from(currentEvents().get(0));
+        List<LogEvent> events = currentEvents();
+        return events.isEmpty() ? null : LogEventDto.from(events.get(0));
     }
 
     /** Single event by its dataset-assigned id; DatasetException → 404 when unknown. */
@@ -71,6 +72,7 @@ public class LogService {
         java.util.Set<String> services = new java.util.LinkedHashSet<>();
         java.util.Set<String> ips = new java.util.LinkedHashSet<>();
         long sumResponseTimeMs = 0;
+        long responseSamples = 0;
         int errors = 0;
         int warnings = 0;
         long earliest = Long.MAX_VALUE;
@@ -78,7 +80,8 @@ public class LogService {
         for (LogEvent event : events) {
             if (event.getLevel() != null) {
                 levels.merge(event.getLevel().name(), 1, Integer::sum);
-                if (event.getLevel() == com.loginsight.model.LogLevel.ERROR) {
+                if (event.getLevel() == com.loginsight.model.LogLevel.ERROR
+                        || event.getLevel() == com.loginsight.model.LogLevel.FATAL) {
                     errors++;
                 }
                 if (event.getLevel() == com.loginsight.model.LogLevel.WARN) {
@@ -94,18 +97,21 @@ public class LogService {
             if (event.getIpAddress() != null) {
                 ips.add(event.getIpAddress());
             }
-            sumResponseTimeMs += event.getResponseTime();
+            if (event.getResponseTime() > 0) {
+                sumResponseTimeMs += event.getResponseTime();
+                responseSamples++;
+            }
             if (event.getTimestamp() != null) {
                 long epoch = event.getTimestamp().toEpochMilli();
                 earliest = Math.min(earliest, epoch);
                 latest = Math.max(latest, epoch);
             }
         }
-        double avgResponseTimeMs = n == 0 ? 0 : (double) sumResponseTimeMs / n;
+        double avgResponseTimeMs = responseSamples == 0 ? 0
+                : (double) sumResponseTimeMs / responseSamples;
         double requestsPerMinute = 0;
-        if (n > 1 && earliest != Long.MAX_VALUE && latest > earliest) {
-            double minutes = (latest - earliest) / 60_000.0;
-            requestsPerMinute = minutes <= 0 ? n : (double) (n - 1) / minutes;
+        if (n > 0 && earliest != Long.MAX_VALUE && latest > earliest) {
+            requestsPerMinute = (double) n / ((latest - earliest) / 60_000.0);
         }
 
         List<Map<String, Object>> topServices = topKFrequentAnalyzer
