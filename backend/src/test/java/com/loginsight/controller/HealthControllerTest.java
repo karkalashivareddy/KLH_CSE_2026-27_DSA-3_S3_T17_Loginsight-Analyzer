@@ -34,6 +34,7 @@ class HealthControllerTest {
 
     @Test
     void statusReportsEngineCount() throws Exception {
+        datasetService.clear();
         mockMvc.perform(get("/api/health/status"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
