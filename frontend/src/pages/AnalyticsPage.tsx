@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useApi, type UseApiResult } from '../hooks/useApi';
 import { api } from '../api/client';
 import type { Heatmap as HeatmapDTO, HostRow, HttpStatsDto, OverviewDto } from '../api/types';
-import { Badge, Card, DonutChart, EmptyState, ErrorBox, HBarChart, HeatmapGrid, LevelBadge, NoDatasetState, PageHeader, Spinner, StatCard, TimeChart } from '../components/ui';
+import { Card, DonutChart, EmptyState, ErrorBox, HBarChart, HeatmapGrid, LevelBadge, NoDatasetState, PageHeader, Spinner, StatCard, TimeChart } from '../components/ui';
 import { LEVEL_COLORS, formatMillis, formatNumber, formatTs } from '../components/format';
 
 const RANGES = ['5m', '15m', '1h', '6h', '24h'] as const;
@@ -20,13 +20,6 @@ type Tab = (typeof TABS)[number]['id'];
 function isMissingDataset(error: Error): boolean {
   const status = (error as Error & { apiError?: { status?: number } }).apiError?.status;
   return status === 404;
-}
-
-function sourceState(result: UseApiResult<unknown>): { label: string; tone: 'good' | 'warn' | 'danger' | 'info' } {
-  if (result.loading) return { label: 'Loading', tone: 'info' };
-  if (result.error) return { label: isMissingDataset(result.error) ? 'No dataset' : 'Unavailable', tone: 'danger' };
-  if (result.data === null) return { label: 'No response', tone: 'warn' };
-  return { label: 'Ready', tone: 'good' };
 }
 
 export default function AnalyticsPage() {
@@ -47,19 +40,8 @@ export default function AnalyticsPage() {
       <div id={`analytics-panel-${tab}`} role="tabpanel" aria-labelledby={`analytics-tab-${tab}`} tabIndex={0}>
         {active.loading ? <Card title="Loading analytics"><Spinner label="Requesting the selected analytics view…" /></Card> : active.error ? isMissingDataset(active.error) ? <NoDatasetState detail="Load a dataset before requesting analytics aggregates." /> : <ErrorBox error={active.error} retry={active.reload} /> : tab === 'timeline' ? <TimelineTab overview={overview} range={range} setRange={setRange} /> : tab === 'severity' ? <SeverityTab overview={overview} /> : tab === 'heatmap' ? <HeatmapTab heatmap={heatmap} /> : tab === 'http' ? <HttpTab http={http} /> : <HostsTab hosts={hosts} />}
       </div>
-      <SourceCoverage overview={overview} heatmap={heatmap} http={http} hosts={hosts} />
     </div>
   );
-}
-
-function SourceCoverage({ overview, heatmap, http, hosts }: { overview: UseApiResult<OverviewDto | null>; heatmap: UseApiResult<HeatmapDTO>; http: UseApiResult<HttpStatsDto>; hosts: UseApiResult<HostRow[]> }) {
-  const sources = [
-    { label: 'Overview timeline and severity', result: overview as UseApiResult<unknown>, reload: overview.reload },
-    { label: 'Activity heatmap', result: heatmap as UseApiResult<unknown>, reload: heatmap.reload },
-    { label: 'HTTP analytics', result: http as UseApiResult<unknown>, reload: http.reload },
-    { label: 'Host analytics', result: hosts as UseApiResult<unknown>, reload: hosts.reload }
-  ];
-  return <Card title="Data source coverage" sub="Independent endpoint states; an unavailable source does not replace the active view."><div className="table-scroll"><table className="info-table"><caption className="sr-only">Analytics source coverage</caption><thead><tr><th>Source</th><th>State</th><th>Action</th></tr></thead><tbody>{sources.map((source) => { const state = sourceState(source.result); return <tr key={source.label}><td>{source.label}</td><td><Badge tone={state.tone}>{state.label}</Badge></td><td><button className="btn btn-sm" type="button" onClick={source.reload} disabled={source.result.refreshing}>{source.result.refreshing ? 'Retrying…' : 'Retry'}</button></td></tr>; })}</tbody></table></div></Card>;
 }
 
 function TimelineTab({ overview, range, setRange }: { overview: UseApiResult<OverviewDto | null>; range: string; setRange: (value: string) => void }) {

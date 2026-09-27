@@ -93,12 +93,12 @@ export function EmptyState({ children, icon = true }: { children: ReactNode; ico
 
 export function NoDatasetState({ detail = 'Choose a source before requesting dataset-backed investigation data.' }: { detail?: string }) {
   return (
-    <EmptyState>
-      <Database size={23} aria-hidden="true" />
-      <strong>No dataset loaded.</strong>
-      <span>{detail}</span>
-      <Link className="btn btn-sm" to="/datasets">Open datasets</Link>
-    </EmptyState>
+    <section className="source-empty-state" aria-labelledby="source-empty-title">
+      <div className="source-empty-orbit" aria-hidden="true"><span /><span /><span /><Database size={24} /></div>
+      <div className="source-empty-copy"><span className="eyebrow">YOUR WORKSPACE IS READY</span><h2 id="source-empty-title">No investigation data yet</h2><p>{detail}</p></div>
+      <div className="source-empty-actions"><Link className="btn btn-primary" to="/datasets">Choose a source</Link><Link className="btn" to="/ingestion">Upload logs</Link><Link className="btn btn-quiet" to="/live">Open dataset replay</Link></div>
+      <div className="source-empty-note"><span>1</span> Source <i aria-hidden="true" /><span>2</span> Observe <i aria-hidden="true" /><span>3</span> Investigate</div>
+    </section>
   );
 }
 

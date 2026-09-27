@@ -1,34 +1,18 @@
-import { useMemo, useState } from 'react';
-import { Activity, ArrowUpRight, Database, ExternalLink, RefreshCw, Search, ShieldAlert } from 'lucide-react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { Activity, ArrowUpRight, Database, ExternalLink, Radio, RefreshCw, Search, ShieldAlert, Timer } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useApi, type UseApiResult } from '../hooks/useApi';
 import { api } from '../api/client';
-import type { IncidentDto, LogEvent, ObjectApiResponse, OverviewDto, ServiceStatsDto, SystemStatus } from '../api/types';
+import type { IncidentDto, LogEvent, ObjectApiResponse, OverviewDto, SystemStatus } from '../api/types';
+import { useApi, type UseApiResult } from '../hooks/useApi';
 import { TopologyPanel, type TopologyMode } from '../components/TopologyPanel';
 import { useReplay } from '../replay/ReplayContext';
-import {
-  Badge,
-  Card,
-  DonutChart,
-  EmptyState,
-  ErrorBox,
-  EventDrawer,
-  HBarChart,
-  HeatmapGrid,
-  LevelBadge,
-  NoDatasetState,
-  PageHeader,
-  Spinner,
-  StatCard,
-  StatusPill,
-  TimeChart
-} from '../components/ui';
-import { LEVEL_COLORS, formatMillis, formatNumber, formatTs } from '../components/format';
+import { SimulationBand } from '../telemetry/SimulationBand';
+import { Badge, Card, EmptyState, ErrorBox, EventDrawer, LevelBadge, NoDatasetState, PageHeader, Spinner, StatusPill, TimeChart } from '../components/ui';
+import { formatMillis, formatNumber, formatTs } from '../components/format';
 
 const RANGES = ['5m', '15m', '1h', '6h', '24h'] as const;
 const HEALTHY_ERROR_RATE_MAX = 5;
 const WATCH_ERROR_RATE_MAX = 10;
-
 type HealthBand = 'healthy' | 'watch' | 'elevated' | 'unknown';
 
 function scopeText(data: OverviewDto): string {
@@ -40,24 +24,11 @@ function windowText(data: OverviewDto): string {
   return `${formatTs(data.windowStart)} – ${formatTs(data.windowEnd)}`;
 }
 
-function coverageText(data: OverviewDto): { value: string; detail: string } {
-  if (!Number.isFinite(data.datasetEvents) || data.datasetEvents <= 0) return { value: '—', detail: 'Full dataset total unavailable' };
-  const percentage = (data.events / data.datasetEvents) * 100;
-  return { value: `${percentage.toFixed(1)}%`, detail: `${formatNumber(data.events)} of ${formatNumber(data.datasetEvents)} full-dataset events` };
-}
-
 function healthBand(rate: number): HealthBand {
   if (!Number.isFinite(rate)) return 'unknown';
   if (rate < HEALTHY_ERROR_RATE_MAX) return 'healthy';
   if (rate < WATCH_ERROR_RATE_MAX) return 'watch';
   return 'elevated';
-}
-
-function healthLabel(band: HealthBand): string {
-  if (band === 'healthy') return 'Healthy';
-  if (band === 'watch') return 'Watch';
-  if (band === 'unknown') return 'Unavailable';
-  return 'Elevated';
 }
 
 function incidentTime(value: string): number {
@@ -69,28 +40,18 @@ function incidentInWindow(incident: IncidentDto, data: OverviewDto): boolean {
   const start = incidentTime(data.windowStart);
   const end = incidentTime(data.windowEnd);
   if (!start || !end) return true;
-  const incidentStart = incidentTime(incident.start);
-  const incidentEnd = incidentTime(incident.end);
-  return incidentEnd >= start && incidentStart <= end;
-}
-
-function latestIncident(incidents: IncidentDto[]): IncidentDto | null {
-  return incidents.reduce<IncidentDto | null>((latest, incident) => {
-    if (!latest || incidentTime(incident.start) > incidentTime(latest.start)) return incident;
-    return latest;
-  }, null);
+  return incidentTime(incident.end) >= start && incidentTime(incident.start) <= end;
 }
 
 function investigationFor(incidents: IncidentDto[], data: OverviewDto): IncidentDto | null {
   const scoped = incidents.filter((incident) => incidentInWindow(incident, data));
-  const active = scoped.find((incident) => ['ACTIVE', 'OPEN'].includes(incident.status.toUpperCase()));
-  const hasWindow = incidentTime(data.windowStart) > 0 && incidentTime(data.windowEnd) > 0;
-  return active ?? latestIncident(scoped) ?? (hasWindow ? null : latestIncident(incidents));
+  return scoped.find((incident) => ['ACTIVE', 'OPEN'].includes(incident.status.toUpperCase()))
+    ?? scoped.reduce<IncidentDto | null>((latest, incident) => !latest || incidentTime(incident.start) > incidentTime(latest.start) ? incident : latest, null);
 }
 
 export default function OverviewPage() {
   const [range, setRange] = useState<string>('1h');
-  const [selected, setSelected] = useState<LogEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<LogEvent | null>(null);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [topologyMode, setTopologyMode] = useState<TopologyMode>('2d');
   const overview = useApi<OverviewDto | null>((signal) => api.overview(range, { signal }), `overview-${range}`);
@@ -99,137 +60,105 @@ export default function OverviewPage() {
   const health = useApi<SystemStatus>((signal) => api.systemStatus({ signal }));
   const replay = useReplay();
   const data = overview.data;
-  const coverage = data ? coverageText(data) : { value: '—', detail: '' };
   const investigation = data ? investigationFor(incidents.data ?? [], data) : null;
-  const severityData = data ? Object.entries(data.severity).map(([label, value]) => ({ label, value, color: LEVEL_COLORS[label.toUpperCase()] ?? 'var(--severity-unknown)' })) : [];
-  const timeline = data?.timeline.map((point) => ({ label: formatTs(point.start), value: point.count })) ?? [];
-  const statusClasses = data ? httpClassBreakdown(data.statusCodes) : [];
   const topologyNodes = useMemo(() => data && dependencies.data
     ? dependencies.data.nodes.map((node) => {
       const service = data.topServices.find((candidate) => candidate.name === node.id);
-      return {
-        ...node,
-        errorRate: service?.eventRate,
-        health: service ? healthBand(service.eventRate) : 'unknown' as const
-      };
+      return { ...node, errorRate: service?.eventRate, health: service ? healthBand(service.eventRate) : 'unknown' as const };
     })
     : [], [data, dependencies.data]);
   const topologyEdges = useMemo(() => dependencies.data?.edges ?? [], [dependencies.data]);
-  const refreshing = overview.refreshing || dependencies.refreshing || incidents.refreshing || health.refreshing;
-  const refreshAll = () => {
-    overview.reload();
-    dependencies.reload();
-    incidents.reload();
-    health.reload();
-  };
+  const refreshAll = () => { overview.reload(); dependencies.reload(); incidents.reload(); health.reload(); };
+  const errorShare = data && data.events > 0 ? (data.errors / data.events) * 100 : null;
 
   return (
-    <div className="page">
+    <div className="page experience-page overview-page">
       <PageHeader
-        eyebrow="Command Center"
-        title="Command Center"
-        description={data ? <><strong>{data.dataset}</strong> · {scopeText(data)} · {windowText(data)} · backend <StatusPill status={health.data?.status ?? data.systemStatus} /></> : 'A selected-window operational view built only from returned dataset and runtime data.'}
-        actions={<><button className="btn btn-sm" type="button" onClick={refreshAll} disabled={refreshing}><RefreshCw size={14} aria-hidden="true" />{refreshing ? 'Refreshing' : 'Refresh'}</button><Link className="btn btn-sm" to="/datasets">Dataset <ArrowUpRight size={14} aria-hidden="true" /></Link></>}
+        eyebrow="LOGINSIGHT / OBSERVE"
+        title="System overview"
+        description={data ? <><strong>{data.dataset}</strong> · {scopeText(data)} · {windowText(data)}</> : 'A workspace for reading operational signals, following service relationships and inspecting evidence.'}
+        actions={<><button className="btn btn-sm" type="button" onClick={refreshAll} disabled={overview.refreshing || dependencies.refreshing || incidents.refreshing || health.refreshing}><RefreshCw size={14} aria-hidden="true" /> Refresh</button><Link className="btn btn-sm" to="/replay"><Radio size={14} aria-hidden="true" /> Dataset replay</Link><Link className="btn btn-primary" to="/live"><Radio size={14} aria-hidden="true" /> Live monitor</Link></>}
       />
 
-      <div className="tab-bar command-range-bar" role="group" aria-label="Command Center selected-window range">
-        {RANGES.map((value) => <button key={value} className={`btn btn-sm${range === value ? ' btn-primary' : ''}`} type="button" aria-pressed={range === value} onClick={() => { setRange(value); setSelectedService(null); }}>{value}</button>)}
-        {overview.lastUpdated && <span className="text-muted">Updated {formatTs(new Date(overview.lastUpdated).toISOString())}</span>}
+      <div className="page">
+        <SimulationBand />
       </div>
 
-      {overview.loading ? <Card title="Loading selected window"><Spinner label="Requesting the selected-window snapshot…" /></Card> : overview.error ? <ErrorBox error={overview.error} retry={overview.reload} /> : !data ? <NoDatasetState detail="Load a bundled sample or upload a log file before opening Command Center." /> : <>
-        <section className="command-metric-strip" aria-label="Command Center selected-window metrics">
-          <StatCard label="Selected-window observed rate" value={`${data.eventsPerMinute.toFixed(2)} / min`} sub={`${formatNumber(data.events)} observed events · ${scopeText(data)}`} color="var(--accent)" />
-          <StatCard label="Detected incident windows" value={formatNumber(data.activeIncidents)} sub="Heuristic windows returned for this scope" color="var(--warn)" />
-          <StatCard label="Dataset coverage" value={coverage.value} sub={coverage.detail} color="var(--mod-flow)" />
-          <StatCard label="Selected-window events" value={formatNumber(data.events)} sub={`${formatNumber(data.warnings)} warnings · ${formatNumber(data.errors)} ERROR/FATAL`} color="var(--mod-dp)" />
-        </section>
-
-        <section className="command-hero-grid" aria-label="Command Center topology and active investigation">
-          <Card className="command-topology-card" title="Observed request-trail topology" sub={`Node size follows dataset-wide events; health band and error rate follow the ${scopeText(data)}. Edge weight follows observed request-trail adjacency, not verified infrastructure.`} actions={<Link className="btn btn-sm" to="/services">Service fleet <ArrowUpRight size={13} aria-hidden="true" /></Link>}>
-            {dependencies.loading ? <Spinner label="Requesting observed service adjacency…" /> : dependencies.error ? <ErrorBox error={dependencies.error} retry={dependencies.reload} /> : dependencies.data ? <><TopologyPanel nodes={topologyNodes} edges={topologyEdges} mode={topologyMode} onModeChange={setTopologyMode} selectedId={selectedService} onSelect={setSelectedService} description={`Node size follows dataset-wide events; health band and error rate follow the ${scopeText(data)}. Edge weight follows observed request-trail adjacency, not verified infrastructure.`} />{selectedService && <div className="topology-selection-summary"><span>Selected service: <strong>{selectedService}</strong></span><Link className="btn btn-sm" to={`/services/${encodeURIComponent(selectedService)}`}>Open service <ArrowUpRight size={13} aria-hidden="true" /></Link></div>}</> : <EmptyState>No dependency response is available.</EmptyState>}
-          </Card>
-          <InvestigationPanel result={incidents} incident={investigation} scope={data} />
-        </section>
-
-        <div className="command-pipeline-grid">
-          <Card title="Pipeline story" sub="Follow the returned evidence from source loading to event investigation.">
-            <ol className="command-pipeline-story">
-              <li><Link to="/ingestion"><Database size={15} aria-hidden="true" /><span><strong>Load</strong><small>{data.dataset}</small></span></Link></li>
-              <li><Link to="/analytics"><Activity size={15} aria-hidden="true" /><span><strong>Observe</strong><small>{formatNumber(data.events)} selected-window events</small></span></Link></li>
-              <li><Link to="/incidents"><ShieldAlert size={15} aria-hidden="true" /><span><strong>Detect</strong><small>{formatNumber(data.activeIncidents)} heuristic windows</small></span></Link></li>
-              <li><Link to="/logs"><Search size={15} aria-hidden="true" /><span><strong>Investigate</strong><small>{formatNumber(data.recentCritical.length)} critical events returned</small></span></Link></li>
-            </ol>
-          </Card>
-          <Card title="Shared replay context" sub="One bounded SSE subscription is shared with Live Replay; this is not real-time capture." actions={<Link className="btn btn-sm" to="/live">Open live replay <ArrowUpRight size={13} aria-hidden="true" /></Link>}>
-            <div className="replay-context-summary">
-              <div className="replay-context-status"><Badge tone="info" label="Demo replay of the loaded dataset, not live production telemetry">DEMO REPLAY</Badge><StatusPill status={replay.statusLabel} /><strong>{replay.currentDataset ?? data.dataset}</strong></div>
-              <div className="progress-track" role="progressbar" aria-label="Shared replay progress" aria-valuenow={replay.emitted} aria-valuemin={0} aria-valuemax={Math.max(replay.total, 1)}><div className="progress-fill" style={{ width: `${replay.progress}%` }} /></div>
-              <div className="progress-meta"><span>{formatNumber(replay.emitted)} / {formatNumber(replay.total)} events</span><span>{replay.liveStatus?.source ?? '—'}</span></div>
-              <div className="quick-actions"><button className="btn btn-sm" type="button" onClick={() => { if (replay.isRunning) replay.stop(); else if (replay.state === 'complete') replay.restart(); else replay.start(); }} disabled={!replay.liveStatus || replay.liveStatus.enabled === false}>{replay.isRunning ? 'Stop replay' : replay.state === 'complete' ? 'Replay again' : 'Start replay'}</button><Link className="btn btn-sm" to="/live">Controls</Link></div>
-              {replay.error && <div className="replay-inline-error" role="alert">{replay.error.message}</div>}
-            </div>
-          </Card>
+      <section className="overview-intro" aria-label="LogInsight overview">
+        <div className="overview-intro-copy">
+          <div className="overview-kicker"><span className="signal-mark" aria-hidden="true"><Activity size={15} /></span> SIGNALS · IMPACT · EVIDENCE</div>
+          <h2>See the signal.<br /><span>Follow the evidence.</span></h2>
+          <p>Move from observed activity to the logs and algorithms behind an investigation.</p>
         </div>
-
-        <Card title={`Observed timeline · ${data.range}`} sub={`${scopeText(data)} · ${windowText(data)}`}>
-          <TimeChart data={timeline} height={210} label={`Observed events for ${data.range}`} />
-        </Card>
-
-        <div className="command-detail-grid">
-          <ServiceHealthMatrix fallback={data.topServices} scope={scopeText(data)} />
-          <Card title="Pattern intelligence" sub="Heuristic token normalization; counts and examples are returned data, not machine-learning output." actions={<Link className="btn btn-sm" to="/patterns">All patterns <ArrowUpRight size={13} aria-hidden="true" /></Link>}>
-            {data.topPatterns.length === 0 ? <EmptyState>No recurring patterns were returned for this scope.</EmptyState> : <div className="table-scroll"><table className="log-table"><caption className="sr-only">Pattern intelligence for the selected window</caption><thead><tr><th>Level</th><th>Template</th><th>Count</th><th>Share</th><th>Example</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>{data.topPatterns.map((pattern) => <tr key={`${pattern.template}-${pattern.level}`}><td><LevelBadge level={pattern.level} /></td><td><Link to={`/patterns?level=${encodeURIComponent(pattern.level || 'all')}`}><code className="pattern-template">{pattern.template}</code></Link></td><td className="num">{formatNumber(pattern.count)}</td><td className="num">{data.events > 0 ? `${((pattern.count / data.events) * 100).toFixed(2)}%` : '—'}</td><td className="muted">{pattern.example}</td><td><Link className="btn btn-sm" to={`/logs?q=${encodeURIComponent(pattern.example || pattern.template)}`} aria-label={`Search logs for the example message of ${pattern.template}`}><Search size={13} aria-hidden="true" /> Logs</Link></td></tr>)}</tbody></table></div>}
-          </Card>
+        <div className="overview-source-card">
+          <div className="source-card-heading"><span className="source-pulse" aria-hidden="true" /><span>{data ? 'SOURCE IN VIEW' : 'WORKSPACE READY'}</span></div>
+          {data ? <><strong>{data.dataset}</strong><span>{scopeText(data)} · {formatNumber(data.datasetEvents)} dataset events</span><div className="source-card-actions"><Link to="/datasets">Change source <ArrowUpRight size={13} aria-hidden="true" /></Link><Link to="/live">Open dataset replay</Link></div>{replay.liveStatus?.enabled && <Badge tone="info" label="Bounded SSE replay of this dataset; not live production telemetry">REPLAY {replay.statusLabel.toUpperCase()}</Badge>}</> : <><strong>No investigation data yet</strong><span>Choose a source to populate this workspace.</span><div className="source-card-actions"><Link to="/live">Replay data</Link><Link to="/datasets">Choose a source</Link></div></>}
         </div>
+      </section>
 
-        <div className="command-detail-grid">
-          <Card title="HTTP class breakdown" sub="Observed response classes from the selected-window status-code counts; latency is not inferred.">
-            {statusClasses.length === 0 ? <EmptyState>No HTTP status codes were returned for this scope.</EmptyState> : <div className="http-class-chart" aria-label="Observed HTTP response classes"><HBarChart data={statusClasses} maxItems={10} /><div className="chart-footnote">Classes aggregate the returned status codes; exact code values remain available in Analytics.</div></div>}
-          </Card>
-          <Card title="Window context" sub="Selected-window severity and activity distribution.">
-            <div className="window-context-grid"><div><DonutChart data={severityData} size={145} label={`Severity for ${data.range}`} /></div><div className="table-scroll"><HeatmapGrid days={data.heatmap.days} columns={data.heatmap.columns} cells={data.heatmap.cells} /></div></div>
-          </Card>
+      <div className="overview-window-bar">
+        <div className="window-label"><span className="window-label-dot" /> OBSERVED WINDOW</div>
+        <div className="window-switch" role="group" aria-label="Observed time window">
+          {RANGES.map((value) => <button key={value} type="button" aria-pressed={range === value} className={range === value ? 'is-active' : ''} onClick={() => { setRange(value); setSelectedService(null); }}>{value}</button>)}
         </div>
+        {overview.lastUpdated && <span className="window-updated">Updated {formatTs(new Date(overview.lastUpdated).toISOString())}</span>}
+      </div>
 
-        <Card title="Recent critical events" sub={`Newest ERROR/FATAL events returned for ${scopeText(data)}`} actions={<Link className="btn btn-sm" to="/logs">Open explorer <ArrowUpRight size={14} aria-hidden="true" /></Link>}>
-          {data.recentCritical.length === 0 ? <EmptyState>No critical events were returned in this scope.</EmptyState> : <div className="log-list">{data.recentCritical.map((event) => <div className="log-item" key={event.id}><div className="log-item-top"><LevelBadge level={event.level} /><span className="log-item-service">{event.service}</span><span className="log-item-host">{event.host}</span><span className="log-item-time">{formatTs(event.timestamp)}</span></div><Link className="log-item-msg" to={`/logs/${event.id}`}>{event.message}</Link><div className="log-item-meta">{event.httpMethod && <span className="http-pill">{event.httpMethod} {event.statusCode}</span>}{event.responseTime > 0 && <span>{formatMillis(event.responseTime)}</span>}<Link className="btn btn-sm" to={`/services/${encodeURIComponent(event.service)}`}>Service</Link><button className="icon-btn" type="button" onClick={() => setSelected(event)} aria-label={`Inspect event ${event.id}`} title="Inspect event"><ExternalLink size={14} aria-hidden="true" /></button></div></div>)}</div>}
-        </Card>
-      </>}
+      {overview.loading ? <div className="experience-loading"><div className="skeleton-line skeleton-line--wide" /><div className="skeleton-grid">{Array.from({ length: 4 }, (_, index) => <div key={index} className="skeleton-metric" />)}</div><div className="skeleton-hero" /></div>
+        : overview.error ? <ErrorBox error={overview.error} retry={overview.reload} />
+          : !data ? <NoDatasetState detail="Start with a bounded replay, load a bundled sample, or upload logs. Metrics remain empty until a source is loaded." />
+            : <>
+              <section className="overview-metrics" aria-label="Selected-window signals">
+                <Metric label="Events observed" value={formatNumber(data.events)} note={`${scopeText(data)} · ${formatNumber(data.datasetEvents)} in source`} tone="cyan" icon={<Activity size={16} aria-hidden="true" />} />
+                <Metric label="Observed rate" value={`${data.eventsPerMinute.toFixed(1)} / min`} note="Backend selected-window aggregate" tone="blue" icon={<Timer size={16} aria-hidden="true" />} />
+                <Metric label="Error share" value={errorShare === null ? '—' : `${errorShare.toFixed(2)}%`} note={`${formatNumber(data.errors)} ERROR/FATAL of ${formatNumber(data.events)} events`} tone={errorShare !== null && errorShare >= 5 ? 'amber' : 'green'} icon={<ShieldAlert size={16} aria-hidden="true" />} />
+                <Metric label="Incident windows" value={formatNumber(data.activeIncidents)} note="Heuristic windows returned for scope" tone="violet" icon={<Database size={16} aria-hidden="true" />} />
+              </section>
 
-      <EventDrawer event={selected} onClose={() => setSelected(null)} />
+              <section className="overview-main-grid" aria-label="System signals and current investigation">
+                <Card className="overview-topology-surface" title="Service relationships" sub="Observed request-trail adjacency. This view reflects logs and does not verify infrastructure or prove causality." actions={<Link className="text-action" to="/services">Open service view <ArrowUpRight size={13} aria-hidden="true" /></Link>}>
+                  {dependencies.loading ? <Spinner label="Loading observed service relationships" /> : dependencies.error ? <ErrorBox error={dependencies.error} retry={dependencies.reload} /> : dependencies.data ? <TopologyPanel nodes={topologyNodes} edges={topologyEdges} mode={topologyMode} onModeChange={setTopologyMode} selectedId={selectedService} onSelect={setSelectedService} incidentServiceIds={investigation?.services ?? []} incidentLabel={investigation ? `Services named by incident #${investigation.id} detector window` : undefined} description={`Service sizes follow dataset events. Health and error share follow ${scopeText(data)}. Connections follow request identifiers observed in the log records.`} /> : <EmptyState>No dependency view was returned for this source.</EmptyState>}
+                  {selectedService && <div className="selection-strip"><span>Selected <strong>{selectedService}</strong></span><Link to={`/services/${encodeURIComponent(selectedService)}`}>Inspect service <ArrowUpRight size={13} aria-hidden="true" /></Link></div>}
+                </Card>
+
+                <InvestigationCard result={incidents} incident={investigation} />
+              </section>
+
+              <section className="overview-lower-grid" aria-label="Recent signal context">
+                <Card title="Event signals" sub={`Recent ERROR/FATAL events returned for ${scopeText(data)}.`} actions={<Link className="text-action" to="/logs">Open logs <ArrowUpRight size={13} aria-hidden="true" /></Link>}>
+                  {data.recentCritical.length === 0 ? <EmptyState>No critical events were returned for this selected window.</EmptyState> : <div className="signal-event-list">{data.recentCritical.slice(0, 6).map((event) => <article className="signal-event" key={event.id}>
+                    <div className="signal-event-marker" aria-hidden="true" /><div className="signal-event-copy"><div className="signal-event-meta"><LevelBadge level={event.level} /><Link to={`/services/${encodeURIComponent(event.service)}`}>{event.service}</Link><time>{formatTs(event.timestamp)}</time></div><button type="button" className="signal-event-message" onClick={() => setSelectedEvent(event)}>{event.message}</button><div className="signal-event-foot">{event.httpMethod && <span>{event.httpMethod} {event.statusCode}</span>}{event.responseTime > 0 && <span>{formatMillis(event.responseTime)}</span>}<span>{event.host}</span></div></div><button className="icon-btn" type="button" onClick={() => setSelectedEvent(event)} aria-label={`Inspect event ${event.id}`}><ExternalLink size={14} aria-hidden="true" /></button>
+                  </article>)}</div>}
+                </Card>
+
+                <div className="overview-context-column">
+                  <Card title="Activity rhythm" sub={`${data.range} · ${windowText(data)}`}><TimeChart data={data.timeline.map((point) => ({ label: formatTs(point.start), value: point.count }))} height={170} label={`Observed event count over ${data.range}`} /></Card>
+                  <Card title="Recurring patterns" sub="Normalized message templates returned by the backend.">
+                    {data.topPatterns.length === 0 ? <EmptyState>No recurring patterns were returned.</EmptyState> : <div className="overview-pattern-list">{data.topPatterns.slice(0, 4).map((pattern) => <Link key={`${pattern.template}-${pattern.level}`} to={`/logs?q=${encodeURIComponent(pattern.example || pattern.template)}`}><span className="pattern-level">{pattern.level || 'UNKNOWN'}</span><code>{pattern.template}</code><strong>{formatNumber(pattern.count)}</strong><Search size={14} aria-hidden="true" /></Link>)}</div>}
+                  </Card>
+                </div>
+              </section>
+            </>}
+      <EventDrawer event={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </div>
   );
 }
 
-function InvestigationPanel({ result, incident, scope }: { result: UseApiResult<IncidentDto[]>; incident: IncidentDto | null; scope: OverviewDto }) {
-  return <Card className="command-investigation-card" title="Latest detected investigation" sub={`Dataset-wide detector results filtered to the selected window: ${scopeText(scope)} · ${windowText(scope)}. Heuristic window evidence; no causal attribution is inferred.`} actions={<Link className="btn btn-sm" to="/incidents">All incidents <ArrowUpRight size={13} aria-hidden="true" /></Link>}>
-    {result.loading ? <Spinner label="Requesting detected investigation windows…" /> : result.error ? <ErrorBox error={result.error} retry={result.reload} /> : !incident ? <EmptyState><ShieldAlert size={22} aria-hidden="true" /><strong>No detected windows returned.</strong><span>The detector returned no incident for this scope. This is not evidence of system health.</span><Link className="btn btn-sm" to="/logs">Inspect events</Link></EmptyState> : <>
-      <div className="investigation-status-row"><StatusPill status={incident.status} /><span className="incident-id">Incident #{incident.id}</span><span className="incident-count">{formatNumber(incident.eventCount)} evidence events</span></div>
-      <div className="detail-grid investigation-details"><div className="detail-row"><span>Window start</span><strong>{formatTs(incident.start)}</strong></div><div className="detail-row"><span>Window end</span><strong>{formatTs(incident.end)}</strong></div><div className="detail-row"><span>Services named by detector</span><strong>{incident.services.length > 0 ? incident.services.join(', ') : '—'}</strong></div><div className="detail-row"><span>Detector method</span><strong>{incident.method}</strong></div></div>
-      <div className="investigation-pattern"><span>Primary returned pattern</span><code>{incident.primaryPattern}</code></div>
-      <div className="quick-actions"><Link className="btn btn-sm btn-run" to={`/incidents/${incident.id}`}><ShieldAlert size={13} aria-hidden="true" /> Open evidence</Link>{incident.services.slice(0, 3).map((service) => <Link className="btn btn-sm" key={service} to={`/services/${encodeURIComponent(service)}`}>{service}</Link>)}</div>
-      <p className="method-note">The window and pattern are returned detector output. They do not establish why the events occurred.</p>
+function Metric({ label, value, note, tone, icon }: { label: string; value: string; note: string; tone: 'cyan' | 'blue' | 'green' | 'amber' | 'violet'; icon: ReactNode }) {
+  return <div className={`overview-metric overview-metric--${tone}`}><span className="overview-metric-icon">{icon}</span><div className="overview-metric-label">{label}</div><strong>{value}</strong><small>{note}</small></div>;
+}
+
+function InvestigationCard({ result, incident }: { result: UseApiResult<IncidentDto[]>; incident: IncidentDto | null }) {
+  return <Card className="investigation-feature" title="Investigation" sub="Detector output for the selected window." actions={<Link className="text-action" to="/incidents">All incidents <ArrowUpRight size={13} aria-hidden="true" /></Link>}>
+    {result.loading ? <Spinner label="Requesting incident windows" /> : result.error ? <ErrorBox error={result.error} retry={result.reload} /> : !incident ? <EmptyState><ShieldAlert size={22} aria-hidden="true" /><strong>No detector window in this view</strong><span>This is an empty result, not evidence of system health.</span><Link className="btn btn-sm" to="/logs">Inspect logs</Link></EmptyState> : <>
+      <div className="investigation-feature-top"><span className="investigation-index">#{incident.id}</span><StatusPill status={incident.status} /></div>
+      <h3>{incident.primaryPattern || 'Elevated error window'}</h3>
+      <p className="investigation-feature-time">{formatTs(incident.start)} <span>to</span> {formatTs(incident.end)}</p>
+      <div className="investigation-stat"><strong>{formatNumber(incident.eventCount)}</strong><span>ERROR/FATAL events in detector window</span></div>
+      <div className="investigation-service-list"><span>Services named by detector</span>{incident.services.length ? incident.services.map((service) => <Link key={service} to={`/services/${encodeURIComponent(service)}`}>{service}<ArrowUpRight size={12} aria-hidden="true" /></Link>) : <small>No service names returned</small>}</div>
+      <div className="investigation-method"><span>Method</span><p>{incident.method}</p></div>
+      <Link className="investigation-open" to={`/incidents/${incident.id}`}>Open investigation <ArrowUpRight size={15} aria-hidden="true" /></Link>
+      <p className="investigation-caveat">This is heuristic grouping of observed errors. It does not establish a root cause.</p>
     </>}
   </Card>;
-}
-
-function ServiceHealthMatrix({ fallback, scope }: { fallback: ServiceStatsDto[]; scope: string }) {
-  return <Card title="Service health matrix" sub={`Heuristic error-rate bands only: healthy <${HEALTHY_ERROR_RATE_MAX}%, watch ${HEALTHY_ERROR_RATE_MAX}–<${WATCH_ERROR_RATE_MAX}%, elevated ≥${WATCH_ERROR_RATE_MAX}%. Selected-window scope: ${scope}.`}>
-    {fallback.length === 0 ? <EmptyState>No service rollups were returned for this scope.</EmptyState> : <div className="table-scroll"><table className="log-table"><caption className="sr-only">Service health matrix derived from selected-window error rates</caption><thead><tr><th>Service</th><th>Events</th><th>Errors</th><th>Error rate</th><th>Heuristic band</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>{fallback.map((service) => { const band = healthBand(service.eventRate); return <tr key={service.name}><td><Link to={`/services/${encodeURIComponent(service.name)}`}><strong>{service.name}</strong></Link></td><td className="num">{formatNumber(service.events)}</td><td className="num">{formatNumber(service.errors)}</td><td className="num">{Number.isFinite(service.eventRate) ? `${service.eventRate.toFixed(2)}%` : '—'}</td><td><BadgeHollow band={band} /></td><td><Link className="btn btn-sm" to={`/logs?q=${encodeURIComponent(`service:${service.name}`)}`}><ExternalLink size={13} aria-hidden="true" /> Events</Link></td></tr>; })}</tbody></table></div>}
-  </Card>;
-}
-
-function BadgeHollow({ band }: { band: HealthBand }) {
-  return <span className={`health-band health-band--${band}`} role="img" aria-label={`Heuristic health band: ${healthLabel(band)}`}>{healthLabel(band)}</span>;
-}
-
-function httpClassBreakdown(statusCodes: Record<string, number>): Array<{ label: string; value: number }> {
-  const grouped = new Map<string, number>();
-  Object.entries(statusCodes).forEach(([code, count]) => {
-    const numeric = Number(code);
-    const label = Number.isInteger(numeric) && numeric >= 100 && numeric <= 599 ? `${Math.floor(numeric / 100)}xx` : `HTTP ${code}`;
-    grouped.set(label, (grouped.get(label) ?? 0) + count);
-  });
-  return [...grouped.entries()].sort((left, right) => left[0].localeCompare(right[0])).map(([label, value]) => ({ label, value }));
 }

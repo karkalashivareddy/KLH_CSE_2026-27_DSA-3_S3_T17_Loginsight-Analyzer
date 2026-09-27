@@ -31,9 +31,16 @@ import type {
   RunCompleteEvent,
   RunRecord,
   RunSummary,
+  Scenario,
   SearchBenchmarkResponse,
   ServiceDetail,
   ServiceStatsDto,
+  SimulationCompleteEvent,
+  SimulationFrame,
+  SimulationIncident,
+  SimulationStartEvent,
+  SimulationStatus,
+  SimulationTransitionRequest,
   SuggestionDto,
   SystemStatus,
   TextHackResponse,
@@ -75,6 +82,11 @@ function isFormData(value: BodyInit | null | undefined): value is FormData {
 function bounded(value: number | undefined, min: number, max: number, fallback: number): number {
   if (value === undefined || !Number.isFinite(value)) return fallback;
   return Math.max(min, Math.min(max, Math.round(value)));
+}
+
+function clamp(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.max(min, Math.min(max, value));
 }
 
 function pathFor(path: string): string {
@@ -541,10 +553,101 @@ class Api {
     };
   }
 
+  /* -------------------------------------------------------------------------------------------
+   * Deterministic live simulation. Kept separate from `liveStream` (dataset replay) on purpose:
+   * these events are generated, and the two sources must never be conflated in the UI.
+   * ----------------------------------------------------------------------------------------- */
+
+  scenarios = (options?: RequestOptions): Promise<Scenario[]> => request<Scenario[]>('/scenarios', {}, options);
+  scenario = (id: string, options?: RequestOptions): Promise<Scenario> =>
+    request<Scenario>(`/scenarios/${encodeURIComponent(id)}`, {}, options);
+  simulationStatus = (options?: RequestOptions): Promise<SimulationStatus> =>
+    request<SimulationStatus>('/simulation/status', {}, options);
+  simulationSample = (
+    scenario: string | undefined,
+    seed: number | undefined,
+    frames = 1,
+    options?: RequestOptions
+  ): Promise<SimulationFrame> => {
+    const query = new URLSearchParams({ frames: String(bounded(frames, 1, 1_000, 1)) });
+    if (scenario) query.set('scenario', scenario);
+    if (typeof seed === 'number' && Number.isFinite(seed)) query.set('seed', String(Math.trunc(seed)));
+    return request<SimulationFrame>(`/simulation/sample?${query.toString()}`, {}, options);
+  };
+  simulationIncidents = (sessionId: string, options?: RequestOptions): Promise<SimulationIncident[]> =>
+    request<SimulationIncident[]>(`/simulation/incidents?sessionId=${encodeURIComponent(sessionId)}`, {}, options);
+  transitionIncident = (
+    id: number,
+    body: SimulationTransitionRequest,
+    options?: RequestOptions
+  ): Promise<SimulationIncident> =>
+    post<SimulationIncident>(`/simulation/incidents/${id}/transition`, body, options);
+
+  /**
+   * Subscribes to the deterministic simulation stream.
+   *
+   * `speed` changes only how fast frames are delivered — never which events are produced, so a
+   * slower run reaches the same state at the same tick. The returned function aborts the stream.
+   */
+  simulationStream(
+    handlers: {
+      onStart?: (start: SimulationStartEvent) => void;
+      onFrame?: (frame: SimulationFrame) => void;
+      onComplete?: (complete: SimulationCompleteEvent) => void;
+      onError?: (error: Error) => void;
+      onClose?: () => void;
+    },
+    opts?: { scenario?: string; seed?: number; speed?: number; intervalMs?: number; maxFrames?: number }
+  ): () => void {
+    const controller = new AbortController();
+    const state = { closed: false };
+    void (async () => {
+      try {
+        const query = new URLSearchParams({
+          intervalMs: String(bounded(opts?.intervalMs, 40, 5_000, 250)),
+          maxFrames: String(bounded(opts?.maxFrames, 1, 20_000, 1_200))
+        });
+        if (opts?.scenario) query.set('scenario', opts.scenario);
+        if (typeof opts?.seed === 'number' && Number.isFinite(opts.seed)) {
+          query.set('seed', String(Math.trunc(opts.seed)));
+        }
+        if (typeof opts?.speed === 'number' && Number.isFinite(opts.speed)) {
+          query.set('speed', String(clamp(opts.speed, 0.25, 8)));
+        }
+        const response = await fetch(`${BASE}/simulation/stream?${query.toString()}`, {
+          headers: { Accept: 'text/event-stream' },
+          signal: controller.signal,
+          cache: 'no-store'
+        });
+        if (!response.ok) throw await streamError(response, '/simulation/stream');
+        await consumeSse(response, (event) => {
+          if (!event.data) return;
+          if (event.event !== 'start' && event.event !== 'frame' && event.event !== 'complete') return;
+          let parsed: unknown;
+          try {
+            parsed = JSON.parse(event.data) as unknown;
+          } catch {
+            throw new Error(`Malformed ${event.event} event from the server`);
+          }
+          if (!isSsePayload(parsed)) throw new Error(`Malformed ${event.event} event from the server`);
+          if (event.event === 'start') handlers.onStart?.(parsed as SimulationStartEvent);
+          else if (event.event === 'frame') handlers.onFrame?.(parsed as SimulationFrame);
+          else handlers.onComplete?.(parsed as SimulationCompleteEvent);
+        });
+        finishStream(controller, handlers, state);
+      } catch (error) {
+        finishStream(controller, handlers, state, error);
+      }
+    })();
+    return () => {
+      controller.abort();
+      finishStream(controller, handlers, state);
+    };
+  }
+
   modules = (options?: RequestOptions): Promise<ModuleInfo[]> => request<ModuleInfo[]>('/modules', {}, options);
   module = (id: string, options?: RequestOptions): Promise<ModuleInfo | null> =>
-    optional<ModuleInfo>(`/modules/${encodeURIComponent(id)}`, undefined, options);
-  algorithms = (options?: RequestOptions): Promise<AlgorithmInfo[]> => request<AlgorithmInfo[]>('/algorithms', {}, options);
+    optional<ModuleInfo>(`/modules/${encodeURIComponent(id)}`, undefined, options);  algorithms = (options?: RequestOptions): Promise<AlgorithmInfo[]> => request<AlgorithmInfo[]>('/algorithms', {}, options);
   algorithm = (key: string, options?: RequestOptions): Promise<AlgorithmInfo | null> =>
     optional<AlgorithmInfo>(`/algorithms/${encodeURIComponent(key)}`, undefined, options);
 

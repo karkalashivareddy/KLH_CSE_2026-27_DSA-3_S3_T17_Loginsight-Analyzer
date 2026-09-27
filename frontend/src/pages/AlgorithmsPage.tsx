@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ExternalLink, Filter, Play, RefreshCw, Search } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { api } from '../api/client';
 import type { AlgorithmGroup, AlgorithmGroupItem } from '../api/types';
@@ -8,17 +8,18 @@ import { Badge, Card, EmptyState, ErrorBox, PageHeader, Spinner, StatCard } from
 
 export default function AlgorithmsPage() {
   const { data, loading, refreshing, error, reload } = useApi<AlgorithmGroup[]>((signal) => api.algorithmGroups({ signal }));
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = useState('');
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [runningKey, setRunningKey] = useState<string | null>(null);
   const [runFailure, setRunFailure] = useState<{ key: string; message: string } | null>(null);
   const navigate = useNavigate();
   const query = filter.trim().toLowerCase();
+  const moduleFilter = searchParams.get('module')?.toLowerCase() ?? '';
   const groups = useMemo(() => {
     if (!data) return [];
-    if (!query) return data;
-    return data.map((group) => ({ ...group, algorithms: group.algorithms.filter((algorithm) => `${algorithm.name} ${algorithm.key} ${algorithm.problem} ${algorithm.description}`.toLowerCase().includes(query)) })).filter((group) => group.algorithms.length > 0);
-  }, [data, query]);
+    return data.map((group) => ({ ...group, algorithms: group.algorithms.filter((algorithm) => !query || `${algorithm.name} ${algorithm.key} ${algorithm.problem} ${algorithm.description}`.toLowerCase().includes(query)) })).filter((group) => (!moduleFilter || group.module.toLowerCase() === moduleFilter) && group.algorithms.length > 0);
+  }, [data, moduleFilter, query]);
   const allAlgorithms = data?.flatMap((group) => group.algorithms) ?? [];
   const selected = allAlgorithms.find((algorithm) => algorithm.key === selectedKey) ?? null;
   const matchingCount = groups.reduce((sum, group) => sum + group.algorithms.length, 0);
@@ -47,7 +48,8 @@ export default function AlgorithmsPage() {
           <StatCard label="Traceable" value={allAlgorithms.filter((algorithm) => algorithm.tracked).length} color="var(--ok)" />
           <StatCard label="Exposed endpoints" value={allAlgorithms.filter((algorithm) => Boolean(algorithm.canonicalEndpoint)).length} color="var(--info)" />
         </div>
-        <Card title="Filter catalogue" sub="Filtering is applied to the returned API catalogue; no catalogue entries are synthesized.">
+        {moduleFilter && <div className="algo-module-context"><span>MODULE FOCUS</span><strong>{data.find((group) => group.module.toLowerCase() === moduleFilter)?.module ?? searchParams.get('module')}</strong><button className="btn btn-sm" type="button" onClick={() => setSearchParams({}, { replace: true })}>Clear module filter</button></div>}
+        <Card title="Find an algorithm" sub="Filter the returned catalogue by name, key, problem or description.">
           <div className="explorer-filters"><label className="sr-only" htmlFor="algorithm-filter">Filter algorithms</label><input id="algorithm-filter" className="input" type="text" placeholder="Name, key, problem or description…" value={filter} onChange={(event) => setFilter(event.target.value)} /><Filter size={15} aria-hidden="true" /><span className="text-muted">{matchingCount} matching entries</span></div>
         </Card>
         {groups.length === 0 ? <Card title="Catalogue results"><EmptyState><Search size={22} aria-hidden="true" /><strong>No algorithms match this filter.</strong><span>Clear the filter to view the full returned catalogue.</span></EmptyState></Card> : <div className="pattern-layout"><Card title="Catalogue" sub={`${matchingCount} entries across ${groups.length} modules`}><div className="table-scroll"><table className="log-table"><caption className="sr-only">Algorithm catalogue</caption><thead><tr><th>Algorithm</th><th>Module</th><th>Query type</th><th>Time</th><th>Space</th><th>Exposure</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>{groups.flatMap((group) => group.algorithms.map((algorithm) => <tr key={algorithm.key} className={selectedKey === algorithm.key ? 'winner-row' : undefined}><td><button className="btn btn-sm" type="button" onClick={() => setSelectedKey(algorithm.key)} aria-label={`Inspect ${algorithm.name}`}><strong>{algorithm.name}</strong><code className="algo-key">{algorithm.key}</code></button></td><td className="muted">{group.module}</td><td><Badge>{algorithm.queryType}</Badge></td><td className="mono">{algorithm.timeComplexity}</td><td className="mono">{algorithm.spaceComplexity}</td><td>{algorithm.tracked && <Badge tone="info">traceable</Badge>} {algorithm.canonicalEndpoint && <Badge tone="good">exposed</Badge>}</td><td><button className="icon-btn" type="button" onClick={() => setSelectedKey(algorithm.key)} aria-label={`Inspect ${algorithm.name}`} title="Inspect algorithm"><Search size={14} aria-hidden="true" /></button></td></tr>))}</tbody></table></div></Card><div>{selected ? <AlgorithmDetail algorithm={selected} onRun={runAlgorithm} running={runningKey === selected.key} runError={runFailure?.key === selected.key ? runFailure.message : null} /> : <Card title="Algorithm detail"><EmptyState><Search size={21} aria-hidden="true" /><strong>Select an algorithm.</strong><span>Its returned problem, endpoint and complexity metadata will appear here.</span></EmptyState></Card>}</div></div>}

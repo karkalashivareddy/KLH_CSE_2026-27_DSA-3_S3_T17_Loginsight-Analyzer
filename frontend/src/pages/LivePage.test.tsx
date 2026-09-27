@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../api/client';
@@ -57,7 +57,8 @@ describe('Live Replay', () => {
     expect(await screen.findByText('DEMO REPLAY')).toBeInTheDocument();
     expect(screen.getByLabelText('Demo replay of the loaded dataset, not live production telemetry')).toBeInTheDocument();
     expect(screen.getByText(/Demo replay: a bounded SSE replay of the loaded dataset/)).toBeInTheDocument();
-    expect(screen.getByText('Replay state: Ready')).toBeInTheDocument();
+    expect(screen.getByText('Replay channel')).toBeInTheDocument();
+    expect(within(screen.getByRole('status')).getByText('Ready')).toBeInTheDocument();
   });
 
   it('starts and replays again with the selected batch size and pace', async () => {
@@ -72,7 +73,7 @@ describe('Live Replay', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: /Start replay/ })).toBeInTheDocument());
 
     fireEvent.change(screen.getByLabelText('Batch size'), { target: { value: '100' } });
-    fireEvent.change(screen.getByLabelText('Pace'), { target: { value: '1500' } });
+    fireEvent.change(screen.getByLabelText('Interval between batches'), { target: { value: '1500' } });
     fireEvent.click(screen.getByRole('button', { name: /Start replay/ }));
 
     expect(liveStream).toHaveBeenCalledTimes(1);

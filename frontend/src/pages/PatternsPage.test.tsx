@@ -44,7 +44,7 @@ describe('Patterns evidence links', () => {
 
     render(<MemoryRouter><PatternsPage /></MemoryRouter>);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Inspect examples for request <*> failed' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Investigate request <*> failed, 6 occurrences' }));
 
     const link = await screen.findByRole('link', { name: 'Search logs for the example message of request <*> failed' });
     expect(link).toHaveAttribute('href', '/logs?q=request%20failed%20for%20order%2042');

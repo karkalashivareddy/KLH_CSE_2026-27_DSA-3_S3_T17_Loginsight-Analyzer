@@ -4,15 +4,36 @@ LogInsight Analyzer is a full-stack, in-memory log investigation workspace. It c
 
 > Academic/portfolio software. The Docker artifacts are a single-node deployment shape, not a claim of production scale or public deployment.
 
+## The problem
+
+During an outage, the log lines needed to explain what happened are spread across services, arrive interleaved and out of order, and are queried far faster than a human can read them. LogInsight applies classical algorithms to that work — multi-pattern and exact-substring search, bounded edit distance, streaming window aggregation, and dependency-graph traversal — and presents the result as an investigation surface where every number on screen can be traced back to the algorithm that produced it.
+
+The intended workflow is:
+
+**Ingest → Observe → Detect → Investigate → Explain → Act → Verify**
+
+Ingest a dataset or start a generated scenario, observe service health and live metrics, let the detector raise a window, investigate the evidence behind it, explain it with the algorithm evidence and dependency graph, act through an explicit operator lifecycle, then verify that measured metrics returned to a healthy level. The application does not claim to identify a root cause on its own; it reports measured evidence and leaves attribution to the operator.
+
+## Technology stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, TypeScript, Vite, React Router, hand-rolled SVG charts, Three.js (lazy-loaded 3D only), Vitest + Testing Library |
+| Backend | Java 21, Spring Boot (REST + Server-Sent Events), in-memory dataset store, JUnit 5 |
+| Data | Backend-held in-memory dataset, JSONL and pipe-delimited uploads, bundled `sample-data/` samples |
+| Transport | HTTP REST plus SSE. No WebSocket, no external log collector, no cloud integration |
+
+
 ## Current implementation
 
 The current shell is a dark observability workspace with:
 
-- Command Center, Log Explorer, Search, Analytics, Patterns, Incidents, Demo Replay, Datasets and Ingestion views.
+- Command Center, Log Explorer, Search, Analytics, Patterns, Detector Windows, Incident Workbench, Services, Datasets and Ingestion views.
+- A **Scenario Lab** that configures and runs the deterministic microservice simulation, a **Live Monitor** that streams it, and a separate **Dataset Replay** for the loaded dataset.
 - An Algorithm Lab with the backend catalogue, measured search benchmark and recorded run sessions.
 - System and Documentation views.
 - A responsive navigation shell with a command palette, breadcrumbs, runtime status and dataset status.
-- Hand-rolled SVG charts and an interactive service topology with a 2D SVG default plus an on-demand Three.js/WebGL 3D view. The graph is derived from observed dataset request trails, with an accessible service-list and 2D fallback. There is no WebSocket client.
+- Hand-rolled SVG charts and an interactive service topology with a 2D SVG default plus an on-demand Three.js/WebGL 3D view, an accessible service-list and 2D fallback. Topology provenance is labelled: dataset pages show `OBSERVED DEPENDENCIES`, simulation pages show `DECLARED DEPENDENCIES`. There is no WebSocket client.
 
 The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](docs/IMPLEMENTATION_AUDIT.md). The API contract is [docs/API.md](docs/API.md). See [docs/COMMAND_CENTER.md](docs/COMMAND_CENTER.md) for the Command Center semantics.
 
@@ -89,7 +110,12 @@ The Compose file was syntax-validated with `docker compose config`. The Docker d
 
 ### Terminology
 
-These documents use **Demo Replay** wherever a replay of loaded data is meant. The route is `/live`, and the sidebar entry and page heading are currently labelled `Live Replay`; that label is a navigation name for a bounded dataset replay, not a real-time capture claim. The backend reports the stream as `source: demo-replay`, and the UI shows the `demo-replay` label and a "not real-time" disclosure.
+These documents distinguish two separate data modes and never use one name for the other:
+
+- **Dataset Replay** — a bounded replay of the *loaded dataset*. Route `/replay`, sidebar label `Dataset Replay`, backend reports `source: demo-replay`, and the UI shows a "not real-time" disclosure.
+- **Live Monitor** — the *deterministic generated simulation*. Route `/live`, sidebar label `Live Monitor`, backend reports `source: live-simulation`. It is generated from a scenario definition plus a seed, not captured from any external system.
+
+`/live` is **not** the dataset replay route. Dataset replay lives at `/replay`. Scenario configuration and run control live at `/scenario-lab` (alias `/simulation`).
 
 ## API behavior
 
@@ -109,6 +135,10 @@ The current handler maps validation and malformed requests to `400`, missing dat
 
 ## Algorithms
 
+### DSA-3 relationship
+
+The six catalogue modules map directly onto the DSA-3 subject groupings: **Strings**, **Dynamic Programming**, **Graph & Flow**, **Approximation**, **Randomized**, and **Parallel**. Each descriptor is classified as a **product feature** (genuinely exercised by a product path), an **algorithm engine** (a real REST or trace endpoint that a user or a run session can invoke), or an **academic lab** entry (implemented and tested, but not wired into a product panel). The per-algorithm classification is in [docs/DSA_PRODUCT_MAPPING.md](docs/DSA_PRODUCT_MAPPING.md), and the subject-by-subject breakdown is in [docs/04-dsa-mapping.md](docs/04-dsa-mapping.md). No algorithm is presented as a product capability unless a product path actually calls it.
+
 The backend catalogue currently contains 42 descriptors across six modules, 35 registered query engines, 36 catalogue entries reachable through a REST or trace endpoint, and 13 trace-instrumented algorithms. Product-facing algorithm use is intentionally narrower:
 
 - KMP powers free-text product search.
@@ -116,6 +146,7 @@ The backend catalogue currently contains 42 descriptors across six modules, 35 r
 - Heuristic token normalization powers Patterns; it is not ML.
 - Five-minute baseline thresholding powers Incidents; it is rule-based and exposes evidence.
 - Group-by-`requestId` adjacency folding builds the Command Center topology; it is a deterministic pass over the log, not a service registry.
+- Aho-Corasick multi-pattern search and a rolling sliding-window aggregate power the generated simulation's evidence panel, and declared-graph BFS computes the incident blast radius. These are simulation-path algorithms, not claims about observed infrastructure.
 - Naive, KMP, Z and Rabin-Karp are compared by one measured run per matcher over the loaded dataset.
 - The remaining catalogue entries are exposed algorithm engines, library-only implementations, or trace/run-session capabilities; they are not all claimed to drive a product panel.
 - The course rule against `java.util` delegation in `dsa/**` is enforced by `EngineScopeGuardTest`: it freezes today's exact `java.util` imports per `dsa` source file in a manifest, fails the build on any new `java.util` import under `dsa/`, and allows the ledger to shrink. `java.util.concurrent` (parallel) and `java.util.Random` (randomized) are course-licensed and recorded in that manifest.

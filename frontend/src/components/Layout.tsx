@@ -8,6 +8,7 @@ import {
   Command,
   Database,
   FileSearch,
+  FlaskConical,
   FolderKanban,
   History,
   LayoutDashboard,
@@ -20,6 +21,7 @@ import {
   Server,
   ShieldAlert,
   Timer,
+  Waypoints,
   Workflow,
   X,
   type LucideIcon
@@ -48,37 +50,25 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Operate',
+    label: 'Workspace',
     entries: [
       { to: '/', label: 'Overview', icon: LayoutDashboard, end: true, aliases: ['/command-center'], keywords: 'command center dashboard home' },
-      { to: '/live', label: 'Live Replay', icon: Radio, keywords: 'stream sse replay dataset' }
-    ]
-  },
-  {
-    label: 'Investigate',
-    entries: [
-      { to: '/incidents', label: 'Incidents', icon: ShieldAlert, aliases: ['/investigate'], keywords: 'alerts investigation evidence' },
+      { to: '/scenario-lab', label: 'Scenario Lab', icon: FlaskConical, aliases: ['/simulation'], keywords: 'deterministic simulation scenario incident seed generator' },
+      { to: '/live', label: 'Live Monitor', icon: Radio, keywords: 'live monitor stream simulation generated traffic' },
+      { to: '/replay', label: 'Dataset Replay', icon: History, aliases: ['/live-replay'], keywords: 'dataset replay sse bounded demo' },
       { to: '/logs', label: 'Logs', icon: FileSearch, keywords: 'events explorer query' },
-      { to: '/services', label: 'Services', icon: Network, keywords: 'fleet dependencies hosts' }
-    ]
-  },
-  {
-    label: 'Analyze',
-    entries: [
+      { to: '/incidents', label: 'Detector Windows', icon: ShieldAlert, aliases: ['/investigate'], keywords: 'detector windows dataset incidents' },
+      { to: '/incidents/workbench', label: 'Incident Workbench', icon: Waypoints, keywords: 'simulation incident investigation lifecycle blast radius evidence' },
+      { to: '/services', label: 'Services', icon: Network, keywords: 'fleet dependencies hosts' },
       { to: '/patterns', label: 'Patterns', icon: Workflow, keywords: 'templates recurrence' },
       { to: '/analytics', label: 'Analytics', icon: BarChart3, aliases: ['/analyze'], keywords: 'charts traffic severity http hosts' },
-      { to: '/search', label: 'Search', icon: Search, keywords: 'query matcher fuzzy' }
-    ]
-  },
-  {
-    label: 'Algorithm Lab',
-    entries: [
-      { to: '/analysis', label: 'Algorithm Lab', icon: CircleGauge, end: true, aliases: ['/lab', '/algorithm-lab'], keywords: 'engines laboratory' }
     ]
   },
   {
     label: 'More',
     entries: [
+      { to: '/analysis', label: 'Algorithm Lab', icon: CircleGauge, end: true, aliases: ['/lab', '/algorithm-lab'], keywords: 'engines laboratory' },
+      { to: '/search', label: 'Algorithmic Search', icon: Search, keywords: 'query matcher fuzzy' },
       { to: '/algorithms', label: 'Algorithms', icon: Workflow, aliases: ['/analysis/algorithms'], keywords: 'catalogue dsa engines' },
       { to: '/benchmarks', label: 'Benchmarks', icon: Timer, aliases: ['/analysis/benchmarks'], keywords: 'search measured performance' },
       { to: '/runs', label: 'Run Sessions', icon: History, keywords: 'trace replay sessions' },
@@ -161,12 +151,7 @@ function pageCrumbs(pathname: string): Array<{ label: string; to?: string }> {
   const crumbs: Array<{ label: string; to?: string }> = [{ label: 'Workspace', to: '/' }];
   if (!entry) return [{ label: 'Workspace' }, { label: 'Not found' }];
 
-  const group = NAV_GROUPS.find((candidate) => candidate.entries.includes(entry));
-  if (group) {
-    const groupTarget = group.entries[0]?.to;
-    crumbs.push({ label: group.label, to: groupTarget });
-    if (entry.label !== group.label) crumbs.push({ label: entry.label, to: entry.to });
-  }
+  if (entry.label !== 'Overview') crumbs.push({ label: entry.label, to: entry.to });
 
   const segments = path.split('/').filter(Boolean);
   if (segments.length > 1 && ['logs', 'incidents', 'services', 'runs'].includes(segments[0])) {
@@ -263,12 +248,21 @@ function CommandPalette({ open, onClose, onToggleSidebar, sidebarCollapsed }: {
     },
     {
       id: 'action:live',
-      label: 'Open live replay',
-      description: 'Start a bounded dataset replay',
+      label: 'Open live monitor',
+      description: 'Watch the deterministic simulation stream',
       group: 'Actions',
       icon: Radio,
-      keywords: 'live replay stream sse',
+      keywords: 'live monitor simulation stream generated',
       run: () => navigate('/live')
+    },
+    {
+      id: 'action:scenario',
+      label: 'Open scenario lab',
+      description: 'Start or preview a reproducible incident scenario',
+      group: 'Actions',
+      icon: FlaskConical,
+      keywords: 'scenario lab simulation seed incident generator',
+      run: () => navigate('/scenario-lab')
     },
     {
       id: 'action:dataset',
@@ -462,12 +456,27 @@ export default function Layout() {
     }
   });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileViewport, setMobileViewport] = useState(() => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 960px)').matches);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const system = useApi<SystemStatus>((signal) => api.systemStatus({ signal }));
   const live = useApi<LiveStatus>((signal) => api.liveStatus({ signal }));
   const crumbs = useMemo(() => pageCrumbs(location.pathname), [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const media = window.matchMedia('(max-width: 960px)');
+    const update = () => setMobileViewport(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    const sidebar = sidebarRef.current as (HTMLElement & { inert?: boolean }) | null;
+    if (sidebar) sidebar.inert = mobileViewport && !mobileOpen;
+  }, [mobileOpen, mobileViewport]);
 
   const closeMobile = useCallback(() => {
     setMobileOpen(false);
@@ -545,19 +554,18 @@ export default function Layout() {
   const liveTone: Tone = live.error ? 'danger' : live.data?.enabled ? 'good' : 'muted';
   const liveLabel = live.error ? 'Unavailable' : live.loading && !live.data ? 'Checking' : live.data?.enabled ? 'Ready' : 'Standby';
   const datasetDetail = system.error ? 'Unavailable' : system.loading && !system.data ? 'Checking status' : datasetLoaded ? `${formatNumber(system.data?.datasetSize ?? 0)} events` : 'Load a source';
-  const liveDetail = live.error ? 'Unavailable' : live.loading && !live.data ? 'Checking status' : live.data?.dataset ?? 'No replay source';
 
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <div className={`app-shell${collapsed ? ' app-shell--collapsed' : ''}${mobileOpen ? ' app-shell--mobile-open' : ''}`}>
-        <aside ref={sidebarRef} id="primary-navigation" className="sidebar" aria-label="Primary navigation">
+        <aside ref={sidebarRef} id="primary-navigation" className="sidebar" aria-label="Primary navigation" aria-hidden={mobileViewport && !mobileOpen}>
           <div className="sidebar-brand">
             <Link className="brand-link" to="/" aria-label="LogInsight Analyzer home">
               <span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36" focusable="false"><path d="M4 19h7l4-10 7 19 4-9h6" /><circle cx="27" cy="19" r="2.2" /></svg></span>
               <span className="brand-copy">
                 <span className="brand-text">LogInsight</span>
-                <span className="brand-tagline">Observability workspace</span>
+                <span className="brand-tagline">Real-time log intelligence</span>
               </span>
             </Link>
             <button className="icon-btn mobile-close-btn" type="button" onClick={closeMobile} aria-label="Close navigation" title="Close navigation">
@@ -565,14 +573,14 @@ export default function Layout() {
             </button>
           </div>
 
-          <div className="sidebar-workspace">
-            <span className="workspace-kicker">Workspace</span>
-            <span className="workspace-name">Log intelligence</span>
-            <span className="workspace-version">Build {PROJECT.version}</span>
-          </div>
+          <Link className="sidebar-workspace" to="/datasets" aria-label={datasetLoaded ? `Current source ${datasetLabel}` : 'Choose a telemetry source'}>
+            <span className="workspace-kicker">Current source</span>
+            <span className="workspace-name">{datasetLoaded ? datasetLabel : 'Choose telemetry'}</span>
+            <span className="workspace-version">{datasetLoaded ? datasetDetail : 'Simulation · replay · upload'}</span>
+          </Link>
 
           <div className="sidebar-controls">
-            <span className="sidebar-section-label">Navigation</span>
+            <span className="sidebar-section-label">Explore</span>
             <button className="icon-btn sidebar-collapse" type="button" onClick={toggleCollapsed} aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'} title={collapsed ? 'Expand navigation' : 'Collapse navigation'}>
               {collapsed ? <PanelLeftOpen size={17} aria-hidden="true" /> : <PanelLeftClose size={17} aria-hidden="true" />}
             </button>
@@ -587,7 +595,7 @@ export default function Layout() {
               <StatusDot tone={systemTone} label={`Backend ${systemLabel}`} />
               <span>API {systemLabel.toLowerCase()}</span>
             </div>
-            <div className="sidebar-footer-meta"><span>Local workspace</span><span>v{PROJECT.version}</span></div>
+            <div className="sidebar-footer-meta"><span>Log intelligence</span><span>v{PROJECT.version}</span></div>
           </div>
         </aside>
 
@@ -608,19 +616,16 @@ export default function Layout() {
                     </span>
                   ))}
                 </nav>
-                <div className="connection-indicator" role="status" aria-live="polite">
-                  <StatusDot tone={systemTone} label={`Backend ${systemLabel}`} />
-                  <span>Backend {systemLabel.toLowerCase()}</span>
-                  <span className="connection-divider" aria-hidden="true" />
-                  <span>Demo replay channel {liveLabel.toLowerCase()}</span>
+                <div className="connection-indicator sr-only" role="status" aria-live="polite">
+                  Backend {systemLabel.toLowerCase()} · Demo replay channel {liveLabel.toLowerCase()}
                 </div>
               </div>
             </div>
             <div className="header-actions">
               <div className="header-status-group" aria-label="Runtime status">
-                <StatusChip icon={Database} label="Dataset" value={datasetLabel} detail={datasetDetail} tone={datasetTone} to="/datasets" />
-                <StatusChip icon={Radio} label="Demo replay" value={liveLabel} detail={liveDetail} tone={liveTone} to="/live" />
-                <StatusChip icon={Server} label="Backend" value={systemLabel} detail="API status" tone={systemTone} to="/system" />
+                <StatusChip icon={Database} label="Source" value={datasetLabel} tone={datasetTone} to="/datasets" />
+                <StatusChip icon={Radio} label="Replay" value={liveLabel} tone={liveTone} to="/live" />
+                <StatusChip icon={Server} label="API" value={systemLabel} tone={systemTone} to="/system" />
               </div>
               <button className="command-trigger" type="button" onClick={() => setPaletteOpen(true)} aria-label="Open command palette" title="Open command palette">
                 <Command size={15} aria-hidden="true" />

@@ -28,6 +28,9 @@ export interface TopologyPanelProps {
   onModeChange?: (mode: TopologyMode) => void;
   selectedId?: string | null;
   onSelect?: (id: string | null) => void;
+  graphKind?: 'observed' | 'declared';
+  incidentServiceIds?: string[];
+  incidentLabel?: string;
 }
 
 const WIDTH = 760;
@@ -96,7 +99,7 @@ function shortRateText(node: TopologyNode): string {
   return `${node.errorRate.toFixed(1)}% window`;
 }
 
-export function TopologyPanel({ nodes, edges, title = 'Observed service topology', description = 'Node size follows dataset-wide events; node health and error rate follow the selected window. Edge weight follows observed request-trail adjacency.', mode, defaultMode = '2d', onModeChange, selectedId, onSelect }: TopologyPanelProps) {
+export function TopologyPanel({ nodes, edges, graphKind = 'observed', title = graphKind === 'declared' ? 'Declared service topology' : 'Observed service topology', description = graphKind === 'declared' ? 'Node size follows simulated events in the selected window; node health and error rate follow the selected window. Edge weight follows the declared scenario dependency graph.' : 'Node size follows dataset-wide events; node health and error rate follow the selected window. Edge weight follows observed request-trail adjacency.', mode, defaultMode = '2d', onModeChange, selectedId, onSelect, incidentServiceIds = [], incidentLabel }: TopologyPanelProps) {
   const titleId = useId();
   const descriptionId = useId();
   const markerId = useId().replace(/:/g, '');
@@ -111,16 +114,23 @@ export function TopologyPanel({ nodes, edges, title = 'Observed service topology
   const activeSelected = selectedId === undefined ? internalSelected : selectedId;
   const maxEvents = Math.max(1, ...nodes.map((node) => Math.max(0, node.events)));
   const maxWeight = Math.max(1, ...edges.map((edge) => Math.max(0, edge.weight)));
+  const incidentServices = useMemo(() => new Set(incidentServiceIds), [incidentServiceIds]);
   const visualEdges = useMemo(() => {
     if (showAllEdges || edges.length <= DEFAULT_VISIBLE_EDGE_LIMIT) return edges;
     return [...edges]
       .sort((left, right) => Math.max(0, right.weight) - Math.max(0, left.weight) || left.source.localeCompare(right.source) || left.target.localeCompare(right.target))
       .slice(0, DEFAULT_VISIBLE_EDGE_LIMIT);
   }, [edges, showAllEdges]);
-  const edgeScope = `${visualEdges.length} of ${edges.length} observed dependencies shown`;
+  const edgeScope = `${visualEdges.length} of ${edges.length} ${graphKind === 'declared' ? 'declared dependencies' : 'observed dependencies'} shown`;
   const stageDescription = edges.length > visualEdges.length
-    ? `${description} The visualization shows the ${visualEdges.length} strongest returned edges by observed weight; the accessible adjacency list below includes all ${edges.length} returned edges.`
+    ? `${description} The visualization shows the ${visualEdges.length} strongest returned edges by ${graphKind === 'declared' ? 'simulated window volume' : 'observed weight'}; the accessible adjacency list below includes all ${edges.length} returned edges.`
     : `${description} The visualization shows all ${edges.length} returned edges.`;
+  const weightSource = graphKind === 'declared' ? 'simulated window volume' : 'observed request-trail weight';
+  const eventsUnit = graphKind === 'declared' ? 'events in window' : 'dataset events';
+  const adjacencyHeading = graphKind === 'declared' ? 'Declared dependency adjacency' : 'Observed request-trail adjacency';
+  const edgeWeightUnit = graphKind === 'declared' ? 'declared window weight' : 'observed weight';
+  const rendererNote = graphKind === 'declared' ? 'DECLARED DEPENDENCIES' : 'OBSERVED DEPENDENCIES';
+  const emptyState = graphKind === 'declared' ? 'No declared service nodes were returned.' : 'No observed service nodes were returned.';
 
   const positions = useMemo(() => {
     const map = new Map<string, Point>();
@@ -186,15 +196,16 @@ export function TopologyPanel({ nodes, edges, title = 'Observed service topology
           <button className="btn btn-sm" type="button" onClick={resetView}>Reset view</button>
         </div>
       </div>
-      <p id={descriptionId} className="sr-only">{description} Edge thickness and particles encode observed request-trail weight, not verified infrastructure.</p>
+      {incidentLabel && incidentServices.size > 0 && <div className="topology-incident-context" role="note"><span className="topology-incident-symbol" aria-hidden="true" />{incidentLabel}; highlighted nodes are names returned in the same detector window, not a causal path.</div>}
+      <p id={descriptionId} className="sr-only">{description} Edge thickness and particles encode {weightSource}, not verified infrastructure.</p>
       <div className={stageClass} data-mode={activeMode} data-reduced-motion={reducedMotion ? 'true' : 'false'}>
-        <div className="topology-renderer-note">{activeMode === '3d' ? 'THREE.JS · WEBGL' : 'OBSERVED DEPENDENCIES'}{edges.length > DEFAULT_VISIBLE_EDGE_LIMIT && <span className="topology-edge-scope">{edgeScope}</span>}</div>
-        {nodes.length === 0 ? <div className="topology-empty" role="status">No observed service nodes were returned.</div> : activeMode === '3d' ? <Suspense fallback={<div className="topology-empty" role="status">Loading 3D service view…</div>}>
-          <Topology3D nodes={nodes} edges={visualEdges} selectedId={activeSelected} focusToken={focusToken} resetToken={resetToken} reducedMotion={reducedMotion} onSelect={select} />
+        <div className="topology-renderer-note">{activeMode === '3d' ? 'THREE.JS · WEBGL' : rendererNote}{edges.length > DEFAULT_VISIBLE_EDGE_LIMIT && <span className="topology-edge-scope">{edgeScope}</span>}</div>
+        {nodes.length === 0 ? <div className="topology-empty" role="status">{emptyState}</div> : activeMode === '3d' ? <Suspense fallback={<div className="topology-empty" role="status">Loading 3D service view…</div>}>
+          <Topology3D nodes={nodes} edges={visualEdges} selectedId={activeSelected} incidentServiceIds={incidentServiceIds} focusToken={focusToken} resetToken={resetToken} reducedMotion={reducedMotion} graphKind={graphKind} onSelect={select} />
         </Suspense> : <>
           <svg className="topology-svg" viewBox={viewBox} role="img" aria-labelledby={`${titleId}-visual ${descriptionId}-visual`} aria-describedby={`${descriptionId}-visual`} focusable="false">
             <title id={`${titleId}-visual`}>{title}</title>
-            <desc id={`${descriptionId}-visual`}>{stageDescription} Selectable service nodes. Edge thickness and particles encode observed request-trail weight, not verified infrastructure.</desc>
+            <desc id={`${descriptionId}-visual`}>{stageDescription} Selectable service nodes. Edge thickness and particles encode {weightSource}, not verified infrastructure.</desc>
             <defs>
               <marker id={markerId} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-muted)" />
@@ -235,6 +246,7 @@ export function TopologyPanel({ nodes, edges, title = 'Observed service topology
                 const normalized = Math.max(0, node.events) / maxEvents;
                 const radius = 12 + Math.sqrt(normalized) * 22;
                 const selected = activeSelected === node.id;
+                const incidentRelated = incidentServices.has(node.id);
                 const health = healthBand(node);
                 const handleKey = (event: KeyboardEvent<SVGGElement>) => {
                   if (event.key === 'Enter' || event.key === ' ') {
@@ -242,12 +254,13 @@ export function TopologyPanel({ nodes, edges, title = 'Observed service topology
                     select(node.id);
                   }
                 };
-                return (
-                  <g key={node.id} className={`topology-node topology-node--${health}${selected ? ' topology-node--selected' : ''}`} role="button" tabIndex={0} aria-pressed={selected} aria-label={`${node.id}, ${formatNumber(node.events)} dataset events, ${rateText(node)}, ${healthText(node)}`} onClick={() => select(node.id)} onKeyDown={handleKey} data-node-id={node.id} data-events={node.events} data-health={health} data-radius={radius}>
+                  return (
+                  <g key={node.id} className={`topology-node topology-node--${health}${selected ? ' topology-node--selected' : ''}${incidentRelated ? ' topology-node--incident' : ''}`} role="button" tabIndex={0} aria-pressed={selected} aria-label={`${node.id}, ${formatNumber(node.events)} ${eventsUnit}, ${rateText(node)}, ${healthText(node)}${incidentRelated ? ', named in the incident detector window' : ''}`} onClick={() => select(node.id)} onKeyDown={handleKey} data-node-id={node.id} data-events={node.events} data-health={health} data-radius={radius} data-incident-related={incidentRelated ? 'true' : 'false'}>
+                    {incidentRelated && <circle className="topology-incident-ring" cx={point.x} cy={point.y} r={radius + 8} />}
                     <circle cx={point.x} cy={point.y} r={radius} fill="var(--bg-elevated)" stroke={selected ? 'var(--accent-strong)' : 'var(--accent)'} strokeWidth={selected ? 3 : 2} />
                     <circle className="topology-health-dot" cx={point.x - radius + 7} cy={point.y - radius + 8} r={3.5} fill={`var(--${health === 'unknown' ? 'text-muted' : health === 'healthy' ? 'ok' : health === 'watch' ? 'warn' : 'danger'})`} />
                     <text x={point.x} y={point.y + 4} textAnchor="middle" className="node-label">{shortLabel(node.id)}</text>
-                    <text x={point.x} y={point.y + radius + 15} textAnchor="middle" className="node-count">{formatNumber(node.events)} dataset · {shortRateText(node)}</text>
+                    <text x={point.x} y={point.y + radius + 15} textAnchor="middle" className="node-count">{formatNumber(node.events)} {graphKind === 'declared' ? 'events' : 'dataset'} · {shortRateText(node)}</text>
                   </g>
                 );
               })}
@@ -256,11 +269,11 @@ export function TopologyPanel({ nodes, edges, title = 'Observed service topology
         </>}
       </div>
       <div className="topology-accessible-list">
-        <div className="topology-list-heading">Accessible service list · dataset events and selected-window error rate</div>
+        <div className="topology-list-heading">Accessible service list · {eventsUnit} and selected-window error rate</div>
         <ul aria-label="Accessible service list">
-          {nodes.map((node) => <li key={node.id}><button type="button" className={`topology-service-button${activeSelected === node.id ? ' topology-service-button--selected' : ''}`} aria-label={`${node.id}, ${formatNumber(node.events)} dataset events, ${rateText(node)}, ${healthText(node)}`} aria-pressed={activeSelected === node.id} onClick={() => select(node.id)}><span>{node.id}</span><span>{formatNumber(node.events)} dataset events</span><span>{rateText(node)}</span><span>{healthText(node)}</span></button></li>)}
+          {nodes.map((node) => <li key={node.id}><button type="button" className={`topology-service-button${activeSelected === node.id ? ' topology-service-button--selected' : ''}${incidentServices.has(node.id) ? ' topology-service-button--incident' : ''}`} aria-label={`${node.id}, ${formatNumber(node.events)} ${eventsUnit}, ${rateText(node)}, ${healthText(node)}${incidentServices.has(node.id) ? ', named in the incident detector window' : ''}`} aria-pressed={activeSelected === node.id} onClick={() => select(node.id)}><span>{node.id}</span><span>{formatNumber(node.events)} {eventsUnit}</span><span>{rateText(node)}</span><span>{incidentServices.has(node.id) ? 'Incident window' : healthText(node)}</span></button></li>)}
         </ul>
-        {edges.length > 0 && <><div className="topology-list-heading topology-list-heading--edges">Observed request-trail adjacency</div><ul aria-label="Observed request-trail adjacency edges">{edges.map((edge, index) => <li className="topology-edge-item" key={`${edge.source}-${edge.target}-${index}`}>{edge.source} → {edge.target} <span>{formatNumber(edge.weight)} observed weight</span></li>)}</ul></>}
+        {edges.length > 0 && <><div className="topology-list-heading topology-list-heading--edges">{adjacencyHeading}</div><ul aria-label={`${adjacencyHeading} edges`}>{edges.map((edge, index) => <li className="topology-edge-item" key={`${edge.source}-${edge.target}-${index}`}>{edge.source} → {edge.target} <span>{formatNumber(edge.weight)} {edgeWeightUnit}</span></li>)}</ul></>}
       </div>
     </section>
   );

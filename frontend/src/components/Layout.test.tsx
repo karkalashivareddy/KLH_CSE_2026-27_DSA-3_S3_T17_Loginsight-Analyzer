@@ -67,12 +67,11 @@ describe('application shell', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('link', { name: 'Dataset: Checking' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Demo replay: Checking' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Dataset: No dataset' })).toBeNull();
-    expect(screen.queryByRole('link', { name: 'Demo replay: Standby' })).toBeNull();
-    expect(screen.getAllByText('Checking status')).toHaveLength(2);
-    expect(screen.getByText('Demo replay channel checking')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Source: Checking' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Replay: Checking' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Source: No dataset' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Replay: Standby' })).toBeNull();
+    expect(screen.getByText(/Backend checking/)).toBeInTheDocument();
   });
 
   it('keeps supporting routes under an accessible More control', async () => {
@@ -91,7 +90,10 @@ describe('application shell', () => {
 
     const navigation = screen.getByRole('navigation', { name: 'Workspace sections' });
     expect(within(navigation).getByRole('link', { name: 'Overview' })).toBeInTheDocument();
-    expect(within(navigation).getByRole('link', { name: 'Incidents' })).toBeInTheDocument();
+    expect(within(navigation).getByRole('link', { name: 'Detector Windows' })).toBeInTheDocument();
+  expect(within(navigation).getByRole('link', { name: 'Incident Workbench' })).toBeInTheDocument();
+  expect(within(navigation).getByRole('link', { name: 'Scenario Lab' })).toBeInTheDocument();
+  expect(within(navigation).getByRole('link', { name: 'Live Monitor' })).toBeInTheDocument();
     expect(within(navigation).queryByRole('link', { name: 'Benchmarks' })).toBeNull();
     fireEvent.click(within(navigation).getByRole('button', { name: /^More/ }));
     expect(within(navigation).getByRole('link', { name: 'Benchmarks' })).toBeInTheDocument();

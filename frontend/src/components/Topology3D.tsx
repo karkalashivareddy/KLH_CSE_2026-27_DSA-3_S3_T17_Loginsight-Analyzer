@@ -7,9 +7,11 @@ interface Topology3DProps {
   nodes: TopologyNode[];
   edges: TopologyEdge[];
   selectedId: string | null;
+  incidentServiceIds: string[];
   focusToken: number;
   resetToken: number;
   reducedMotion: boolean;
+  graphKind?: 'observed' | 'declared';
   onSelect: (id: string | null) => void;
 }
 
@@ -17,6 +19,7 @@ type SceneNode = {
   group: THREE.Group;
   core: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>;
   halo: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>;
+  incidentRing?: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>;
   position: THREE.Vector3;
   health: NonNullable<TopologyNode['health']>;
 };
@@ -38,7 +41,7 @@ const HEALTH_COLORS: Record<NonNullable<TopologyNode['health']>, number> = {
 function graphPositions(nodes: TopologyNode[]): Map<string, THREE.Vector3> {
   const positions = new Map<string, THREE.Vector3>();
   const count = Math.max(nodes.length, 1);
-  const radius = Math.max(2.7, Math.min(5.6, 1.35 + count * 0.48));
+  const radius = Math.max(3.8, Math.min(7.1, 1.6 + count * 0.68));
   nodes.forEach((node, index) => {
     const angle = (Math.PI * 2 * index) / count - Math.PI / 2;
     const y = count <= 2 ? (index === 0 ? 0.3 : -0.25) : Math.sin(index * 1.7) * 1.1;
@@ -47,7 +50,7 @@ function graphPositions(nodes: TopologyNode[]): Map<string, THREE.Vector3> {
   return positions;
 }
 
-export default function Topology3D({ nodes, edges, selectedId, focusToken, resetToken, reducedMotion, onSelect }: Topology3DProps) {
+export default function Topology3D({ nodes, edges, selectedId, incidentServiceIds, focusToken, resetToken, reducedMotion, graphKind = 'observed', onSelect }: Topology3DProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const latestSelectionRef = useRef(selectedId);
   const onSelectRef = useRef(onSelect);
@@ -82,12 +85,12 @@ export default function Topology3D({ nodes, edges, selectedId, focusToken, reset
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x091216, 13, 30);
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 60);
-    camera.position.set(0, 7.7, 15.6);
+    camera.position.set(0, 8.4, 20.5);
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = !reducedMotion;
     controls.dampingFactor = 0.08;
     controls.minDistance = 6;
-    controls.maxDistance = 24;
+    controls.maxDistance = 30;
     controls.maxPolarAngle = Math.PI * 0.82;
     controls.target.set(0, 0, 0);
     controls.update();
@@ -110,6 +113,7 @@ export default function Topology3D({ nodes, edges, selectedId, focusToken, reset
     scene.add(grid);
 
     const positions = graphPositions(nodes);
+    const incidentServices = new Set(incidentServiceIds);
     const maxEvents = Math.max(1, ...nodes.map((node) => Math.max(0, node.events)));
     const maxWeight = Math.max(1, ...edges.map((edge) => Math.max(0, edge.weight)));
     const nodeObjects = new Map<string, SceneNode>();
@@ -144,6 +148,16 @@ export default function Topology3D({ nodes, edges, selectedId, focusToken, reset
       halo.rotation.x = Math.PI / 2.5;
       group.add(halo);
 
+      let incidentRing: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial> | undefined;
+      if (incidentServices.has(node.id)) {
+        incidentRing = new THREE.Mesh(
+          new THREE.TorusGeometry(scale * 1.78, 0.012, 5, 56),
+          new THREE.MeshBasicMaterial({ color: 0xa78bfa, transparent: true, opacity: 0.72 })
+        );
+        incidentRing.rotation.x = Math.PI / 2.5;
+        group.add(incidentRing);
+      }
+
       const hitArea = new THREE.Mesh(
         new THREE.SphereGeometry(scale * 1.9, 12, 10),
         new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
@@ -152,7 +166,7 @@ export default function Topology3D({ nodes, edges, selectedId, focusToken, reset
       group.add(hitArea);
       nodeMeshes.push(core, shell, hitArea);
       scene.add(group);
-      nodeObjects.set(node.id, { group, core, halo, position: position.clone(), health });
+      nodeObjects.set(node.id, { group, core, halo, incidentRing, position: position.clone(), health });
     });
 
     const curves: THREE.QuadraticBezierCurve3[] = [];
@@ -309,7 +323,7 @@ export default function Topology3D({ nodes, edges, selectedId, focusToken, reset
     const onFitRequest = () => setCameraGoal(null);
     const onSelectionChange = () => renderOnce();
     const onResetRequest = () => {
-      cameraGoal.position.set(0, 7.7, 15.6);
+      cameraGoal.position.set(0, 8.4, 20.5);
       cameraGoal.target.set(0, 0, 0);
       cameraGoal.active = !reducedMotion;
       if (reducedMotion) {
@@ -402,7 +416,7 @@ export default function Topology3D({ nodes, edges, selectedId, focusToken, reset
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [nodes, edges, reducedMotion, retryToken]);
+  }, [nodes, edges, incidentServiceIds, reducedMotion, retryToken]);
 
   useEffect(() => {
     if (focusToken <= 0 || nodes.length === 0) return;
@@ -439,7 +453,7 @@ export default function Topology3D({ nodes, edges, selectedId, focusToken, reset
         <button className="btn btn-sm" type="button" onClick={() => stageRef.current?.dispatchEvent(new CustomEvent('topology-fit-view'))}>Fit graph</button>
         <span>Drag to orbit · scroll to zoom</span>
       </div>}
-      <p className="topology-three-note">Node size represents dataset event volume. Edges and moving signals represent observed request-trail weight; particle motion is illustrative, not a measured live request stream.</p>
+      <p className="topology-three-note">{graphKind === 'declared' ? 'Node size represents simulated events in the selected window. Edges and moving signals represent declared scenario dependencies; particle motion is illustrative, not a measured live request stream.' : 'Node size represents dataset event volume. Edges and moving signals represent observed request-trail weight; particle motion is illustrative, not a measured live request stream.'}</p>
     </div>
   );
 }

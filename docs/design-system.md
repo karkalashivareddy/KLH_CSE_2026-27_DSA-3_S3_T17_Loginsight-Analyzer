@@ -1,50 +1,81 @@
-# LogInsight Visual System
+# LogInsight Frontend Design System
 
-The interface uses one dark graphite visual system for the operational workspace and the algorithm lab. Operational data stays visually primary; blur, lighting and motion are restrained and never supply metrics that are absent from the API.
+The frontend uses a dark graphite system with restrained cyan interaction states, semantic health colors, and violet for algorithmic context. Data remains the visual priority: color, blur, and motion only describe values returned by the application APIs.
 
-## Color and surfaces
+## Source of truth
 
-The canonical base tokens live in `frontend/src/styles/global.css`; component-level material and responsive rules live in `frontend/src/styles/experience.css`.
+- `frontend/src/styles/product.css` owns the visual tokens, product background, component skin, page compositions, and responsive refinements.
+- `frontend/src/styles/global.css` supplies semantic/base layout rules and accessible structural behavior. It consumes the tokens declared by `product.css` and does not define a second palette.
+- `frontend/src/main.tsx` loads the structural rules followed by the product skin.
 
-| Token | Meaning |
-| --- | --- |
-| `--bg` / `--bg-elevated` / `--bg-soft` | graphite page, shell and nested surfaces |
-| `--text` / `--text-muted` / `--text-faint` | primary content, secondary context and metadata |
-| `--accent` | active navigation, keyboard focus and selected state |
-| `--ok` / `--warn` / `--danger` | healthy, watch/degraded and elevated/critical state |
-| `--info` / `--purple` | informational and algorithmic/academic context |
-| `--surface-0` … `--surface-3` | stepped glass opacity |
-| `--glass-blur-1` … `--glass-blur-modal` | card, elevated surface and overlay blur levels |
-| `--motion-fast` / `--motion-normal` / `--motion-slow` | 120 / 220 / 420 ms transition rhythm |
+## Tokens and semantics
 
-Status is paired with text and shape as well as color. Severity badges and health bands preserve their labels for users who do not distinguish color. The page background has a low contrast grid and fixed radial light; neither animates.
+The `:root` block in `product.css` defines the graphite backgrounds, glass levels, text scale, semantic colors, spacing, radii, shadows, typography, blur, and motion timing. Status is not communicated by color alone: badges and graph nodes include labels or accessible descriptions.
 
-Glass appears on the shell, command palette, topology hero and selected cards. Dense tables remain opaque enough for readability. Every focusable control retains a visible focus ring. Mobile widths reduce the number of simultaneous columns and visual effects.
+| Meaning | Token family | Use |
+| --- | --- | --- |
+| Active / live / selected | `--accent*` | Primary actions, focus, active navigation |
+| Healthy / resolved | `--ok*` | Healthy services and completed work |
+| Warning / degraded | `--warn*` | Elevated but noncritical signals |
+| Critical / error | `--danger*`, `--severity-*` | Error evidence and critical state |
+| Informational | `--info*` | Dataset or runtime context |
+| Algorithmic | `--purple`, `--mod-*`, `--glow-*` | DSA modules and analysis workspaces |
 
-## Navigation and hierarchy
+The background uses fixed, low-contrast radial light and a faint grid. Glass is reserved for the shell, primary hero panels, selected cards, floating controls, and drawers. Dense event content remains more opaque for readability.
 
-The persistent shell prioritizes Operate, Investigate, Analyze and Algorithm Lab. Supporting catalogue, benchmark, run, source, ingestion, system and documentation routes sit under a collapsible More group and remain available in the command palette. The overview leads with selected-window metrics and the observed dependency view, then the current detector result and supporting analysis.
+## Navigation and page hierarchy
+
+The sidebar keeps Overview, Scenario Lab, Live Monitor, Dataset Replay, Logs, Detector Windows, Incident Workbench, Services, Patterns, and Analytics in the primary workspace. The Algorithm Lab, algorithmic search, catalogue, benchmarks, run sessions, datasets, ingestion, system, and documentation remain available under the collapsible More group and command palette.
+
+The Overview leads with source and selected time-window context, a backend-derived signal strip, observed service relationships, current detector output, and supporting events/patterns. Logs prioritizes a query composer and bounded result stream. Incidents pairs detector windows with the selected evidence window. Services combines the observed graph with a contextual service view.
 
 ## Topology encodings
 
-Both renderers consume the same nodes and edges from the existing dependency API:
+Both renderers consume the same nodes and edges returned by the dependency API:
 
-- A node is a service returned by observed `requestId` request-trail grouping.
-- Node size represents event volume. It does not represent service importance or request rate.
+- A node is a service returned by observed request-trail grouping.
+- Node size represents dataset event volume; it does not represent service importance or request rate.
 - Node color and health label use the existing heuristic error-rate band.
-- Edge geometry and width represent the observed adjacency relationship and its returned weight.
-- By default, both renderers show the 18 strongest returned edges by weight to keep dense request-trail datasets readable. `Show all` reveals every returned edge. The accessible adjacency list always retains the full backend result.
-- The SVG view is the default and draws bounded particles from normalized displayed-edge weight.
-- The lazy Three.js/WebGL view positions the same displayed nodes and edges in perspective. A capped `InstancedMesh` animates small markers along observed edges; density and speed are normalized visual encodings, not exact request counts, measured latency or live external requests.
-- The 3D canvas is supplementary and `aria-hidden`. The paired service and edge lists remain the accessible source for keyboard and screen-reader users.
-- WebGL setup failure offers a clear fallback message; selecting 2D returns to the same graph. Orbit, fit and selected-service focus controls are provided in 3D.
+- Edge geometry and width represent returned observed adjacency and weight.
+- The default view shows the strongest returned edges to keep a dense graph readable. “Show all” reveals every returned edge; the accessible adjacency list retains the full API result.
+- The SVG renderer draws a bounded number of particles from normalized displayed-edge weight.
+- The lazy Three.js/WebGL renderer uses the same nodes and edges with capped instanced markers. Density and speed are representative encodings, not exact request counts, measured latency, or live external requests.
+- The canvas is supplementary. The paired service and edge lists remain the accessible source for keyboard and screen-reader users.
+- WebGL setup failure leaves the 2D view available. The 3D renderer supports orbit, fit, and selected-service focus.
 
-The graph represents observed log relationships, not verified infrastructure and not proven causality. Its data is not scoped to the Command Center's selected time window.
+The graph represents relationships observed in log records, not verified infrastructure or proven causality. Its source API is not scoped to the Overview's selected time window.
 
-## Motion and resource lifecycle
+## Motion and lifecycle
 
-CSS state changes use short transitions. SVG particles and 3D traffic motion follow `prefers-reduced-motion`; the WebGL scene stops its animation loop when its panel is outside the viewport or the browser tab is hidden. The canvas uses a capped pixel ratio, observes container resize, and disposes renderer, controls, geometries, materials, observers and event listeners when it unmounts. There is no idle camera rotation or full-screen flashing.
+Motion uses the shared fast, normal, and slow timing tokens. Reduced-motion preferences suppress decorative movement. The WebGL renderer pauses while its panel is outside the viewport or the browser tab is hidden, caps pixel ratio and particle count, observes container resize, and disposes renderer resources, geometries, materials, controls, observers, and listeners on unmount.
 
-## Support and limits
+## Product data modes and limits
 
-2D SVG remains the supported fallback for devices without WebGL. The Three.js chunk is loaded only after choosing the 3D mode. No chart framework, motion framework, external telemetry source, AI service or WebSocket client was added for this visual pass. A Chrome browser with WebGL rendered the scene successfully; component tests cover the unavailability fallback and the production build verifies the lazy bundle.
+The current backend provides two clearly separated data modes. **Dataset mode** analyses the loaded log dataset and supports a bounded SSE dataset replay. **Simulation mode** runs a deterministic generated microservice scenario over SSE; it is labelled as generated simulation, not as observed telemetry. The interface labels replay as replay; it does not represent it as a live production source. Patterns are heuristic normalization, and incidents are elevated-error windows. Neither implies ML confidence or confirmed root cause. There is no external telemetry integration in this frontend.
+
+Because the two modes have different provenance, topology surfaces state their source explicitly: dataset pages render `OBSERVED DEPENDENCIES` with dataset event counts, while simulation pages render `DECLARED DEPENDENCIES` because the service graph is declared by the scenario definition rather than inferred from request identifiers.
+
+The Three.js view is lazy-loaded and the 2D SVG topology is the fallback. The production build still reports a 576 kB minified lazy 3D chunk; it is downloaded only when the 3D view is selected.
+
+## Deterministic simulation surfaces
+
+Three surfaces read the same server stream and are documented here so their shared state is explicit:
+
+| Surface | Route | Purpose |
+| --- | --- | --- |
+| Scenario Lab | `/scenario-lab` | Choose a scenario and seed, start or preview a run, inspect signals, evidence, incidents and the lifecycle. |
+| Live Monitor | `/live` | Operational view of the running stream: measured error rate, p95 latency, throughput, topology health and the event buffer. |
+| Incident workbench | `/incidents/workbench` | Investigate one candidate: measured evidence, blast radius, correlated events and forward-only lifecycle transitions. |
+| System overview | `/` | `SimulationBand` summarises the same frame so the overview never contradicts the monitor. |
+
+One `TelemetryProvider` owns the stream. Overview, Monitor and workbench read that single frame, so numbers cannot drift between screens. The dataset replay context is deliberately separate: `/replay` is a bounded replay of the loaded dataset and is labelled as such.
+
+Design rules for these surfaces:
+
+- Generated traffic is always labelled. Events and panels carry `live-simulation` or a visible `generated · not captured` note, and never share a list, chart or total with dataset-backed data.
+- Phase labels are derived server-side from the measured intensity curve, so a badge cannot claim a phase the metrics contradict.
+- Evidence rows show algorithm, purpose, input size, result, measured runtime and complexity. There is no confidence score, because none is computed.
+- Blast radius highlighting is reachability over declared dependencies, described in the interface as a traversal and never as a probability or a confirmed root cause.
+- Charts reuse `TimeChart`, stat tiles reuse `StatCard` and topology reuses the shared `TopologyPanel`, so 2D/3D switching and accessibility behaviour are identical everywhere.
+- `status-strip`, `scenario-card`, `health-chip`, `signal-item`, `evidence-item`, `incident-card` and `workbench-*` extend the token set only; no new palette, radius or shadow value is introduced.
+- The workbench collapses from three panes to a single column below 1180 px, and every hover or transform transition is suppressed under `prefers-reduced-motion`.

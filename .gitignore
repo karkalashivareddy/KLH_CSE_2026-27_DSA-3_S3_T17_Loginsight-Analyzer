@@ -11,6 +11,8 @@ node_modules/
 dist/
 build/
 *.tsbuildinfo
+coverage/
+.vite/
 
 # Environment & secrets
 .env

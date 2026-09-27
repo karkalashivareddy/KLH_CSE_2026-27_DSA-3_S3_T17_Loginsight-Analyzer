@@ -50,8 +50,13 @@ export default function PatternsPage() {
           <StatCard label="Method" value="Heuristic" sub="not ML" color="var(--warn)" />
         </div>
         <div className="pattern-layout">
-          <Card title={`Recurring structures (${list.length})`} sub="Select a template to request its supporting events" actions={patterns.refreshing ? <Badge tone="info">Refreshing</Badge> : undefined}>
-            <div className="table-scroll"><table className="log-table"><caption className="sr-only">Recurring message patterns</caption><thead><tr><th>Level</th><th>Template</th><th>Count</th><th>Example</th></tr></thead><tbody>{list.map((pattern) => <tr key={`${pattern.template}-${pattern.count}`} className={selected?.template === pattern.template ? 'winner-row' : undefined}><td><LevelBadge level={pattern.level} /></td><td><button className="btn btn-sm" type="button" onClick={() => setSelected(pattern)} aria-label={`Inspect examples for ${pattern.template}`}><code className="pattern-template">{pattern.template}</code></button></td><td className="num">{formatNumber(pattern.count)}</td><td className="muted">{pattern.example}</td></tr>)}</tbody></table></div>
+          <Card title={`Recurring structures (${list.length})`} sub="Select a normalized template to request its supporting events" actions={patterns.refreshing ? <Badge tone="info">Refreshing</Badge> : undefined}>
+            <div className="pattern-card-list" role="group" aria-label="Normalized message templates">{list.map((pattern) => <button key={`${pattern.template}-${pattern.count}`} type="button" className={`pattern-card${selected?.template === pattern.template ? ' pattern-card--selected' : ''}`} aria-pressed={selected?.template === pattern.template} onClick={() => setSelected(pattern)} aria-label={`Investigate ${pattern.template}, ${formatNumber(pattern.count)} occurrences`}>
+              <span className="pattern-card-top"><LevelBadge level={pattern.level} /><span>{formatNumber(pattern.count)} occurrences</span></span>
+              <code className="pattern-card-template">{pattern.template}</code>
+              <span className="pattern-card-example">Example · {pattern.example}</span>
+              <span className="pattern-frequency-track" aria-hidden="true"><i style={{ width: `${largest > 0 ? Math.max(3, pattern.count / largest * 100) : 0}%` }} /></span>
+            </button>)}</div>
           </Card>
           <div>
             {selected ? <Card title="Pattern evidence" sub={selected.example} actions={<><Badge tone="info">{selected.level}</Badge><Link className="btn btn-sm" to={`/logs?q=${encodeURIComponent(selected.example || selected.template)}`} aria-label={`Search logs for the example message of ${selected.template}`}><ExternalLink size={13} aria-hidden="true" /> Matching logs</Link></>}>

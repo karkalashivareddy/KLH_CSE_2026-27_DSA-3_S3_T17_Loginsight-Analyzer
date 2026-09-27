@@ -15,6 +15,21 @@ describe('TopologyPanel', () => {
     vi.restoreAllMocks();
   });
 
+  it('describes a declared simulation graph without dataset wording', () => {
+    const { container } = render(<TopologyPanel nodes={nodes} edges={edges} graphKind="declared" />);
+
+    expect(container.querySelector('.topology-renderer-note')?.textContent).toContain('DECLARED DEPENDENCIES');
+    expect(screen.getByText('Declared dependency adjacency')).toBeInTheDocument();
+    expect(screen.getByText('Accessible service list · events in window and selected-window error rate')).toBeInTheDocument();
+    expect(container.querySelector('[data-node-id="api"]')).toHaveAttribute(
+      'aria-label',
+      'api, 100 events in window, 6.3% window error rate, watch',
+    );
+    expect(container.querySelector('.node-count')?.textContent).toContain('100 events ·');
+    expect(container.textContent).not.toContain('dataset');
+    expect(container.textContent).not.toContain('Observed');
+  });
+
   it('exposes an accessible service list and selectable data-driven nodes', () => {
     const onSelect = vi.fn();
     const { container } = render(<TopologyPanel nodes={nodes} edges={edges} onSelect={onSelect} />);
@@ -45,6 +60,17 @@ describe('TopologyPanel', () => {
     expect(screen.getByText('Accessible service list \u00b7 dataset events and selected-window error rate')).toBeInTheDocument();
     expect(screen.getByText('100 dataset events')).toBeInTheDocument();
     expect(screen.getByText('6.3% window error rate')).toBeInTheDocument();
+  });
+
+  it('marks service names returned in an incident window without claiming causality', () => {
+    const { container } = render(<TopologyPanel nodes={nodes} edges={edges} incidentServiceIds={['api']} incidentLabel="Named by incident #7" />);
+
+    const apiNode = container.querySelector('[data-node-id="api"]');
+    expect(apiNode).toHaveAttribute('data-incident-related', 'true');
+    expect(apiNode).toHaveClass('topology-node--incident');
+    expect(apiNode).toHaveAttribute('aria-label', expect.stringContaining('named in the incident detector window'));
+    expect(container.querySelector('[data-node-id="auth"]')).toHaveAttribute('data-incident-related', 'false');
+    expect(screen.getByText(/Named by incident #7/)).toHaveTextContent('not a causal path');
   });
 
   it('keeps dense graphs legible while retaining every returned edge for inspection', () => {

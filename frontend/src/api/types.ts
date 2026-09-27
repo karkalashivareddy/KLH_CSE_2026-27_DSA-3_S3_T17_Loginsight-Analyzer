@@ -552,3 +552,188 @@ export interface SearchBenchmarkResponse {
   winner: string;
   note: string;
 }
+/* ---------------------------------------------------------------------------------------------
+ * Deterministic live simulation (docs/API.md §10).
+ *
+ * These events are GENERATED, not captured. `source` is always "live-simulation" and every payload
+ * carries a label saying so, so the UI never has to guess whether it is looking at real telemetry.
+ * ------------------------------------------------------------------------------------------- */
+
+export type SimulationPhase = 'healthy' | 'onset' | 'degrading' | 'peak';
+
+export type SimulationLifecycleStatus =
+  | 'DETECTED'
+  | 'INVESTIGATING'
+  | 'ACKNOWLEDGED'
+  | 'MITIGATED'
+  | 'RESOLVED';
+
+export type ServiceHealthState = 'healthy' | 'degraded' | 'critical';
+
+export interface Scenario {
+  id: string;
+  title: string;
+  summary: string;
+  seed: number;
+  durationSeconds: number;
+  onsetSeconds: number;
+  peakSeconds: number;
+  recoverySeconds: number;
+  affectedServices: string[];
+  errorSignatures: string[];
+  expectedSignal: string;
+  expectedIncident: string;
+  severity: string;
+  source: 'live-simulation';
+  label: string;
+}
+
+export interface SimulationSignal {
+  id: string;
+  kind: 'error-burst' | 'latency' | 'volume' | 'signature' | string;
+  label: string;
+  detail: string;
+  severity: string;
+  service: string;
+}
+
+/** One measured algorithm invocation supporting an incident. Never hand-written. */
+export interface SimulationEvidence {
+  algorithm: string;
+  purpose: string;
+  inputSize: number;
+  inputUnit: string;
+  result: string;
+  runtimeNanos: number;
+  runtimeMicros: number;
+  complexity: string;
+  references: string[];
+}
+
+export interface ServiceHealth {
+  service: string;
+  label: string;
+  tier: string;
+  events: number;
+  errors: number;
+  errorRate: number;
+  averageLatencyMs: number;
+  state: ServiceHealthState;
+  load: number;
+  inBlastRadius: boolean;
+}
+
+export interface SimulationTopologyPayload {
+  nodes: { id: string; label: string; tier: string }[];
+  edges: { source: string; target: string }[];
+  kind: 'declared' | string;
+  label: string;
+}
+
+export interface SimulationTimelineEntry {
+  at: string;
+  status: SimulationLifecycleStatus;
+  label: string;
+}
+
+export interface SimulationIncident {
+  id: number;
+  scenarioId: string;
+  title: string;
+  signal: string;
+  method: string;
+  severity: string;
+  status: SimulationLifecycleStatus;
+  open: boolean;
+  originService: string;
+  affectedServices: string[];
+  blastRadius: string[];
+  detectedAt: string;
+  start: string;
+  end: string | null;
+  lastUpdatedAt: string;
+  eventCount: number;
+  errorRate: number;
+  p95LatencyMs: number;
+  matchedSignatures: string[];
+  evidence: SimulationEvidence[];
+  timeline: SimulationTimelineEntry[];
+  persistence: 'session' | string;
+}
+
+/**
+ * One frame of the simulation stream: a complete analytical snapshot, not just a batch of events.
+ * Every chart in the UI derives from this payload rather than recomputing analytics in the browser.
+ */
+export interface SimulationFrame {
+  /** Server-side session this frame belongs to, so operator actions work without a live stream. */
+  sessionId: string;
+  sequence: number;
+  source: 'live-simulation' | string;
+  label: string;
+  scenarioId: string;
+  scenarioTitle: string;
+  seed: number;
+  tick: number;
+  tickMillis: number;
+  eventsPerFrame: number;
+  intensity: number;
+  phase: SimulationPhase;
+  totalEvents: number;
+  totalErrors: number;
+  errorRate: number;
+  eventsPerSecond: number;
+  averageLatencyMs: number;
+  p95LatencyMs: number;
+  baselineP95LatencyMs: number;
+  windowSize: number;
+  windowCapacity: number;
+  matchedSignatures: string[];
+  events: LogEvent[];
+  signals: SimulationSignal[];
+  evidence: SimulationEvidence[];
+  health: ServiceHealth[];
+  incidents: SimulationIncident[];
+  topology: SimulationTopologyPayload;
+}
+
+export interface SimulationStatus {
+  enabled: boolean;
+  source: string;
+  label: string;
+  scenarios: number;
+  activeSessions: number;
+  maxConcurrentStreams: number;
+  speed: { min: number; max: number; default: number };
+  intervalMs: { min: number; max: number; default: number };
+  maxFrames: { min: number; max: number; default: number };
+  determinism: string;
+  persistence: string;
+}
+
+export interface SimulationStartEvent {
+  sessionId: string;
+  source: 'live-simulation' | string;
+  scenarioId: string;
+  scenarioTitle: string;
+  seed: number;
+  tickMillis: number;
+  speed: number;
+  paceMs: number;
+  expectedSignal: string;
+  expectedIncident: string;
+  label: string;
+}
+
+export interface SimulationCompleteEvent {
+  sessionId: string;
+  frames: number;
+  ticks: number;
+  reason: string;
+}
+
+export interface SimulationTransitionRequest {
+  sessionId: string;
+  status?: SimulationLifecycleStatus;
+  advance?: boolean;
+}
