@@ -2,7 +2,7 @@
 
 > Historical phase report. It is retained for traceability and is not the current product contract. For the audited `rebuild/loginsight-v4` implementation, see [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md), [API.md](API.md) and [README.md](../README.md).
 
-> **Stale figures in this file.** Every test count, route name and Lab behaviour below is a snapshot of the phase this report describes. The current suite is **827 backend tests** plus **24 frontend tests across 10 files**, and the current UI surface is documented in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md). Do not read the counts, `/labs/:module/:key` deep links, `TextHackPage`, `LabPage`, `CourseMapPage` or the run-launching Lab described here as current.
+> **Stale figures in this file.** Every test count, route name and Lab behaviour below is a snapshot of the phase this report describes. The current suite is **873 backend tests** plus **53 frontend tests across 17 files**, and the current UI surface is documented in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md). Do not read the counts, `/labs/:module/:key` deep links, `TextHackPage`, `LabPage`, `CourseMapPage` or the run-launching Lab described here as current.
 
 Transforms **LogInsight Analyzer** into a DSA-3 lab where real algorithms, real traces, and real
 benchmarks are surfaced through a six-module catalogue, a natural-style query facade, and recorded
@@ -78,14 +78,14 @@ rebuild and fixed all findings:
 
 Result: verification unchanged for that phase — **696 tests / 0 failures** (`mvn -q verify`),
 `npm run build` clean, and the rebuilt jar passed the live smoke matrix (catalogue, searches without
-scope, TextHack, runs/SSE). The current gate is 827 backend tests plus the 24-test frontend suite across 10 files;
+scope, TextHack, runs/SSE). The current gate is 873 backend tests plus the 53-test frontend suite across 10 files;
 see [13-testing.md](13-testing.md).
 
 ## How to verify (current branch)
 
 ```powershell
-.\mvnw.cmd -q verify          # backend: 827 tests, 0 failures
-cd frontend ; npm test        # frontend: 24 tests across 10 files
+.\mvnw.cmd -q verify          # backend: 873 tests, 0 failures
+cd frontend ; npm test        # frontend: 53 tests across 17 files
 cd frontend ; npm run build   # tsc + vite production build
 .\mvnw.cmd -q spring-boot:run # then open http://localhost:8080 (or `npm run dev` in frontend/)
 curl http://localhost:8080/api/modules

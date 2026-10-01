@@ -10,8 +10,8 @@ This is the canonical description of the checked-out implementation. It is based
 
 | Gate | Command | Result |
 |---|---|---|
-| Backend | `cd backend; .\mvnw.cmd -o verify` | 827 tests, 0 failures, 0 errors; Spring Boot jar packaged |
-| Frontend tests | `cd frontend; npm test` | 24 tests across 10 files passed |
+| Backend | `cd backend; .\mvnw.cmd -o verify` | 873 tests, 0 failures, 0 errors; Spring Boot jar packaged |
+| Frontend tests | `cd frontend; npm test` | 53 tests across 17 files passed |
 | Frontend build | `cd frontend; npm run build` | TypeScript and Vite production build passed |
 | Compose syntax | `docker compose config --quiet` | Passed |
 | Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable in the audit environment |
@@ -80,20 +80,27 @@ Full detail is in [COMMAND_CENTER.md](COMMAND_CENTER.md). The audited facts:
 
 ## Frontend test inventory
 
-`npm test` runs Vitest over 24 tests in 10 files:
+`npm test` runs Vitest over 53 tests in 17 files:
 
 | File | Tests | Covers |
 |---|---:|---|
 | `src/api/client.test.ts` | 3 | SSE frame parsing (chunking, comments, ids, multiline data, unterminated final frame) and multipart boundary handling |
-| `src/components/format.test.ts` | 3 | Millisecond vs nanosecond duration formatting, including fractional values |
-| `src/components/Layout.test.tsx` | 2 | Skip navigation, grouped navigation entries and active navigation |
-| `src/components/TopologyPanel.test.tsx` | 4 | Accessible node/edge lists, data-driven radius and particle counts, controlled depth mode, reset view, reduced-motion static particles |
+| `src/components/format.test.ts` | 6 | Millisecond vs nanosecond duration formatting (including fractional values) and `eventKey` stability for dataset and generated events |
+| `src/components/Layout.test.tsx` | 4 | Skip navigation, grouped navigation entries and active navigation |
+| `src/components/TopologyPanel.test.tsx` | 7 | Accessible node/edge lists, data-driven radius and particle counts, controlled depth mode, reset view, reduced-motion static particles |
 | `src/pages/AlgorithmsPage.test.tsx` | 3 | Algorithm Lab runs a catalogue `defaultInput` through the runs API, shows the run input, and surfaces a rejected run without navigating |
 | `src/pages/AnalyticsPage.test.tsx` | 1 | Analytics tablist association: `aria-selected`, `aria-controls` and tabpanel labelling follow the selected tab |
+| `src/pages/IncidentWorkbench.test.tsx` | 4 | Related-event rendering, evidence sections, and stable keys for generated event rows |
 | `src/pages/LivePage.test.tsx` | 2 | Demo replay disclosure, shared `Replay state:` label, and start/replay-again honouring the selected batch size and pace |
+| `src/pages/LogsPage.test.tsx` | 1 | Log row rendering and dataset-backed empty/loading states |
+| `src/pages/MonitorPage.test.tsx` | 4 | Simulation event stream rendering, tick counter, and stable keys for generated event rows |
 | `src/pages/OverviewPage.test.tsx` | 3 | Command Center selected-window metrics, coverage, investigation state and the explicit no-dataset state |
 | `src/pages/PatternsPage.test.tsx` | 1 | Pattern example links search the returned example message rather than the wildcard template |
+| `src/pages/ScenarioLabPage.test.tsx` | 4 | Scenario catalogue, selection, start/pause/resume, and stable keys for generated event rows |
+| `src/pages/ServicesPage.test.tsx` | 2 | Service table ordering and health-band presentation |
 | `src/replay/ReplayContext.test.tsx` | 2 | Single SSE subscription, progress, state transitions and stop/restart behavior |
+| `src/telemetry/adapters.test.ts` | 4 | Dataset vs generated-event normalization, including identity fields used for React keys |
+| `src/telemetry/SimulationBand.test.tsx` | 2 | Simulation control band labelling and connection-status exposure |
 
 This is focused component coverage. It is not browser QA.
 

@@ -67,11 +67,20 @@ public final class IncidentLifecycleStore {
         return incidents.size();
     }
 
-    /** Applies an explicit operator-driven transition; returns the incident either way. */
+    /**
+     * Applies an explicit operator-driven transition.
+     *
+     * @return the incident, or empty when the incident id is unknown
+     * @throws IllegalLifecycleTransitionException when the requested state is not a legal
+     *     forward step from the incident's current state
+     */
     public synchronized Optional<SimulationIncident> transition(int id, SimulationIncident.Status target, Instant at) {
         SimulationIncident incident = incidents.get(id);
         if (incident == null) {
             return Optional.empty();
+        }
+        if (!incident.canTransitionTo(target)) {
+            throw new IllegalLifecycleTransitionException(id, incident.getStatus(), target);
         }
         incident.transitionTo(target, at, false);
         return Optional.of(incident);
@@ -107,5 +116,24 @@ public final class IncidentLifecycleStore {
     public synchronized void clear() {
         incidents.clear();
         nextId = 1;
+    }
+
+    /**
+     * Raised when an operator asks for a lifecycle state the incident cannot reach from where it is.
+     *
+     * <p>Surfaced as HTTP 409 so a UI that offers a lifecycle control can distinguish "the server
+     * refused this transition" from "the transition succeeded" instead of silently re-rendering the
+     * unchanged incident.</p>
+     */
+    public static final class IllegalLifecycleTransitionException extends RuntimeException {
+
+        private static final long serialVersionUID = 1L;
+
+        public IllegalLifecycleTransitionException(int incidentId,
+                                                    SimulationIncident.Status current,
+                                                    SimulationIncident.Status requested) {
+            super("Incident " + incidentId + " is " + current
+                    + "; lifecycle transitions only move forward, so " + requested + " is not reachable");
+        }
     }
 }

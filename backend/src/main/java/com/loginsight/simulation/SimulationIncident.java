@@ -223,9 +223,20 @@ public final class SimulationIncident {
         return transitionTo(target, at, false);
     }
 
+    /**
+     * Whether {@code target} is a legal destination from the current state.
+     *
+     * <p>Transitions only move forward, and {@link Status#RESOLVED} is terminal. Re-requesting the
+     * current state is legal and idempotent; anything else is rejected by
+     * {@link #transitionTo(Status, Instant, boolean)}.</p>
+     */
+    public synchronized boolean canTransitionTo(Status target) {
+        return target != null && target.ordinal() >= status.ordinal() && status != Status.RESOLVED;
+    }
+
     /** Sets an explicit state, distinguishing operator-driven from simulation-driven moves. */
     public synchronized boolean transitionTo(Status target, Instant at, boolean automatic) {
-        if (target == null || target.ordinal() < status.ordinal() || status == Status.RESOLVED) {
+        if (!canTransitionTo(target)) {
             return false;
         }
         if (target == status) {

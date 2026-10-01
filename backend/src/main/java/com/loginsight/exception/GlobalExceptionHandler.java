@@ -25,6 +25,8 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.loginsight.simulation.IncidentLifecycleStore.IllegalLifecycleTransitionException;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -144,6 +146,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> notFound(DatasetException e,
                                                         HttpServletRequest request) {
         return body(HttpStatus.NOT_FOUND, "DatasetException", e.getMessage(), request);
+    }
+
+    /**
+     * An incident lifecycle action the current state does not allow: HTTP 409.
+     *
+     * <p>Distinct from 400 because the request is well formed — it asks for a real state — but the
+     * incident cannot reach it from where it is. 409 keeps a rejected operator action visibly distinct
+     * from a successful one.</p>
+     */
+    @ExceptionHandler(IllegalLifecycleTransitionException.class)
+    public ResponseEntity<Map<String, Object>> lifecycleConflict(IllegalLifecycleTransitionException e,
+                                                                 HttpServletRequest request) {
+        return body(HttpStatus.CONFLICT, "IllegalLifecycleTransitionException", e.getMessage(), request);
     }
 
     /** Engine failure after validation: HTTP 500, safe message. */

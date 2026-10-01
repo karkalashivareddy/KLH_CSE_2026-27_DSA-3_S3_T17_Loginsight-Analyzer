@@ -2,7 +2,7 @@
 
 > Historical audit of an earlier phase. It is not the current verification record. See [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) for the current branch and [DEPLOYMENT.md](DEPLOYMENT.md) for the container validation boundary.
 
-> **Stale figures in this file.** Test counts, surefire file counts and bundle sizes below are the snapshot this pass measured. The current branch runs **827 backend tests** and **24 frontend tests across 10 files**; see [13-testing.md](13-testing.md). The `LabPage`, `TextHackPage` and `/labs/:module/:key` surfaces named here no longer exist; the current Algorithm Lab is a catalogue browser, documented in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md).
+> **Stale figures in this file.** Test counts, surefire file counts and bundle sizes below are the snapshot this pass measured. The current branch runs **873 backend tests** and **53 frontend tests across 17 files**; see [13-testing.md](13-testing.md). The `LabPage`, `TextHackPage` and `/labs/:module/:key` surfaces named here no longer exist; the current Algorithm Lab is a catalogue browser, documented in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md).
 
 > Scope: verify the complete TextHack rebuild (phases 1-13, commits `f014e5a` → `cf76458` → `b711d94`)
 > on branch `main`, then fix anything that fails the bar, and re-verify. No feature creep - this pass
@@ -131,4 +131,4 @@ application route); not reachable from the UI.
 | P3-04 stale screenshots | Done | `docs/screenshots/` (8 unreferenced pre-rebuild PNGs) removed; README links to the live app instead of stale images. |
 
 Final state for that pass: `mvn -q verify` **696 tests / 0 failures / 0 errors** (85 surefire files), `npm run build` clean
-(JS 235.8 kB / gzip 73.5 kB, CSS 22.8 kB). All live smoke checks green against the rebuilt jar. The current branch gate is 827 backend tests plus 24 frontend tests across 10 files; see [13-testing.md](13-testing.md).
+(JS 235.8 kB / gzip 73.5 kB, CSS 22.8 kB). All live smoke checks green against the rebuilt jar. The current branch gate is 873 backend tests plus 53 frontend tests across 17 files; see [13-testing.md](13-testing.md).

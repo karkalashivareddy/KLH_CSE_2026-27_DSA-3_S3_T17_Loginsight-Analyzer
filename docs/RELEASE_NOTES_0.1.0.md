@@ -26,8 +26,8 @@ This is the current single-node release shape for the academic/portfolio project
 
 | Check | Result |
 |---|---|
-| `cd backend; .\mvnw.cmd -o verify` | 827 tests, 0 failures, 0 errors |
-| `cd frontend; npm test` | 24 tests across 10 files passed |
+| `cd backend; .\mvnw.cmd -o verify` | 873 tests, 0 failures, 0 errors |
+| `cd frontend; npm test` | 53 tests across 17 files passed |
 | `cd frontend; npm run build` | Clean TypeScript/Vite production build |
 | `docker compose config --quiet` | Passed |
 | Docker image build/runtime | Not run: Docker daemon unavailable in the audit environment |

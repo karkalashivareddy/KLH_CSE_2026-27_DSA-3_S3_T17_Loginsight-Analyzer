@@ -15,8 +15,8 @@ npm run build
 
 Results:
 
-- Backend: **827 tests, 0 failures, 0 errors**; Spring Boot jar packaged successfully.
-- Frontend: **24 tests across 10 files passed** with Vitest.
+- Backend: **873 tests, 0 failures, 0 errors**; Spring Boot jar packaged successfully.
+- Frontend: **53 tests across 17 files passed** with Vitest.
 - Frontend build: TypeScript compilation and Vite production build passed.
 - JaCoCo: report generated under `backend/target/site/jacoco/`; no numeric coverage threshold is configured in the POM.
 - Compose syntax: `docker compose config --quiet` passed.

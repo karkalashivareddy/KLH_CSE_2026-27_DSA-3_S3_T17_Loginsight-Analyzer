@@ -11,7 +11,7 @@ import {
   sortIncidents,
   toTopology
 } from '../telemetry/adapters';
-import { formatNumber } from '../components/format';
+import { eventKey, formatNumber } from '../components/format';
 
 const NEXT_STATUS: Record<string, { next: string; label: string; hint: string } | null> = {
   DETECTED: { next: 'INVESTIGATING', label: 'Investigate', hint: 'Start correlating services and events.' },
@@ -107,11 +107,11 @@ export default function IncidentWorkbenchPage() {
           </div>
           <div className="status-strip-item">
             <span className="status-strip-label">Scenario</span>
-            <span>{scenario?.title ?? '—'}</span>
+            <span>{scenario?.title ?? 'Ã¢â‚¬â€'}</span>
           </div>
           <div className="status-strip-item">
             <span className="status-strip-label">Session</span>
-            <span className="mono">{sessionId ? sessionId.slice(0, 8) : '—'}</span>
+            <span className="mono">{sessionId ? sessionId.slice(0, 8) : 'Ã¢â‚¬â€'}</span>
           </div>
           <div className="status-strip-item">
             <span className="status-strip-label">Open</span>
@@ -168,7 +168,7 @@ export default function IncidentWorkbenchPage() {
               <>
                 <Card
                   title={selected.title}
-                  sub={`${selected.method} · ${selected.signal}`}
+                  sub={`${selected.method} Ã‚Â· ${selected.signal}`}
                   actions={<StatusPill status={selected.status} />}
                 >
                   <div className="definition-grid">
@@ -238,7 +238,7 @@ export default function IncidentWorkbenchPage() {
                           </span>
                           <span className="evidence-item-purpose">{item.purpose}</span>
                           <span className="evidence-item-input">
-                            {formatNumber(item.inputSize)} {item.inputUnit} → {item.result}
+                            {formatNumber(item.inputSize)} {item.inputUnit} Ã¢â€ â€™ {item.result}
                           </span>
                           <span className="evidence-item-complexity">{item.complexity}</span>
                         </li>
@@ -268,7 +268,7 @@ export default function IncidentWorkbenchPage() {
                           </Badge>
                         </span>
                         <span className="health-chip-metrics">
-                          {service.errorRate.toFixed(1)}% · {Math.round(service.averageLatencyMs)} ms
+                          {service.errorRate.toFixed(1)}% Ã‚Â· {Math.round(service.averageLatencyMs)} ms
                         </span>
                       </div>
                     ))}
@@ -307,7 +307,7 @@ export default function IncidentWorkbenchPage() {
                     </thead>
                     <tbody>
                       {relatedEvents.map((event) => (
-                        <tr key={event.id}>
+                        <tr key={eventKey(event)}>
                           <td className="mono">{new Date(event.timestamp).toLocaleTimeString()}</td>
                           <td>
                             <Badge tone={event.level === 'ERROR' ? 'danger' : event.level === 'WARN' ? 'warn' : 'info'}>

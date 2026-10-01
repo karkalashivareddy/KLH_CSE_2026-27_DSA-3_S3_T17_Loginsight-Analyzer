@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDuration, formatMillis, formatNanos } from './format';
+import { eventKey, formatDuration, formatMillis, formatNanos } from './format';
 
 describe('duration formatters', () => {
   it('treats duration values as milliseconds', () => {
@@ -18,5 +18,23 @@ describe('duration formatters', () => {
   it('formats fractional millisecond measurements', () => {
     expect(formatMillis(0.5)).toBe('500 µs');
     expect(formatMillis(1_500)).toBe('1.50 s');
+  });
+});
+
+describe('eventKey', () => {
+  it('keys ingested events on their dataset id', () => {
+    expect(eventKey({ id: 7, timestamp: '2026-04-12T10:00:00Z' })).toBe('d7');
+    expect(eventKey({ id: 0, timestamp: '2026-04-12T10:00:00Z' })).toBe('d0');
+  });
+
+  it('keeps generated events distinct even though they all carry the placeholder id', () => {
+    const first = { id: -1, timestamp: '2026-04-12T10:00:00.250Z', requestId: 'req-a-1', message: 'a' };
+    const second = { id: -1, timestamp: '2026-04-12T10:00:00.500Z', requestId: 'req-a-2', message: 'b' };
+    expect(eventKey(first)).not.toBe(eventKey(second));
+  });
+
+  it('is stable for the same generated event', () => {
+    const event = { id: -1, timestamp: '2026-04-12T10:00:00.250Z', requestId: 'req-a-1', message: 'a' };
+    expect(eventKey(event)).toBe(eventKey({ ...event }));
   });
 });

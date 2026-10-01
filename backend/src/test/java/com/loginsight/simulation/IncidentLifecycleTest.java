@@ -1,6 +1,7 @@
 package com.loginsight.simulation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Instant;
 import java.util.List;
@@ -145,6 +146,51 @@ class IncidentLifecycleTest {
     void lifecycleOrderIsStable() {
         assertThat(SimulationFrameDto.lifecycleStates())
                 .containsExactly("DETECTED", "INVESTIGATING", "ACKNOWLEDGED", "MITIGATED", "RESOLVED");
+    }
+
+    @Test
+    @DisplayName("the store rejects a transition the incident cannot reach")
+    void storeRejectsIllegalTransition() {
+        IncidentLifecycleStore store = new IncidentLifecycleStore();
+        SimulationIncident incident = store.open(candidate(), "test");
+        store.transition(incident.getId(), SimulationIncident.Status.ACKNOWLEDGED, Instant.now());
+        int timelineBefore = incident.getTimeline().size();
+
+        assertThatThrownBy(() -> store.transition(incident.getId(), SimulationIncident.Status.DETECTED,
+                Instant.now()))
+                .isInstanceOf(IncidentLifecycleStore.IllegalLifecycleTransitionException.class)
+                .hasMessageContaining("ACKNOWLEDGED")
+                .hasMessageContaining("DETECTED");
+        assertThat(incident.getStatus()).isEqualTo(SimulationIncident.Status.ACKNOWLEDGED);
+        assertThat(incident.getTimeline()).hasSize(timelineBefore);
+    }
+
+    @Test
+    @DisplayName("the store rejects reopening a closed incident")
+    void storeRejectsReopeningClosedIncident() {
+        IncidentLifecycleStore store = new IncidentLifecycleStore();
+        SimulationIncident incident = store.open(candidate(), "test");
+        store.transition(incident.getId(), SimulationIncident.Status.RESOLVED, Instant.now());
+        Instant closedAt = incident.getEnd();
+
+        assertThatThrownBy(() -> store.transition(incident.getId(), SimulationIncident.Status.INVESTIGATING,
+                Instant.now().plusSeconds(30)))
+                .isInstanceOf(IncidentLifecycleStore.IllegalLifecycleTransitionException.class);
+        assertThat(incident.getStatus()).isEqualTo(SimulationIncident.Status.RESOLVED);
+        assertThat(incident.getEnd()).isEqualTo(closedAt);
+    }
+
+    @Test
+    @DisplayName("re-requesting the current state is accepted without a duplicate timeline entry")
+    void idempotentTransitionIsNotRejected() {
+        IncidentLifecycleStore store = new IncidentLifecycleStore();
+        SimulationIncident incident = store.open(candidate(), "test");
+        store.transition(incident.getId(), SimulationIncident.Status.INVESTIGATING, Instant.now());
+        int timelineBefore = incident.getTimeline().size();
+
+        assertThat(store.transition(incident.getId(), SimulationIncident.Status.INVESTIGATING, Instant.now()))
+                .isPresent();
+        assertThat(incident.getTimeline()).hasSize(timelineBefore);
     }
 
     private static SimulationIncident candidate() {

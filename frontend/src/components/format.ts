@@ -56,6 +56,20 @@ export function levelClass(level: string | null): string {
   return (level ?? 'UNKNOWN').toUpperCase();
 }
 
+/**
+ * Stable React key for a log event row.
+ *
+ * `LogEvent.id` is assigned by the dataset layer at ingest time. Events produced by the
+ * deterministic simulation are never ingested, so they all carry the placeholder `id: -1`.
+ * Keying a streamed table on `id` alone therefore collapses every generated row onto the same
+ * key, which React rejects. The simulation's own `requestId` is unique per emitted event, so this
+ * helper falls back to `requestId` + `timestamp` when `id` is not a real dataset identity.
+ */
+export function eventKey(event: { id: number; timestamp: string; requestId?: string | null; message?: string | null }): string {
+  if (event.id >= 0) return `d${event.id}`;
+  return `s${event.requestId ?? ''}-${event.timestamp}-${(event.message ?? '').length}`;
+}
+
 /** Badge colour mapping for log levels. */
 export const LEVEL_COLORS: Record<string, string> = {
   FATAL: 'var(--severity-fatal)',

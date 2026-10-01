@@ -160,7 +160,7 @@ code {
 .brand-tagline {
   margin-top: 0.1rem;
   color: var(--text-faint);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   white-space: nowrap;
 }
 
@@ -175,7 +175,7 @@ code {
 .sidebar-section-label,
 .nav-group-label {
   color: var(--text-faint);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   font-weight: 650;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -252,7 +252,7 @@ code {
 
 .version {
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .app-shell--collapsed .brand-copy,
@@ -398,7 +398,7 @@ code {
   background: var(--bg);
   color: var(--text-faint);
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
 }
 
 .header-status-link {
@@ -506,7 +506,7 @@ code {
 .eyebrow {
   margin-bottom: 0.25rem;
   color: var(--accent);
-  font-size: 0.67rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -598,7 +598,7 @@ code {
 .stat-label {
   overflow: hidden;
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 650;
   letter-spacing: 0.07em;
   text-overflow: ellipsis;
@@ -769,7 +769,7 @@ textarea:focus-visible {
 
 .form-label {
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -787,7 +787,7 @@ textarea:focus-visible {
   border-radius: 999px;
   background: var(--bg-soft);
   color: var(--text-soft);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 650;
   letter-spacing: 0.02em;
   line-height: 1.3;
@@ -829,7 +829,7 @@ textarea:focus-visible {
   padding: 0.2rem 0.48rem;
   border-radius: 4px;
   font-family: var(--mono);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
 }
 
 .status-pill--info {
@@ -849,7 +849,7 @@ textarea:focus-visible {
   padding: 0.17rem 0.4rem;
   border-radius: 4px;
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .table-card .card-body {
@@ -894,7 +894,7 @@ textarea:focus-visible {
   top: 0;
   background: var(--bg-elevated);
   color: var(--text-muted);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -1054,7 +1054,7 @@ textarea:focus-visible {
   padding: 0.15rem 0.35rem;
   border-radius: 3px;
   color: #101416;
-  font-size: 0.62rem;
+  font-size: 0.7rem;
 }
 
 .suggest-value {
@@ -1118,7 +1118,7 @@ textarea:focus-visible {
 .log-item-time {
   margin-left: auto;
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .search-result-service,
@@ -1154,7 +1154,7 @@ textarea:focus-visible {
   margin-top: 0.4rem;
   color: var(--text-muted);
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .log-snippet,
@@ -1391,7 +1391,7 @@ textarea:focus-visible {
 
 .service-rate {
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .service-card-stats {
@@ -1411,7 +1411,7 @@ textarea:focus-visible {
 
 .service-card-foot {
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .dataset-info {
@@ -1508,7 +1508,7 @@ textarea:focus-visible {
 
 .algo-key {
   color: var(--text-muted);
-  font-size: 0.67rem;
+  font-size: 0.7rem;
 }
 
 .algo-chips {
@@ -1521,12 +1521,12 @@ textarea:focus-visible {
   margin-top: 0.6rem;
   color: var(--text-muted);
   font-family: var(--mono);
-  font-size: 0.67rem;
+  font-size: 0.7rem;
 }
 
 .algo-endpoint {
   color: var(--text-muted);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
 }
 
 .lab-intro {
@@ -1547,7 +1547,7 @@ textarea:focus-visible {
 .catalog-category {
   padding: 0.3rem 0.4rem;
   color: var(--text-muted);
-  font-size: 0.67rem;
+  font-size: 0.7rem;
   font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1733,7 +1733,7 @@ textarea:focus-visible {
   margin-bottom: 0.6rem;
   color: var(--text-muted);
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .empty-state {
@@ -1882,7 +1882,7 @@ textarea:focus-visible {
 .heatmap-day {
   color: var(--text-muted);
   font-family: var(--mono);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
 }
 
 .heatmap-cells {
@@ -1903,7 +1903,7 @@ textarea:focus-visible {
   gap: 0.35rem;
   margin-top: 0.55rem;
   color: var(--text-faint);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
 }
 
 .heatmap-legend-scale {
@@ -1974,7 +1974,7 @@ textarea:focus-visible {
 .kbd-hint {
   gap: 0.3rem;
   color: var(--text-faint);
-  font-size: 0.67rem;
+  font-size: 0.7rem;
 }
 
 .step-card {
@@ -2008,7 +2008,7 @@ textarea:focus-visible {
 .step-idx {
   color: var(--text-muted);
   font-family: var(--mono);
-  font-size: 0.67rem;
+  font-size: 0.7rem;
 }
 
 .step-desc {
@@ -2031,7 +2031,7 @@ textarea:focus-visible {
   background: var(--accent-dim);
   color: var(--accent-strong);
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .state-table {
@@ -2133,7 +2133,7 @@ textarea:focus-visible {
   max-width: 5rem;
   overflow: hidden;
   font-family: var(--mono);
-  font-size: 0.58rem;
+  font-size: 0.7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2244,7 +2244,7 @@ textarea:focus-visible {
 .command-heading {
   padding: 0.65rem 0.8rem 0.35rem;
   color: var(--text-faint);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2281,7 +2281,7 @@ textarea:focus-visible {
 .command-result-path {
   color: var(--text-faint);
   font-family: var(--mono);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
 }
 
 .command-empty {
@@ -2298,7 +2298,7 @@ textarea:focus-visible {
   padding: 0.55rem 0.75rem;
   border-top: 1px solid var(--border);
   color: var(--text-faint);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
 }
 
 .command-footer span:nth-of-type(2) {
@@ -2326,7 +2326,7 @@ textarea:focus-visible {
 
 .detail-row span {
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .detail-row strong {
@@ -2398,7 +2398,7 @@ textarea:focus-visible {
 .winner-tag {
   margin-right: 0.35rem;
   color: var(--ok);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
@@ -2704,7 +2704,7 @@ input[type='radio'] {
 
 .brand-tagline {
   color: var(--text-faint);
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   letter-spacing: 0.02em;
 }
 
@@ -2737,7 +2737,7 @@ input[type='radio'] {
 
 .workspace-kicker {
   color: var(--accent);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
@@ -2753,7 +2753,7 @@ input[type='radio'] {
 .workspace-version {
   color: var(--text-faint);
   font-family: var(--mono);
-  font-size: 0.61rem;
+  font-size: 0.7rem;
   letter-spacing: 0.02em;
   text-transform: none;
 }
@@ -2766,7 +2766,7 @@ input[type='radio'] {
 .sidebar-section-label,
 .nav-group-label {
   color: var(--text-faint);
-  font-size: 0.64rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
@@ -2859,7 +2859,7 @@ input[type='radio'] {
   gap: 0.5rem;
   color: var(--text-faint);
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
 }
 
 .app-shell--collapsed .sidebar-brand {
@@ -2962,7 +2962,7 @@ input[type='radio'] {
   min-width: 0;
   gap: 0.35rem;
   color: var(--text-faint);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   letter-spacing: 0.01em;
 }
 
@@ -3020,7 +3020,7 @@ a.header-status-chip:hover {
 
 .status-chip-label {
   color: var(--text-faint);
-  font-size: 0.59rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   line-height: 1.1;
@@ -3031,7 +3031,7 @@ a.header-status-chip:hover {
   max-width: 9rem;
   overflow: hidden;
   color: var(--text-soft);
-  font-size: 0.69rem;
+  font-size: 0.7rem;
   font-weight: 650;
   line-height: 1.2;
   text-overflow: ellipsis;
@@ -3043,7 +3043,7 @@ a.header-status-chip:hover {
   overflow: hidden;
   color: var(--text-faint);
   font-family: var(--mono);
-  font-size: 0.61rem;
+  font-size: 0.7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3127,7 +3127,7 @@ a.header-status-chip:hover {
 
 .eyebrow {
   color: var(--accent);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
 }
 
 .card {
@@ -3175,7 +3175,7 @@ a.header-status-chip:hover {
 
 .stat-label {
   color: var(--text-muted);
-  font-size: 0.64rem;
+  font-size: 0.7rem;
 }
 
 .stat-value {
@@ -3313,7 +3313,7 @@ textarea:focus {
 .state-table thead th {
   background: rgba(22, 30, 35, 0.92);
   color: var(--text-muted);
-  font-size: 0.64rem;
+  font-size: 0.7rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -3421,7 +3421,7 @@ code {
   align-items: center;
   gap: 0.35rem;
   color: var(--accent);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -3470,7 +3470,7 @@ code {
 .command-heading {
   padding: 0.7rem 0.65rem 0.35rem;
   color: var(--text-faint);
-  font-size: 0.63rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3508,7 +3508,7 @@ code {
 .command-result-description {
   overflow: hidden;
   color: var(--text-faint);
-  font-size: 0.67rem;
+  font-size: 0.7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3516,7 +3516,7 @@ code {
 .command-result-path {
   color: var(--text-faint);
   font-family: var(--mono);
-  font-size: 0.64rem;
+  font-size: 0.7rem;
 }
 
 .command-result:hover,
@@ -3543,7 +3543,7 @@ code {
   border-top-color: var(--border);
   background: rgba(9, 13, 16, 0.35);
   color: var(--text-faint);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
 }
 
 .command-footer span:nth-of-type(2) {
@@ -3906,7 +3906,7 @@ code {
 .command-pipeline-story small {
   overflow: hidden;
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3971,7 +3971,7 @@ code {
   background: rgba(9, 13, 16, 0.78);
   color: var(--text-muted);
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
 }
 
 .topology-svg {
@@ -4072,7 +4072,7 @@ code {
 .topology-list-heading {
   margin-bottom: 0.35rem;
   color: var(--text-muted);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -4119,7 +4119,7 @@ code {
 .topology-service-button span:last-child {
   color: var(--text-muted);
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
 }
 
 .topology-service-button:hover,
@@ -4139,7 +4139,7 @@ code {
 .topology-accessible-list li span {
   color: var(--text-faint);
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
 }
 
 .topology-selection-summary {
@@ -4173,7 +4173,7 @@ code {
 .replay-context-status span:last-child {
   margin-left: auto;
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
 }
 
 .replay-inline-error,
@@ -4211,7 +4211,7 @@ code {
 
 .investigation-pattern span {
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
 }
 
@@ -4227,7 +4227,7 @@ code {
   padding: 0.16rem 0.45rem;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
-  font-size: 0.66rem;
+  font-size: 0.7rem;
   font-weight: 650;
 }
 
