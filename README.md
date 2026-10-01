@@ -4,6 +4,50 @@ LogInsight Analyzer is a full-stack, in-memory log investigation workspace. It c
 
 > Academic/portfolio software. The Docker artifacts are a single-node deployment shape, not a claim of production scale or public deployment.
 
+## Screenshots
+
+Captured from the running application at 1440x900 unless noted.
+
+### Overview — command center
+
+![Overview with the KPI strip, telemetry, incident state and service topology](docs/images/overview.png)
+
+### Scenario Lab — controlled failure lab
+
+![Scenario catalogue, selected scenario, run controls and emerging telemetry](docs/images/scenario-lab.png)
+
+### Incident Workbench — investigation desk
+
+![Three-pane workbench: incident navigator, selected incident detail, and context](docs/images/incident-workbench.png)
+
+### Live Monitor — system state to measurement to detection
+
+![Hero telemetry state, KPI row, chart, topology and event stream](docs/images/live-monitor.png)
+
+### Service topology — 2D and 3D
+
+The same backend nodes and edges, rendered two ways. 2D is the accessible SVG map; 3D is a lazy-loaded WebGL scene. Both encode node size from measured event volume and node state from measured health.
+
+| 2D — accessible SVG map | 3D — lazy-loaded WebGL scene |
+|---|---|
+| ![2D service topology](docs/images/topology-2d.png) | ![3D service topology](docs/images/topology-3d.png) |
+
+### Algorithm evidence
+
+![Algorithm catalogue with complexity, exposure and runnable evidence](docs/images/algorithm-evidence.png)
+
+### Dataset analysis
+
+![Analytics over the loaded dataset](docs/images/dataset-analysis.png)
+
+### Responsive layouts
+
+The dashboard is restructured rather than scaled down. Topology, tables and KPI strips collapse to a single column, and hit areas grow on touch viewports.
+
+| Tablet — 1024x768 | Mobile — 390x844 |
+|---|---|
+| ![Overview at 1024x768](docs/images/tablet-overview.png) | ![Overview at 390x844](docs/images/mobile-overview.png) |
+
 ## The problem
 
 During an outage, the log lines needed to explain what happened are spread across services, arrive interleaved and out of order, and are queried far faster than a human can read them. LogInsight applies classical algorithms to that work — multi-pattern and exact-substring search, bounded edit distance, streaming window aggregation, and dependency-graph traversal — and presents the result as an investigation surface where every number on screen can be traced back to the algorithm that produced it.

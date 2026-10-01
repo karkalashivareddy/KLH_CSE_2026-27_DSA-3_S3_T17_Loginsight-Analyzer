@@ -1,0 +1,25 @@
+{
+  "taken": [
+    "overview",
+    "scenario-lab",
+    "incident-workbench",
+    "live-monitor",
+    "algorithm-evidence",
+    "dataset-analysis",
+    "logs",
+    "services",
+    "incidents",
+    "patterns",
+    "dataset-replay",
+    "system",
+    "topology-2d",
+    "topology-3d",
+    "run-summary",
+    "mobile-overview",
+    "mobile-scenario-lab",
+    "mobile-incident-workbench",
+    "tablet-overview"
+  ],
+  "consoleErrors": [],
+  "datasetLoaded": true
+}

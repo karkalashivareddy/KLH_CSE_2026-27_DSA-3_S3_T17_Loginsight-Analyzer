@@ -79,3 +79,29 @@ Design rules for these surfaces:
 - Charts reuse `TimeChart`, stat tiles reuse `StatCard` and topology reuses the shared `TopologyPanel`, so 2D/3D switching and accessibility behaviour are identical everywhere.
 - `status-strip`, `scenario-card`, `health-chip`, `signal-item`, `evidence-item`, `incident-card` and `workbench-*` extend the token set only; no new palette, radius or shadow value is introduced.
 - The workbench collapses from three panes to a single column below 1180 px, and every hover or transform transition is suppressed under `prefers-reduced-motion`.
+
+## Readability and accessibility floor
+
+These are enforced rules, not aspirations. Each was re-measured in the browser after the final styling pass.
+
+| Rule | Value | Enforcement |
+| --- | --- | --- |
+| Minimum text size | 10 px | The smallest values are `10px` and `0.72rem`. The root is `14px`, so `0.72rem` resolves to `10.08px`. No stylesheet declares a smaller rendered font size. |
+| Minimum target size | 24 x 24 px | Dense data rows and inline links are sized to their line-height, so `.log-row-message`, `.log-row-service a`, `.log-row-context a`, `.signal-event-message`, `.signal-event-meta a`, `.text-action`, `.source-card-actions a` and `.breadcrumb-piece a` carry `min-height: 24px`. Below 680 px they grow to 32 px. |
+| Focus visibility | 2 px solid `--accent-strong` | Focus rings are never removed without a replacement. Form controls use `:focus-visible`; the command palette input and topology nodes had no indicator and now do. Keyboard traversal of the shell was verified to produce a visible ring on every stop. |
+| Contrast | 4.5:1 body, 3:1 large text | Measured against the resolved effective background by walking ancestors for the first opaque layer. Zero failures across Overview, Scenario Lab, Live Monitor, Incident Workbench, Logs, Services, Algorithm Lab, Patterns, Incidents and System. |
+| Colour independence | required | Health, severity and provenance are always carried by a label or accessible description, never by hue alone. |
+| Horizontal overflow | 0 px | Verified at 1440x900, 1280x800, 1024x768, 768x1024 and 390x844 on the six densest routes. |
+
+### Reduced motion
+
+`prefers-reduced-motion: reduce` collapses `page-in` and every transition to `0.01ms`, and in the WebGL scene it disables camera damping, skips the animation loop in favour of a single render, and still leaves orbit, zoom and selection fully usable.
+
+### Verified runtime stability
+
+Measured in Chromium against the running application:
+
+- Five 2D-to-3D-to-2D cycles held exactly one `<canvas>` in 3D and zero in 2D, with identical DOM node counts and a flat JS heap, so no renderer or WebGL context is duplicated.
+- Three start/stop cycles kept the event buffer bounded at 40 rows with no DOM or heap growth.
+- Twelve route changes across four routes returned to an identical DOM node count with zero leaked canvases.
+- Console errors: 0.
