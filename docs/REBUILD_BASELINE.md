@@ -2,7 +2,7 @@
 
 > Historical snapshot taken before the later rebuild. It intentionally records the old baseline and is not a current API or UI specification. See [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) for the current branch.
 
-> Counts, route lists and CI steps in this file describe the pre-rebuild tree. The current branch runs `mvn -q verify` (873 tests), `npm ci`, `npm test` (53 tests across 17 files) and `npm run build`; see [13-testing.md](13-testing.md).
+> Counts, route lists and CI steps in this file describe the pre-rebuild tree. The current branch runs `mvn -B verify` (see [13-testing.md](13-testing.md) for the current verified count), `npm ci`, `npm test` and `npm run build`.
 
 Date: 2026-09-23
 Scope: full checkout at `main` (HEAD after fast-forward to `ead2f86`).

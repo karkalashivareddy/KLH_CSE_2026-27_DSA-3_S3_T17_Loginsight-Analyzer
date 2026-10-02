@@ -1,4 +1,4 @@
-# Final Release Readiness — LogInsight Analyzer
+# Final Release Readiness — LogInsight
 
 **Scope of this pass:** release hygiene and repository freeze only. No new feature work, no redesign,
 no refactor of verified code, no API changes. The simulation subsystem, route surface, and design
@@ -13,8 +13,8 @@ pushed by this pass.
 
 | Item | Result |
 | --- | --- |
-| Backend suite | 870 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS |
-| Frontend suite | 17 files, 50 tests, all passed |
+| Backend suite | 877 tests, 0 failures, 0 errors, 0 skipped — BUILD SUCCESS |
+| Frontend suite | 17 files, 55 tests, all passed |
 | TypeScript | `npx tsc --noEmit` clean, exit 0 |
 | Production build | `npm run build` success |
 | Tracked changes | 28 modified or deleted files |
@@ -28,7 +28,7 @@ pushed by this pass.
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Backend full suite | `cd backend; ./mvnw.cmd -o test` | Tests run: 870, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS |
+| Backend full suite | `cd backend; ./mvnw.cmd -o test` | Tests run: 877, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS |
 | Frontend suite | `cd frontend; npm test` | Test Files 17 passed, Tests 50 passed |
 | Frontend typecheck | `cd frontend; npx tsc --noEmit` | exit 0, no diagnostics |
 | Production build | `cd frontend; npm run build` | built successfully (~4.9 s) |
@@ -76,7 +76,7 @@ was touched, and the assertions were not weakened — the same `href` and separa
 run.
 
 **Proof.** With a backend deliberately left running on 8080, the previously failing test passed 3
-consecutive times, and the full suite passed 17 files / 50 tests. It also passes with no backend
+consecutive times, and the full suite passed 17 files / 55 tests. It also passes with no backend
 running. The test is no longer environment-dependent.
 
 **Why this mattered for release.** A suite that passes only when nothing else is running on the

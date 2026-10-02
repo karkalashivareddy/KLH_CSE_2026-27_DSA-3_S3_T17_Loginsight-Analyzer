@@ -1,4 +1,4 @@
-# LogInsight Analyzer — Final Human-Presentation QA Report
+# LogInsight — Final Human-Presentation QA Report
 
 **Date:** 2026-09-27
 **Scope:** Final visual/interaction/presentation pass across all requested routes and viewports.
@@ -17,7 +17,7 @@ A final presentation pass was executed against the running application. **10 con
 - **No leaks across 3 full start/stop cycles** (DOM nodes and JS heap flat).
 - **Contrast:** 0 confirmed low-contrast text on all audited routes; all body/content text ≥ 9px.
 - **Accessibility:** reduced-motion honoured, accessible service list present, mobile touch targets corrected.
-- Backend **870 tests / 0 failures / 0 errors**, frontend **50 tests / 17 files**, TypeScript clean, production build successful.
+- Backend **877 tests / 0 failures / 0 errors**, frontend **55 tests / 17 files**, TypeScript clean, production build successful.
 
 ## 2. Routes audited
 
@@ -253,8 +253,8 @@ Each fix is covered by a test where testable (`TopologyPanel.test.tsx` gained a 
 
 | Check | Command | Result |
 |---|---|---|
-| Backend suite | `./mvnw.cmd -o test` | **870 tests, 0 failures, 0 errors — BUILD SUCCESS** |
-| Frontend suite | `npx vitest run --pool=forks` | **50 tests, 17 files, all passed** |
+| Backend suite | `./mvnw.cmd -o test` | **877 tests, 0 failures, 0 errors — BUILD SUCCESS** |
+| Frontend suite | `npx vitest run --pool=forks` | **55 tests, 17 files, all passed** |
 | TypeScript | `npx tsc --noEmit` | Clean |
 | Production build | `npm run build` | Success (~3.6s) |
 

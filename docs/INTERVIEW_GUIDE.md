@@ -1,6 +1,6 @@
-# LogInsight Analyzer — Interview Guide
+# LogInsight — Interview Guide
 
-Answers below describe the current `rebuild/loginsight-v4` implementation. Historical rebuild counts and browser-QA figures are not current claims.
+Answers below describe the current `main` implementation. Historical rebuild counts and browser-QA figures are not current claims.
 
 ## Product
 

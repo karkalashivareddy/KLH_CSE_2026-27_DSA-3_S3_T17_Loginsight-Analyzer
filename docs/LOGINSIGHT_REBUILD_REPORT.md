@@ -2,7 +2,7 @@
 
 > Historical phase report. The route, count, QA and verification figures below describe the earlier rebuild snapshot. For the current branch, use [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) and [13-testing.md](13-testing.md).
 
-> The 732 backend count and the "no test runner configured in `frontend/`" note are historical. The current branch runs 873 backend tests and 53 frontend tests across 17 files, and `npm test` is a CI gate.
+> The 732 backend count and the "no test runner configured in `frontend/`" note are historical. The current branch runs 877 backend tests and 55 frontend tests across 17 files, and `npm test` is a CI gate.
 
 Date: 2026-09-24. This report records the conversion of the "TextHack — Advanced Algorithms
 Laboratory" site into **LogInsight Analyzer**: a log-intelligence product whose internal search,

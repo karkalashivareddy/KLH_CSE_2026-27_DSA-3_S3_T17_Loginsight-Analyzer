@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-LogInsight Analyzer is now a complete log intelligence and incident investigation platform with two
+LogInsight is now a complete log intelligence and incident investigation platform with two
 deliberately separated data paths:
 
 1. **Dataset analysis** — the loaded log dataset is parsed and queried by the backend, and every
@@ -17,7 +17,7 @@ on the overview, and honest documentation of the determinism model and of every 
 No existing capability was removed: the dataset replay became its own labelled route instead of
 overloading `/live`.
 
-Final verification: **backend 870 tests, 0 failures; frontend 50 tests in 17 files, 0 failures;
+Final verification: **backend 877 tests, 0 failures; frontend 55 tests in 17 files, 0 failures;
 TypeScript clean; production build clean** — plus a real-browser audit driven through the Chrome
 DevTools Protocol against a running backend, described in `FINAL_VISUAL_QA_REPORT.md`.
 
@@ -25,7 +25,7 @@ DevTools Protocol against a running backend, described in `FINAL_VISUAL_QA_REPOR
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Backend full suite | `./mvnw.cmd -o test` | Tests run: 870, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS |
+| Backend full suite | `./mvnw.cmd -o test` | Tests run: 877, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS |
 | Backend compile | `./mvnw.cmd -o -q compile` | clean, no warnings surfaced |
 | Frontend typecheck | `npx tsc --noEmit` | exit 0, no diagnostics |
 | Frontend tests | `npm test` | Test Files 17 passed, Tests 50 passed |
@@ -292,7 +292,7 @@ reads the same navigation table.
 
 ## 19. Testing — Backend
 
-**870 tests, 0 failures.** 41 of them cover the new simulation subsystem:
+**877 tests, 0 failures.** 41 of them cover the new simulation subsystem:
 
 | Test class | Tests | Coverage |
 | --- | --- | --- |
@@ -313,7 +313,7 @@ Defects these tests caught and that were fixed, not suppressed:
 
 ## 20. Testing — Frontend
 
-**50 tests in 17 files, 0 failures** (up from 29 in 11). New coverage:
+**55 tests in 17 files, 0 failures** (up from 29 in 11). New coverage:
 
 | Test file | Tests | What it protects |
 | --- | --- | --- |
@@ -538,6 +538,6 @@ Suggested demo path:
 | Honest academic documentation | Done | `/docs`, `docs/design-system.md`, this report |
 | No algorithms invented outside DSA-3 scope | Verified | `ALGORITHM_ROLES` in `DocsPage`; section 8 uses only Aho-Corasick, KMP and graph traversal |
 | No fabricated metrics, confidences or root causes | Verified | evidence schema; blast-radius copy; absence of any confidence field |
-| Tests and build green | Verified | 870 backend, 50 frontend, tsc clean, build clean |
+| Tests and build green | Verified | 877 backend, 55 frontend, tsc clean, build clean |
 | Real-browser UI audit (geometry, console, live stream) | Verified across 8 routes at 2 viewports | Section 21 |
 | Screenshot / pixel review | Not performed (assistant cannot read images) | Section 21; human check recommended |

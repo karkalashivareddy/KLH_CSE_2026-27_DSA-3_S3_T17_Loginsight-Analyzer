@@ -1,22 +1,22 @@
-# LogInsight Analyzer — Current Implementation Audit
+# LogInsight — Current Implementation Audit
 
-Audit snapshot: 2026-09-25, branch `rebuild/loginsight-v4`.
+Audit snapshot: refreshed against `main`.
 
 This is the canonical description of the checked-out implementation. It is based on the current source, tests, frontend routes, build files and API controllers. Historical rebuild reports remain in `docs/` as snapshots; they are not the current contract.
 
-**Terminology.** These documents use **Demo Replay** for the bounded dataset replay served by `GET /api/live`. The route is `/live` and the sidebar entry and page heading are labelled `Live Replay`; that label is navigation naming, not a real-time claim. The backend reports `source: "demo-replay"` and the UI shows a "not real-time" disclosure.
+**Terminology.** These documents use **Dataset Replay** for the bounded replay of the loaded dataset served by `GET /api/live`. Its frontend route is `/replay`, its sidebar entry and page heading read `Dataset Replay`, the backend reports `source: "demo-replay"` and the UI shows a "not real-time" disclosure. The `/live` route is a different surface: **Live Monitor**, the deterministic server-generated simulation served by `GET /api/simulation/stream` and reporting `source: "live-simulation"`. The two are never interchangeable.
 
 ## Verification snapshot
 
 | Gate | Command | Result |
 |---|---|---|
-| Backend | `cd backend; .\mvnw.cmd -o verify` | 873 tests, 0 failures, 0 errors; Spring Boot jar packaged |
-| Frontend tests | `cd frontend; npm test` | 53 tests across 17 files passed |
+| Backend | `cd backend; .\mvnw.cmd -o verify` | 877 tests, 0 failures, 0 errors; Spring Boot jar packaged |
+| Frontend tests | `cd frontend; npm test` | 55 tests across 17 files passed |
 | Frontend build | `cd frontend; npm run build` | TypeScript and Vite production build passed |
 | Compose syntax | `docker compose config --quiet` | Passed |
 | Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable in the audit environment |
 
-CI mirrors these gates: the backend job runs `mvn -q verify` and the frontend job runs `npm ci`, `npm test` and `npm run build`.
+CI mirrors these gates: the backend job runs `mvn -B verify` and the frontend job runs `npm ci`, `npm test` and `npm run build`.
 
 The Docker daemon limitation still holds at this audit: `docker info` cannot reach `dockerDesktopLinuxEngine`, so image builds and container smoke tests remain unexecuted and unclaimed.
 
@@ -28,7 +28,7 @@ The Maven build targets Java 21 and uses Spring Boot 3.5.16. The frontend uses R
 Browser
   └─ React SPA
        ├─ REST: /api/*
-       └─ SSE: /api/live and /api/runs/{id}/events
+       └─ SSE: /api/simulation/stream, /api/live and /api/runs/{id}/events
               │
               ├─ Vite dev proxy: /api -> localhost:8080
               └─ Nginx deployment proxy: /api/ -> backend:8080
@@ -54,7 +54,10 @@ The current `frontend/src/App.tsx` routes are:
 - `/search`: product search and fuzzy suggestion.
 - `/analytics` and `/analyze`: analytics.
 - `/patterns`, `/incidents`, `/incidents/:id`, `/investigate/:id`, `/services` and `/services/:id`. `/investigate/:id` is an alias of the same `IncidentsPage` detail view and is registered in the command palette under `/incidents`.
-- `/live`: Demo Replay (bounded dataset replay; the navigation and page label still reads `Live Replay`).
+- `/scenario-lab` and `/simulation`: Scenario Lab (scenario catalogue, run controls, generated telemetry).
+- `/live`: Live Monitor (the deterministic generated simulation streamed by `GET /api/simulation/stream`).
+- `/replay`: Dataset Replay (bounded replay of the loaded dataset streamed by `GET /api/live`).
+- `/incidents/workbench`: Incident Workbench (simulation incident investigation, lifecycle, blast radius, algorithm evidence).
 - `/datasets`, `/data` and `/ingestion`.
 - `/analysis`, `/lab`, `/algorithm-lab`, `/algorithms`, `/analysis/algorithms`, `/benchmarks` and `/analysis/benchmarks`.
 - `/runs` and `/runs/:id`.
@@ -80,7 +83,7 @@ Full detail is in [COMMAND_CENTER.md](COMMAND_CENTER.md). The audited facts:
 
 ## Frontend test inventory
 
-`npm test` runs Vitest over 53 tests in 17 files:
+`npm test` runs Vitest over 55 tests in 17 files:
 
 | File | Tests | Covers |
 |---|---:|---|
@@ -178,7 +181,7 @@ This is a source-level audit supported by the focused Layout and TopologyPanel c
 
 - One process, one in-memory dataset, no persistence or durable upload storage.
 - No authentication, authorization, multi-tenancy or production secret management.
-- No external collector, true live ingestion, WebSocket transport or telemetry retention. Demo Replay is a finite, oldest-first replay of the loaded dataset; the route and the `Live Replay` navigation label are UI naming only.
+- No external collector, true live ingestion, WebSocket transport or telemetry retention. Dataset Replay is a finite, oldest-first replay of the loaded dataset and is labelled `not real-time` wherever it appears; Live Monitor is server-generated simulation, not captured telemetry.
 - Service topology edges are observed `requestId` adjacency over the loaded logs, not verified infrastructure. Edge absence is not proof of an absent call, and the graph is not scoped to the Command Center's selected window.
 - Service health bands are fixed error-rate thresholds, not a health model, SLI evaluation or learned score. `eventsPerMinute` is a normalized window rate, not a measured inter-arrival rate.
 - `OverviewDto.systemStatus` is a hardcoded compatibility string. Consumers needing runtime status must use `/api/health/status`.

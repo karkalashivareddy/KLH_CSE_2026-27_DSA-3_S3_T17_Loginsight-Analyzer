@@ -1,4 +1,4 @@
-# LogInsight Analyzer — Portfolio Summary
+# LogInsight — Portfolio Summary
 
 Current branch: `main`. These summaries use only the current implementation and the latest audit results.
 
@@ -32,5 +32,5 @@ Current branch: `main`. These summaries use only the current implementation and 
 | Demo versus replay | `DemoDatasetGenerator`, `LiveStreamService`, `demo-replay` labels |
 | Academic `java.util` scope guard | `EngineScopeGuardTest` frozen manifest over `dsa/**` |
 | Deployment | `backend/Dockerfile`, `frontend/Dockerfile`, `frontend/nginx.conf`, `docker-compose.yml` |
-| Verification | `.\mvnw.cmd -o verify` (873), `npm test` (53 across 17 files), `npm run build`, `docker compose config`; CI runs all three |
+| Verification | `.\mvnw.cmd -o verify` (877), `npm test` (53 across 17 files), `npm run build`, `docker compose config`; CI runs all three |
 | Docker limitation | daemon still unreachable in the audit environment; image/runtime smoke not claimed |

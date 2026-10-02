@@ -2,7 +2,7 @@
 
 ## Current gates
 
-The current checkout was verified on 2026-09-25 with:
+The current checkout was verified locally with:
 
 ```powershell
 cd backend
@@ -15,30 +15,39 @@ npm run build
 
 Results:
 
-- Backend: **873 tests, 0 failures, 0 errors**; Spring Boot jar packaged successfully.
-- Frontend: **53 tests across 17 files passed** with Vitest.
+- Backend: **877 tests, 0 failures, 0 errors**; Spring Boot jar packaged successfully.
+- Frontend: **55 tests across 17 files passed** with Vitest.
 - Frontend build: TypeScript compilation and Vite production build passed.
 - JaCoCo: report generated under `backend/target/site/jacoco/`; no numeric coverage threshold is configured in the POM.
 - Compose syntax: `docker compose config --quiet` passed.
 - Container image build/runtime: not executed because the Docker daemon was unavailable. That limitation still holds; `docker info` cannot reach the Docker engine in this environment, so no image build or container smoke test has been run on this branch.
 
-The checked-in CI workflow runs `mvn -q verify` in the backend job, then `npm ci`, `npm test` and `npm run build` in the frontend job, so the Vitest suite is a merge gate rather than a local-only check. The frontend job pins Node 22 because Vitest 5 declares `engines: ^22.12.0 || ^24.0.0 || >=26.0.0`; the frontend still has no configured browser-test or lint command.
+The checked-in CI workflow runs `mvn -B verify` in the backend job, then `npm ci`, `npm test` and `npm run build` in the frontend job, so the Vitest suite is a merge gate rather than a local-only check. The frontend job pins Node 22 because Vitest 5 declares `engines: ^22.12.0 || ^24.0.0 || >=26.0.0`; the frontend still has no configured browser-test or lint command.
+
+**Local verification and GitHub Actions verification are separate records.** The local commands above run the same goals the workflow runs, but the authoritative gate for a merge is the workflow run on `main`, which reports its own per-job counts. A local green run is not a substitute for a green workflow run, and this document records only what was actually executed.
 
 ## Frontend test inventory
 
 | File | Tests | Coverage |
 |---|---:|---|
 | `src/api/client.test.ts` | 3 | SSE frame parsing — chunked frames, comment lines, event ids, multiline `data:`, and flushing an unterminated final frame. Plus multipart boundary handling. |
-| `src/components/format.test.ts` | 3 | Duration formatting: values treated as milliseconds, values treated as nanoseconds, and fractional millisecond output. |
-| `src/components/Layout.test.tsx` | 2 | Skip link plus grouped navigation entries with active route state. |
-| `src/components/TopologyPanel.test.tsx` | 4 | Accessible service/edge lists; data-driven node radius and edge particle count; controlled depth mode, renderer note and reset view; reduced-motion static particles. |
-| `src/pages/AlgorithmsPage.test.tsx` | 3 | Algorithm Lab posts the catalogue `defaultInput` to the runs API and navigates to the created session; the run input is displayed; a rejected run surfaces an error instead of navigating. |
+| `src/components/format.test.ts` | 8 | Duration, nanosecond and fractional-millisecond formatting, plus the `eventKey` identity contract: dataset ids, deterministic generated ids, provenance namespacing, key stability and the malformed-payload fallback. |
+| `src/components/Layout.test.tsx` | 4 | Skip link, grouped navigation entries with active route state, the `Ctrl+K` command palette with focus restoration, and no false "no dataset" claim while status is still loading. |
+| `src/components/TopologyPanel.test.tsx` | 7 | Accessible service and edge lists; data-driven node radius and edge particle count; declared-graph wording; observed-vs-window count separation; incident-window marking without causal claims; dense-graph legibility; on-demand WebGL load with 2D fallback; reduced-motion static particles. |
+| `src/pages/AlgorithmsPage.test.tsx` | 3 | Algorithm Lab posts the catalogue `defaultInput` to the runs API and navigates to the created session; no run control without an input; a rejected run surfaces an error instead of navigating. |
 | `src/pages/AnalyticsPage.test.tsx` | 1 | Analytics tablist semantics: `aria-selected`, `aria-controls`, and a tabpanel whose `id`/`aria-labelledby` follow the selected tab. |
-| `src/pages/LivePage.test.tsx` | 2 | Demo replay disclosure and shared `Replay state:` label; start and "Replay again" both open one SSE stream with the selected batch size and pace. |
-| `src/pages/OverviewPage.test.tsx` | 3 | Command Center selected-window metrics, dataset coverage, detected-investigation state and the explicit no-dataset state. |
+| `src/pages/IncidentWorkbench.test.tsx` | 4 | The detected incident with its measured evidence and blast radius; lifecycle advance follows the server contract rather than a local guess; automatic advancement offered only while open; session-scoped lifecycle stated in the copy. |
+| `src/pages/LivePage.test.tsx` | 2 | Dataset replay disclosure and shared `Replay state:` label; start and "Replay again" both open one SSE stream with the selected batch size and pace. |
+| `src/pages/LogsPage.test.tsx` | 1 | The explorer applies backend severity syntax and opens the selected event drawer. |
+| `src/pages/MonitorPage.test.tsx` | 4 | The stream is labelled generated rather than captured telemetry; measured frame metrics and server evidence are rendered; a deterministic run starts on demand; operators are pointed at Scenario Lab instead of being offered a traffic control that does not exist. |
+| `src/pages/OverviewPage.test.tsx` | 3 | Command Center selected-window metrics, dataset coverage, detected-investigation state, the bounded-dataset-replay disclosure with working pattern log links, and the explicit source-selection state. |
 | `src/pages/PatternsPage.test.tsx` | 1 | Pattern evidence links search the returned example message, not the wildcard template. |
-| `src/replay/ReplayContext.test.tsx` | 2 | One shared SSE subscription, replay state transitions, progress counters and stop/restart behavior. |
-| **Total** | **24** | |
+| `src/pages/ScenarioLabPage.test.tsx` | 4 | Scenario catalogue with the persisted selection; a real server frame previewed before any stream starts; a deterministic run opened through the client and its session reported; the two data sources kept separate in the copy. |
+| `src/pages/ServicesPage.test.tsx` | 2 | Generated fleet health renders with no dataset loaded, and stays separate from the dataset service map. |
+| `src/replay/ReplayContext.test.tsx` | 2 | One shared SSE subscription, replay state transitions, progress counters, and restart/stop behaviour. |
+| `src/telemetry/SimulationBand.test.tsx` | 2 | Measured simulation metrics come from the shared stream, and the open incident is separated from the dataset sections with a workbench link. |
+| `src/telemetry/adapters.test.ts` | 4 | The measured band reads the current tick rather than the lagging rolling window; reports elevated while the current tick is failing; counts `FATAL` as failing to match the server detector rule; and is explicit about having no measurement. |
+| **Total** | **55** | 17 test files. |
 
 These are focused component tests over client helpers, the shell, the topology renderer, the Command Center, Algorithm Lab, analytics tabs, patterns, the Demo Replay screen and the replay provider. They are not browser QA and do not exercise real network, real SSE timing or real backend responses.
 

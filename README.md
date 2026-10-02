@@ -1,30 +1,35 @@
-# LogInsight Analyzer
+# LogInsight
 
-LogInsight Analyzer is a full-stack, in-memory log investigation workspace. It combines a React 18 + TypeScript + Vite shell with a Java 21 Spring Boot REST/SSE API, classical data-structure and algorithm engines, and a backend-owned dataset lifecycle.
+**Real-Time Log Intelligence & Incident Investigation Platform**
+
+LogInsight is a full-stack, in-memory log investigation workspace. It combines a React 18 + TypeScript + Vite shell with a Java 21 Spring Boot REST/SSE API, classical data-structure and algorithm engines, and a backend-owned dataset lifecycle.
+
+The platform ingests a dataset or runs a deterministic generated scenario, streams it live, detects elevated-error windows with measured evidence, and presents an investigation surface where every number on screen can be traced back to the algorithm that produced it.
 
 > Academic/portfolio software. The Docker artifacts are a single-node deployment shape, not a claim of production scale or public deployment.
 
 ## Screenshots
 
-Captured from the running application at 1440x900 unless noted.
+Captured from the running application at 1440x900 unless noted. The Overview and Scenario Lab shots
+are taken during a live deterministic run, so the figures on screen are measured, not staged.
 
-### Overview — command center
+### 1. Overview — command center
 
-![Overview with the KPI strip, telemetry, incident state and service topology](docs/images/overview.png)
+![Overview during a live run: stream state, KPI strip, detected signals and algorithm evidence](docs/images/overview.png)
 
-### Scenario Lab — controlled failure lab
+### 2. Scenario Lab — controlled failure lab
 
 ![Scenario catalogue, selected scenario, run controls and emerging telemetry](docs/images/scenario-lab.png)
 
-### Incident Workbench — investigation desk
-
-![Three-pane workbench: incident navigator, selected incident detail, and context](docs/images/incident-workbench.png)
-
-### Live Monitor — system state to measurement to detection
+### 3. Live Monitor — system state to measurement to detection
 
 ![Hero telemetry state, KPI row, chart, topology and event stream](docs/images/live-monitor.png)
 
-### Service topology — 2D and 3D
+### 4. Incident Workbench — investigation desk
+
+![Three-zone workbench: incident navigator, measured detail with lifecycle and evidence, and blast radius with topology](docs/images/incident-workbench.png)
+
+### 5. Service topology — 2D and 3D
 
 The same backend nodes and edges, rendered two ways. 2D is the accessible SVG map; 3D is a lazy-loaded WebGL scene. Both encode node size from measured event volume and node state from measured health.
 
@@ -32,11 +37,11 @@ The same backend nodes and edges, rendered two ways. 2D is the accessible SVG ma
 |---|---|
 | ![2D service topology](docs/images/topology-2d.png) | ![3D service topology](docs/images/topology-3d.png) |
 
-### Algorithm evidence
+### 6. Algorithm evidence
 
 ![Algorithm catalogue with complexity, exposure and runnable evidence](docs/images/algorithm-evidence.png)
 
-### Dataset analysis
+### 7. Dataset analysis
 
 ![Analytics over the loaded dataset](docs/images/dataset-analysis.png)
 
@@ -199,7 +204,7 @@ The implementation inventory and exposure rules are in [docs/ALGORITHMS.md](docs
 
 ## Verification
 
-The current checkout was verified with:
+**Local verification** — the current checkout was verified with:
 
 ```powershell
 cd backend
@@ -210,16 +215,16 @@ npm test
 npm run build
 ```
 
-Results from this audit: backend `873` tests, `0` failures, `0` errors; frontend Vitest `53` tests across `17` files passed; frontend TypeScript and Vite production build passed. The backend produces JaCoCo reports under `backend/target/site/jacoco/`. The frontend test files are `api/client.test.ts`, `components/format.test.ts`, `components/Layout.test.tsx`, `components/TopologyPanel.test.tsx`, `pages/AlgorithmsPage.test.tsx`, `pages/AnalyticsPage.test.tsx`, `pages/IncidentWorkbench.test.tsx`, `pages/LivePage.test.tsx`, `pages/LogsPage.test.tsx`, `pages/MonitorPage.test.tsx`, `pages/OverviewPage.test.tsx`, `pages/PatternsPage.test.tsx`, `pages/ScenarioLabPage.test.tsx`, `pages/ServicesPage.test.tsx`, `replay/ReplayContext.test.tsx`, `telemetry/adapters.test.ts` and `telemetry/SimulationBand.test.tsx`. The frontend has no configured lint script and no committed browser-test harness; the screenshots and accessibility/responsive evidence in `final-submission/` come from a Playwright pass run locally against the built app, and `docs/13-testing.md` records exactly what is and is not automated.
+Results: backend **877 tests**, 0 failures, 0 errors, 0 skipped, jar packaged; frontend Vitest **55 tests** across **17 files** passed; TypeScript and the Vite production build clean. The backend produces JaCoCo reports under `backend/target/site/jacoco/`. The 17 frontend test files are `api/client.test.ts`, `components/format.test.ts`, `components/Layout.test.tsx`, `components/TopologyPanel.test.tsx`, `pages/AlgorithmsPage.test.tsx`, `pages/AnalyticsPage.test.tsx`, `pages/IncidentWorkbench.test.tsx`, `pages/LivePage.test.tsx`, `pages/LogsPage.test.tsx`, `pages/MonitorPage.test.tsx`, `pages/OverviewPage.test.tsx`, `pages/PatternsPage.test.tsx`, `pages/ScenarioLabPage.test.tsx`, `pages/ServicesPage.test.tsx`, `replay/ReplayContext.test.tsx`, `telemetry/adapters.test.ts` and `telemetry/SimulationBand.test.tsx`; `docs/13-testing.md` tables every one of them.
 
-Continuous integration runs the same three commands: `mvn -q verify` in the backend job, then `npm ci`, `npm test` and `npm run build` in the frontend job. Earlier phase reports in `docs/` record smaller backend counts from their own snapshot; those figures are historical and are not the current gate.
+**GitHub Actions verification** — `.github/workflows/ci.yml` runs on every push to `main`: the backend job runs `mvn -B verify`, and the frontend job runs `npm ci`, `npm test` and `npm run build`. The authoritative merge gate is the workflow run, not the local run above; the two are recorded separately. Earlier phase reports in `docs/` carry smaller backend counts from their own snapshots and are labelled as such.
 
 ## Limitations
 
 - In-memory, single-current-dataset state; no database, durable uploads, or restart persistence.
 - Run history is bounded at 64 and trace steps at 400; both reset with the process.
 - No authentication, authorization, multi-tenant isolation, or production observability-scale ingestion.
-- The Demo Replay screen is a labelled dataset replay, not a live collector.
+- The Dataset Replay screen is a labelled bounded replay of the loaded dataset, not a live collector. The Live Monitor screen is server-generated simulation, not captured telemetry.
 - Service topology edges are observed request-trail adjacency inferred from `requestId` co-occurrence. They are not verified infrastructure, and a missing edge is not proof of a missing call.
 - Service health bands are error-rate thresholds (healthy <5%, watch 5–<10%, elevated ≥10%, unavailable when the rate is not finite). They are heuristics, not a health model.
 - Benchmarks are host- and input-dependent measurements, not universal performance claims.
@@ -238,5 +243,6 @@ Continuous integration runs the same three commands: `mvn -q verify` in the back
 - [Algorithms](docs/ALGORITHMS.md)
 - [UI and accessibility](docs/UI-UX.md)
 - [Testing](docs/13-testing.md)
+- [Demo guide](docs/DEMO_GUIDE.md)
 - [Project walkthrough](docs/PROJECT_WALKTHROUGH.md)
 - [Historical reports](docs/REBUILD_BASELINE.md), retained as snapshots rather than current specifications

@@ -1,4 +1,4 @@
-# LogInsight Analyzer 0.1.0 — rebuild/loginsight-v4
+# LogInsight 0.1.0 — Real-Time Log Intelligence & Incident Investigation Platform
 
 ## Status
 
@@ -26,13 +26,13 @@ This is the current single-node release shape for the academic/portfolio project
 
 | Check | Result |
 |---|---|
-| `cd backend; .\mvnw.cmd -o verify` | 873 tests, 0 failures, 0 errors |
-| `cd frontend; npm test` | 53 tests across 17 files passed |
+| `cd backend; .\mvnw.cmd -o verify` | 877 tests, 0 failures, 0 errors |
+| `cd frontend; npm test` | 55 tests across 17 files passed |
 | `cd frontend; npm run build` | Clean TypeScript/Vite production build |
 | `docker compose config --quiet` | Passed |
 | Docker image build/runtime | Not run: Docker daemon unavailable in the audit environment |
 
-All three build commands are also the CI gates: the backend job runs `mvn -q verify`, and the frontend job runs `npm ci`, `npm test` and `npm run build`.
+All three build commands are also the CI gates: the backend job runs `mvn -B verify`, and the frontend job runs `npm ci`, `npm test` and `npm run build`.
 
 The Docker daemon limitation still holds on this branch; `docker info` cannot reach the engine, so no image build or container smoke test has been run.
 

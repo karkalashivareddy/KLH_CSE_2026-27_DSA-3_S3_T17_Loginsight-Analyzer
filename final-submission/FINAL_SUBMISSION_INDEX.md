@@ -1,6 +1,6 @@
-# LogInsight Analyzer — Final Submission Index
+# LogInsight — Final Submission Index
 
-**Project:** LogInsight Analyzer — Real-Time Log Intelligence and Incident Investigation Platform
+**Project:** LogInsight — Real-Time Log Intelligence and Incident Investigation Platform
 **Course:** Data Structures and Algorithms-3 (25CS2103E) · 2026-2027, Odd Semester
 **Repository:** https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer
 **Branch:** `main` · **Commit:** `c31cf8b`
@@ -30,8 +30,8 @@ These are the figures produced by the last continuous-integration run on `main`,
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Backend | `cd backend; .\mvnw.cmd -B verify` | **873 tests**, 0 failures, 0 errors, 0 skipped; jar packaged; JaCoCo produced |
-| Frontend tests | `cd frontend; npm test` | **53 tests** across **17 files**, 0 failures |
+| Backend | `cd backend; .\mvnw.cmd -B verify` | **877 tests**, 0 failures, 0 errors, 0 skipped; jar packaged; JaCoCo produced |
+| Frontend tests | `cd frontend; npm test` | **55 tests** across **17 files**, 0 failures |
 | TypeScript | `cd frontend; npx tsc --noEmit` | Clean |
 | Production build | `cd frontend; npm run build` | Succeeds; 3D scene code-split into a lazy 576 kB chunk |
 
