@@ -96,8 +96,8 @@ export default function MonitorPage() {
                 : 'Start a deterministic run to watch the incident form.'}
           </h2>
           <p>
-            {scenario ? `${scenario.title} Ã‚Â· seed ${seed ?? scenario.seed}` : 'No scenario selected.'}
-            {sessionId ? ` Ã‚Â· session ${sessionId.slice(0, 8)}` : ''}
+            {scenario ? `${scenario.title} · seed ${seed ?? scenario.seed}` : 'No scenario selected.'}
+            {sessionId ? ` · session ${sessionId.slice(0, 8)}` : ''}
           </p>
         </div>
         <div className="live-hero-status" role="status" aria-live="polite">
@@ -140,7 +140,7 @@ export default function MonitorPage() {
               disabled={isRunning}
             >
               {[0.25, 0.5, 1, 2, 4, 8].map((option) => (
-                <option key={option} value={option}>{option}Ãƒâ€”</option>
+                <option key={option} value={option}>{option}×</option>
               ))}
             </select>
           </label>
@@ -158,7 +158,7 @@ export default function MonitorPage() {
               <StatCard label="Error rate" value={`${frame.errorRate.toFixed(2)}%`} sub={`baseline p95 ${Math.round(frame.baselineP95LatencyMs)} ms`} color="var(--danger)" />
               <StatCard label="p95 latency" value={`${formatNumber(Math.round(frame.p95LatencyMs))} ms`} sub={`avg ${formatNumber(Math.round(frame.averageLatencyMs))} ms`} color="var(--warn)" />
               <StatCard label="Throughput" value={`${formatNumber(frame.eventsPerSecond)}/s`} sub={`${formatNumber(frame.totalEvents)} events in window`} color="var(--accent)" />
-              <StatCard label="Fleet health" value={`${totals.healthy}/${health.length}`} sub={`${totals.degraded} degraded Ã‚Â· ${totals.critical} critical`} color="var(--info)" />
+              <StatCard label="Fleet health" value={`${totals.healthy}/${health.length}`} sub={`${totals.degraded} degraded · ${totals.critical} critical`} color="var(--info)" />
             </div>
           </div>
 
@@ -228,7 +228,7 @@ export default function MonitorPage() {
                         <span className="evidence-item-runtime">{formatMicros(item.runtimeMicros)}</span>
                       </span>
                       <span className="evidence-item-purpose">{item.purpose}</span>
-                      <span className="evidence-item-input">{formatNumber(item.inputSize)} {item.inputUnit} Ã¢â€ â€™ {item.result}</span>
+                      <span className="evidence-item-input">{formatNumber(item.inputSize)} {item.inputUnit} → {item.result}</span>
                     </li>
                   ))}
                 </ul>
@@ -240,7 +240,7 @@ export default function MonitorPage() {
             <Card
               title="Event stream"
               sub={`${events.length} generated events held in the client buffer.`}
-              actions={<Badge tone="neutral">generated Ã‚Â· not captured</Badge>}
+              actions={<Badge tone="neutral">generated · not captured</Badge>}
             >
               {events.length === 0 ? (
                 <EmptyState icon={false}>No events received yet.</EmptyState>
@@ -293,9 +293,9 @@ export default function MonitorPage() {
                     <span className="incident-card-title">{incident.title}</span>
                     <StatusPill status={incident.status} />
                   </header>
-                  <p className="incident-card-signal">{incident.signal} Ã‚Â· {incident.method}</p>
+                  <p className="incident-card-signal">{incident.signal} · {incident.method}</p>
                   <p className="incident-card-signal">
-                    {incident.errorRate.toFixed(2)}% errors Ã‚Â· {Math.round(incident.p95LatencyMs)} ms p95 Ã‚Â·{' '}
+                    {incident.errorRate.toFixed(2)}% errors · {Math.round(incident.p95LatencyMs)} ms p95 ·{' '}
                     {formatNumber(incident.eventCount)} events
                   </p>
                 </article>

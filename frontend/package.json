@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "LogInsight Analyzer - React dashboard (DSA-3 algorithmic log intelligence)",
+  "description": "LogInsight - Real-Time Log Intelligence & Incident Investigation Platform (DSA-3 algorithmic log intelligence)",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

@@ -85,6 +85,7 @@ export interface TelemetryContextValue {
   reseed: () => void;
   advanceIncident: (incidentId: number) => Promise<void>;
   setIncidentStatus: (incidentId: number, status: SimulationLifecycleStatus) => Promise<void>;
+  refreshIncidents: () => Promise<void>;
   reloadScenarios: () => void;
 }
 
@@ -130,6 +131,7 @@ const emptyTelemetryContext: TelemetryContextValue = {
   reseed: () => undefined,
   advanceIncident: async () => undefined,
   setIncidentStatus: async () => undefined,
+  refreshIncidents: async () => undefined,
   reloadScenarios: () => undefined
 };
 
@@ -221,6 +223,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
   const [samples, setSamples] = useState<TelemetrySample[]>([]);
   const [events, setEvents] = useState<LogEvent[]>([]);
   const [overrideIncident, setOverrideIncident] = useState<SimulationIncident | null>(null);
+  const [sessionIncidents, setSessionIncidents] = useState<SimulationIncident[]>([]);
 
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const generationRef = useRef(0);
@@ -286,6 +289,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
     setSamples([]);
     setEvents([]);
     setOverrideIncident(null);
+    setSessionIncidents([]);
   }, []);
 
   /**
@@ -457,10 +461,30 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
   );
 
   const incidents = useMemo(() => {
-    const fromFrame = frame?.incidents ?? [];
-    if (!overrideIncident) return fromFrame;
-    return fromFrame.map((incident) => (incident.id === overrideIncident.id ? overrideIncident : incident));
-  }, [frame?.incidents, overrideIncident]);
+    const merged = new Map((frame?.incidents ?? []).map((incident) => [incident.id, incident]));
+    for (const incident of sessionIncidents) merged.set(incident.id, incident);
+    if (overrideIncident) merged.set(overrideIncident.id, overrideIncident);
+    return [...merged.values()];
+  }, [frame?.incidents, overrideIncident, sessionIncidents]);
+
+  /**
+   * Re-reads a session's incidents from the server.
+   *
+   * <p>The stream carries the incident list in every frame, but an investigation surface must not
+   * depend on a frame happening to be in memory: after a reload, after the stream ended, or when the
+   * run was started from another screen, the frame is empty even though the server still holds the
+   * session's incidents. `GET /api/simulation/incidents` exists for exactly that case, so the
+   * workbench calls this on mount and gets the real lifecycle back instead of an empty state.</p>
+   */
+  const refreshIncidents = useCallback(async () => {
+    if (!sessionId) return;
+    const fetched = await api.simulationIncidents(sessionId);
+    setSessionIncidents((previous) => {
+      const merged = new Map(previous.map((incident) => [incident.id, incident]));
+      for (const incident of fetched) merged.set(incident.id, incident);
+      return [...merged.values()];
+    });
+  }, [sessionId]);
 
   const openIncidentCount = useMemo(
     () => incidents.filter((incident) => incident.open).length,
@@ -502,7 +526,8 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
       reseed,
       advanceIncident,
       setIncidentStatus,
-      reloadScenarios
+      reloadScenarios,
+      refreshIncidents
     }),
     [
       advanceIncident,
@@ -514,6 +539,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
       isRunning,
       loadPreview,
       openIncidentCount,
+      refreshIncidents,
       reloadScenarios,
       restart,
       reseed,

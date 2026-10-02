@@ -146,11 +146,11 @@ export default function ScenarioLabPage() {
         </div>
         <div className="status-strip-item">
           <span className="status-strip-label">Session</span>
-          <span className="mono">{sessionId ? sessionId.slice(0, 8) : 'Ã¢â‚¬â€'}</span>
+          <span className="mono">{sessionId ? sessionId.slice(0, 8) : '—'}</span>
         </div>
         <div className="status-strip-item">
           <span className="status-strip-label">Seed</span>
-          <span className="mono">{seed ?? scenario?.seed ?? 'Ã¢â‚¬â€'}</span>
+          <span className="mono">{seed ?? scenario?.seed ?? '—'}</span>
         </div>
         <div className="status-strip-item">
           <span className="status-strip-label">Tick</span>
@@ -260,7 +260,7 @@ export default function ScenarioLabPage() {
               >
                 {SPEED_OPTIONS.map((option) => (
                   <option key={option} value={option}>
-                    {option}Ãƒâ€”
+                    {option}×
                   </option>
                 ))}
               </select>
@@ -271,7 +271,7 @@ export default function ScenarioLabPage() {
           </div>
           {completeEvent ? (
             <p className="inline-note">
-              Run complete Ã‚Â· {formatNumber(completeEvent.frames)} frames emitted over {formatNumber(completeEvent.ticks)} ticks (
+              Run complete · {formatNumber(completeEvent.frames)} frames emitted over {formatNumber(completeEvent.ticks)} ticks (
               {completeEvent.reason === 'maxFrames' ? 'frame budget reached' : 'scenario finished'}).
             </p>
           ) : null}
@@ -339,7 +339,7 @@ export default function ScenarioLabPage() {
                     <Badge tone={healthTone(service.state)}>{service.state}</Badge>
                   </span>
                   <span className="health-chip-metrics">
-                    {service.errorRate.toFixed(1)}% Ã‚Â· {Math.round(service.averageLatencyMs)} ms Ã‚Â· load {Math.round(service.load)}
+                    {service.errorRate.toFixed(1)}% · {Math.round(service.averageLatencyMs)} ms · load {Math.round(service.load)}
                   </span>
                   {service.inBlastRadius ? <span className="health-chip-flag">blast radius</span> : null}
                 </button>
@@ -369,7 +369,7 @@ export default function ScenarioLabPage() {
 
             <Card
               title="Algorithm evidence"
-              sub={`${algorithms.length} distinct algorithms executed on this frame Ã‚Â· ${formatMicros(measuredRuntime)} total measured`}
+              sub={`${algorithms.length} distinct algorithms executed on this frame · ${formatMicros(measuredRuntime)} total measured`}
             >
               {evidence.length === 0 ? (
                 <EmptyState icon={false}>No algorithm evidence for this frame yet.</EmptyState>
@@ -384,7 +384,7 @@ export default function ScenarioLabPage() {
                       </span>
                       <span className="evidence-item-purpose">{item.purpose}</span>
                       <span className="evidence-item-input">
-                        {formatNumber(item.inputSize)} {item.inputUnit} Ã¢â€ â€™ {item.result}
+                        {formatNumber(item.inputSize)} {item.inputUnit} → {item.result}
                       </span>
                       <span className="evidence-item-complexity">{item.complexity}</span>
                     </li>
@@ -475,7 +475,7 @@ export default function ScenarioLabPage() {
             )}
           </Card>
 
-          <Card title="Streamed events" sub={`${events.length} generated events retained in the client buffer.`} actions={<Badge tone="neutral">generated Ã‚Â· not captured</Badge>}>
+          <Card title="Streamed events" sub={`${events.length} generated events retained in the client buffer.`} actions={<Badge tone="neutral">generated · not captured</Badge>}>
             {events.length === 0 ? (
               <EmptyState icon={false}>No events received yet.</EmptyState>
             ) : (
@@ -526,19 +526,19 @@ export default function ScenarioLabPage() {
           </div>
           <div>
             <dt>Delivery speed</dt>
-            <dd>{simulationStatus ? `${simulationStatus.speed.min}x Ã¢â‚¬â€œ ${simulationStatus.speed.max}x` : 'Ã¢â‚¬â€'}</dd>
+            <dd>{simulationStatus ? `${simulationStatus.speed.min}x — ${simulationStatus.speed.max}x` : '—'}</dd>
           </div>
           <div>
             <dt>Logical tick</dt>
-            <dd>{startEvent ? `${startEvent.tickMillis} ms` : 'Ã¢â‚¬â€'}</dd>
+            <dd>{startEvent ? `${startEvent.tickMillis} ms` : '—'}</dd>
           </div>
           <div>
             <dt>Determinism</dt>
-            <dd>{simulationStatus?.determinism ?? 'Ã¢â‚¬â€'}</dd>
+            <dd>{simulationStatus?.determinism ?? '—'}</dd>
           </div>
           <div>
             <dt>Persistence</dt>
-            <dd>{simulationStatus?.persistence ?? 'Ã¢â‚¬â€'}</dd>
+            <dd>{simulationStatus?.persistence ?? '—'}</dd>
           </div>
         </div>
         <p className="inline-note">
@@ -560,7 +560,7 @@ export default function ScenarioLabPage() {
       </ol>
       {startEvent ? (
         <p className="inline-note">
-          {startEvent.label} Ã‚Â· session {startEvent.sessionId.slice(0, 8)} Ã‚Â· seed {startEvent.seed} Ã‚Â· {startEvent.paceMs} ms per frame at{' '}
+          {startEvent.label} · session {startEvent.sessionId.slice(0, 8)} · seed {startEvent.seed} · {startEvent.paceMs} ms per frame at{' '}
           {startEvent.speed}x.
         </p>
       ) : null}

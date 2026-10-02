@@ -37,11 +37,20 @@ export default function IncidentWorkbenchPage() {
     stop,
     advanceIncident,
     setIncidentStatus,
+    refreshIncidents,
     error
   } = useTelemetry();
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [mode, setMode] = useState<TopologyMode>('2d');
+
+  // The stream carries incidents in every frame, but this surface must survive a reload, a finished
+  // stream or a run started on another screen. Ask the server what the session actually holds.
+  useEffect(() => {
+    if (!sessionId) return;
+    void refreshIncidents().catch(() => undefined);
+  }, [refreshIncidents, sessionId]);
+
 
   const ordered = useMemo(() => sortIncidents(incidents), [incidents]);
   const selected = useMemo(
@@ -107,11 +116,11 @@ export default function IncidentWorkbenchPage() {
           </div>
           <div className="status-strip-item">
             <span className="status-strip-label">Scenario</span>
-            <span>{scenario?.title ?? 'Ã¢â‚¬â€'}</span>
+            <span>{scenario?.title ?? '—'}</span>
           </div>
           <div className="status-strip-item">
             <span className="status-strip-label">Session</span>
-            <span className="mono">{sessionId ? sessionId.slice(0, 8) : 'Ã¢â‚¬â€'}</span>
+            <span className="mono">{sessionId ? sessionId.slice(0, 8) : '—'}</span>
           </div>
           <div className="status-strip-item">
             <span className="status-strip-label">Open</span>
@@ -168,7 +177,7 @@ export default function IncidentWorkbenchPage() {
               <>
                 <Card
                   title={selected.title}
-                  sub={`${selected.method} Ã‚Â· ${selected.signal}`}
+                  sub={`${selected.method} · ${selected.signal}`}
                   actions={<StatusPill status={selected.status} />}
                 >
                   <div className="definition-grid">
@@ -238,7 +247,7 @@ export default function IncidentWorkbenchPage() {
                           </span>
                           <span className="evidence-item-purpose">{item.purpose}</span>
                           <span className="evidence-item-input">
-                            {formatNumber(item.inputSize)} {item.inputUnit} Ã¢â€ â€™ {item.result}
+                            {formatNumber(item.inputSize)} {item.inputUnit} → {item.result}
                           </span>
                           <span className="evidence-item-complexity">{item.complexity}</span>
                         </li>
@@ -268,7 +277,7 @@ export default function IncidentWorkbenchPage() {
                           </Badge>
                         </span>
                         <span className="health-chip-metrics">
-                          {service.errorRate.toFixed(1)}% Ã‚Â· {Math.round(service.averageLatencyMs)} ms
+                          {service.errorRate.toFixed(1)}% · {Math.round(service.averageLatencyMs)} ms
                         </span>
                       </div>
                     ))}

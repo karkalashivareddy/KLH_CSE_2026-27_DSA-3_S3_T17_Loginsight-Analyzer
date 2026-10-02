@@ -156,6 +156,10 @@ code { border-color: var(--border); background: rgba(0,0,0,.2); }
 .header-leading { gap: 18px; }
 .breadcrumbs { gap: 8px; color: #b7c6c8; font-size: 12px; }
 .breadcrumbs a { color: #82989c; }
+/* Truncate rather than let a long crumb escape its box and collide with the next one. */
+.breadcrumbs .breadcrumb-piece { max-width: 20rem; overflow: hidden; }
+.breadcrumbs .breadcrumb-piece > span,
+.breadcrumbs .breadcrumb-piece > a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .header-status-group { gap: 7px; }
 .header-status-chip { display: inline-flex; min-height: 32px; gap: 7px; padding: 0 9px; border: 1px solid rgba(255,255,255,.065); border-radius: 999px; background: rgba(255,255,255,.022); color: #a7b7b9; }
 .header-status-chip > svg { width: 13px; height: 13px; color: #8aa1a4; }

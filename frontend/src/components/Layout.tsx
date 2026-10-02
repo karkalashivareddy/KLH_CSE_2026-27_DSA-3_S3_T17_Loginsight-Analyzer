@@ -55,7 +55,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: '/', label: 'Overview', icon: LayoutDashboard, end: true, aliases: ['/command-center'], keywords: 'command center dashboard home' },
       { to: '/scenario-lab', label: 'Scenario Lab', icon: FlaskConical, aliases: ['/simulation'], keywords: 'deterministic simulation scenario incident seed generator' },
       { to: '/live', label: 'Live Monitor', icon: Radio, keywords: 'live monitor stream simulation generated traffic' },
-      { to: '/replay', label: 'Dataset Replay', icon: History, aliases: ['/live-replay'], keywords: 'dataset replay sse bounded demo' },
+      { to: '/replay', label: 'Dataset Replay', icon: History, keywords: 'dataset replay sse bounded demo' },
       { to: '/logs', label: 'Logs', icon: FileSearch, keywords: 'events explorer query' },
       { to: '/incidents', label: 'Detector Windows', icon: ShieldAlert, aliases: ['/investigate'], keywords: 'detector windows dataset incidents' },
       { to: '/incidents/workbench', label: 'Incident Workbench', icon: Waypoints, keywords: 'simulation incident investigation lifecycle blast radius evidence' },
@@ -106,6 +106,9 @@ function currentEntry(pathname: string): NavEntry | undefined {
 }
 
 function NavGroupView({ group, pathname }: { group: NavGroup; pathname: string }) {
+  // Only the most specific matching entry is active, so `/incidents/workbench` highlights the
+  // Workbench rather than both it and Detector Windows.
+  const activeEntry = currentEntry(pathname);
   const active = group.entries.some((entry) => entryIsActive(entry, pathname));
   const [expanded, setExpanded] = useState(active);
   const open = group.label !== 'More' || expanded || active;
@@ -116,7 +119,7 @@ function NavGroupView({ group, pathname }: { group: NavGroup; pathname: string }
         : <div className="nav-group-label"><span>{group.label}</span><span className="nav-group-rule" aria-hidden="true" /></div>}
       {open && group.entries.map((entry) => {
         const Icon = entry.icon;
-        const entryActive = entryIsActive(entry, pathname);
+        const entryActive = activeEntry?.to === entry.to;
         return (
           <NavLink
             key={entry.to}
@@ -145,6 +148,14 @@ function readableSegment(value: string): string {
   }
 }
 
+/**
+ * Route segments that are real sub-routes rather than a record identifier.
+ *
+ * `/incidents/workbench` is the Workbench; the trailing segment is not an incident id and must never
+ * be rendered as one.
+ */
+const RESERVED_SUBROUTES = new Set(['workbench', 'status', 'algorithms', 'benchmarks']);
+
 function pageCrumbs(pathname: string): Array<{ label: string; to?: string }> {
   const path = normalizePath(pathname);
   const entry = currentEntry(path);
@@ -155,15 +166,16 @@ function pageCrumbs(pathname: string): Array<{ label: string; to?: string }> {
 
   const segments = path.split('/').filter(Boolean);
   if (segments.length > 1 && ['logs', 'incidents', 'services', 'runs'].includes(segments[0])) {
-    const detail = segments[segments.length - 1];
+    const detail = readableSegment(segments[segments.length - 1]);
     const base = segments[0];
+    if (RESERVED_SUBROUTES.has(detail.toLowerCase())) return crumbs;
     const label = base === 'logs'
-      ? `Event #${readableSegment(detail)}`
+      ? `Event #${detail}`
       : base === 'incidents'
-        ? `Incident #${readableSegment(detail)}`
+        ? `Incident #${detail}`
         : base === 'services'
-          ? `Service ${readableSegment(detail)}`
-          : `Run ${readableSegment(detail)}`;
+          ? `Service ${detail}`
+          : `Run ${detail}`;
     crumbs.push({ label });
   }
 
