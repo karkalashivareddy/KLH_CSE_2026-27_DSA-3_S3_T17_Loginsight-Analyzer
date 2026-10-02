@@ -32,5 +32,5 @@ Current branch: `main`. These summaries use only the current implementation and 
 | Demo versus replay | `DemoDatasetGenerator`, `LiveStreamService`, `demo-replay` labels |
 | Academic `java.util` scope guard | `EngineScopeGuardTest` frozen manifest over `dsa/**` |
 | Deployment | `backend/Dockerfile`, `frontend/Dockerfile`, `frontend/nginx.conf`, `docker-compose.yml` |
-| Verification | `.\mvnw.cmd -o verify` (877), `npm test` (53 across 17 files), `npm run build`, `docker compose config`; CI runs all three |
+| Verification | `.\mvnw.cmd -o verify` (877 backend tests), `npm test` (55 tests across 17 files), `npm run build`, `docker compose config`. CI runs `mvn -B verify` plus `npm ci`, `npm test` and `npm run build` |
 | Docker limitation | daemon still unreachable in the audit environment; image/runtime smoke not claimed |

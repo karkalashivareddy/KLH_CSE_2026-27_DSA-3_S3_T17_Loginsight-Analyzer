@@ -59,21 +59,26 @@ no dataset
           ↓
      one current Dataset
           ├─ product analysis and search
-          ├─ bounded SSE replay (Demo Replay)
+          ├─ bounded SSE replay (Dataset Replay)
           └─ DELETE /api/datasets → no dataset
 ```
 
 A backend restart clears the active dataset. There is no persistence, multi-dataset selection, retention policy or external collector.
 
-## Demo Replay is not live ingestion
+## Dataset Replay is not live ingestion
 
-These documents call this surface **Demo Replay**. Its route is `/live`, and the sidebar entry and page heading are currently labelled `Live Replay`; that label is a navigation name, not a real-time claim.
+This surface is **Dataset Replay**. Its route is `/replay`, its sidebar entry and page heading are
+labelled `Dataset Replay`, and the backend reports `source: "demo-replay"`. The page's own disclosure
+copy still reads "Demo replay of the loaded dataset", which is the one place the older wording survives.
+
+It must not be confused with **Live Monitor** (`/live`), which is a separate server-generated
+deterministic simulation reported as `source: "live-simulation"`.
 
 `GET /api/live` replays the loaded events oldest-first in batches. The backend snapshots the current event list at subscribe time and sorts it by `(timestamp, id)`, so ordering does not depend on ingestion order. `GET /api/live/status` reports the source and label. The stream emits `start`, `batch` and `replay-complete` events, and the UI retains the `demo-replay` / “not real-time” disclosure. Replay controls accept `batchSize=1..200` and `intervalMs=100..60000`; invalid values return the normal 400 envelope.
 
 The replay is bounded by the current event list and is finite: it ends with `replay-complete` rather than continuing to wait, and the emitter has a 6-hour ceiling. It does not connect to Kafka, a log collector, a WebSocket, or a remote telemetry source. Even when the current dataset came from an upload, the application still exposes this as a replay surface rather than claiming live ingestion.
 
-On the client, `frontend/src/replay/ReplayContext.tsx` owns the single SSE subscription. `ReplayProvider` is mounted once in `App.tsx` above the router, so the Command Center replay card and the Demo Replay page read the same state, progress and 300-event buffer rather than each opening a connection. The provider resets the stream when a dataset change is broadcast.
+On the client, `frontend/src/replay/ReplayContext.tsx` owns the single SSE subscription. `ReplayProvider` is mounted once in `App.tsx` above the router, so the Command Center replay card and the Dataset Replay page read the same state, progress and 300-event buffer rather than each opening a connection. The provider resets the stream when a dataset change is broadcast.
 
 ## Related documentation
 

@@ -54,11 +54,12 @@ course-scope guard, not a claim that `dsa` contains no `java.util` type.
 
 The SSE stream at `GET /api/live` replays the in-memory event list oldest-first
 and then ends. Rather than presenting it as live capture, the backend reports
-`source: "demo-replay"`, the UI prints a "not real-time" disclosure, and the
-documentation calls the surface Demo Replay even though the route and the
-navigation label still read `/live` and `Live Replay`. One `ReplayProvider`
-subscription backs both the Command Center card and the replay page, so the two
-screens cannot disagree about progress.
+`source: "demo-replay"` and the UI prints a "not real-time" disclosure. The
+dataset replay now has its own route, `/replay`, with the navigation and page
+label `Dataset Replay`; `/live` was repointed at the Live Monitor generated
+simulation so the two are never conflated. One `ReplayProvider` subscription
+backs both the Command Center card and the replay page, so the two screens
+cannot disagree about progress.
 
 ## Keep window-scoped metrics and dataset-wide topology separate
 

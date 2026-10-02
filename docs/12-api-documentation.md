@@ -1,5 +1,11 @@
 # 12 — Algorithm API Supplement
 
+> **Superseded — kept for phase traceability.** This phase-numbered file records the
+> algorithm-laboratory surface as it stood during the rebuild. The authoritative contract, including
+> the deterministic simulation endpoints and the 409 lifecycle mapping, is
+> [API.md](API.md). Where the two differ, API.md is correct. The current DSA exposure and classification
+> lives in [ALGORITHMS.md](ALGORITHMS.md) and [DSA_PRODUCT_MAPPING.md](DSA_PRODUCT_MAPPING.md).
+
 The product-facing REST and error contract is maintained in [API.md](API.md). This file records the algorithm-laboratory surface retained alongside the rebuilt product shell.
 
 ## Result envelope

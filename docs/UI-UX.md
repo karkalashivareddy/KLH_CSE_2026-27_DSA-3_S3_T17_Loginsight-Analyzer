@@ -6,19 +6,22 @@ The current frontend is a React 18 + TypeScript + Vite single-page application w
 
 `Layout.tsx` prioritizes four daily-use groups—Operate, Investigate, Analyze and Algorithm Lab. Supporting Algorithms, Benchmarks, Run Sessions, Datasets, Ingestion, System and Documentation links live under a collapsible More section. The header shows backend, active dataset and dataset-replay status from the API; it does not surface algorithm counts as global runtime metrics.
 
-Aliases such as `/command-center`, `/analyze`, `/data`, `/lab`, `/algorithm-lab`, `/algorithms` and `/benchmarks` are routed to the same current pages. `/live` remains explicitly labelled as dataset replay; it is not presented as an external production stream.
+Aliases such as `/command-center`, `/analyze`, `/data`, `/lab`, `/algorithm-lab`, `/analysis/algorithms` and `/analysis/benchmarks` are routed to the same current pages. `/live` is the Live Monitor generated simulation, not a dataset replay and not an external production stream; the dataset replay lives at `/replay`.
 
 ## Current screens
 
-- Command Center (`/`, `/command-center`): selected-window metric strip, observed request-trail topology, detected investigation, pipeline story, shared replay context, timeline, service health matrix, pattern intelligence, HTTP class breakdown, window context and recent critical events. Range buttons switch the selected window.
-- Logs: indexed explorer, paging, filters and event detail.
-- Search: structured query fields, KMP free text, typeahead and Levenshtein suggestion.
-- Analytics: timeline, severity, heatmap, HTTP and hosts.
-- Patterns and Incidents: heuristic results with examples/evidence. Incident evidence is reachable at `/incidents`, `/incidents/:id` and the alias `/investigate/:id`.
-- Services: fleet rollups and per-service activity.
-- Demo Replay (`/live`): bounded SSE replay with source disclosure and progress, reading the same `ReplayProvider` state as the Command Center. The navigation entry and page heading are labelled `Live Replay`.
+- Overview (`/`, `/command-center`): selected-window metric strip, live simulation band, observed request-trail topology, detected investigation, pipeline story, shared replay context, timeline, service health matrix, pattern intelligence, HTTP class breakdown, window context and recent critical events. Range buttons switch the selected window.
+- Logs (`/logs`, `/logs/:id`): indexed explorer, paging, filters and event detail.
+- Algorithmic Search (`/search`): structured query fields, KMP free text, typeahead and Levenshtein suggestion.
+- Analytics (`/analytics`): timeline, severity, heatmap, HTTP and hosts.
+- Patterns (`/patterns`) and Detector Windows (`/incidents`, `/incidents/:id`, alias `/investigate/:id`): heuristic results with examples and evidence.
+- Scenario Lab (`/scenario-lab`, alias `/simulation`): scenario catalogue, run controls, and the generated telemetry frames and algorithm evidence.
+- Live Monitor (`/live`): the generated simulation stream — stream state, scenario, seed, speed, tick, phase, measured error rate, throughput, p95, signals, evidence, incident, event stream and declared topology.
+- Incident Workbench (`/incidents/workbench`): the investigation surface — incident navigator, measured detail with lifecycle, timeline and algorithm evidence, and context with origin, affected services, blast radius, topology and health.
+- Services (`/services`): fleet rollups and per-service activity.
+- Dataset Replay (`/replay`): bounded SSE replay of the loaded dataset with source disclosure and progress, reading the same `ReplayProvider` state as the Command Center. Its page disclosure copy still reads "Demo replay of the loaded dataset".
 - Datasets/Ingestion: demo, bundled sample and upload workflows.
-- Analysis: catalogue, measured benchmark and recorded run sessions.
+- Algorithm Lab (`/analysis`, alias `/lab` and `/algorithm-lab`): catalogue, measured benchmark and recorded run sessions.
 - System/Docs: runtime registry and concise API guidance.
 
 Charts are hand-rolled SVG components. The dependency graph has a default SVG view and an on-demand Three.js/WebGL view. There is no WebSocket client and no browser-generated telemetry source.
@@ -75,6 +78,6 @@ This is a source-level review supported by focused Layout and TopologyPanel comp
 
 Empty dataset states link to Datasets/Ingestion rather than showing invented metrics. The Command Center labels its own scope: the metric strip names the rate "Selected-window observed rate", the timeline and window-context cards print `windowStart`–`windowEnd` and the `scope` string, and a separate card shows coverage against the unfiltered `datasetEvents` total. The header status pill reads the real `/api/health/status` value rather than the hardcoded `OverviewDto.systemStatus` compatibility string.
 
-Patterns are labelled heuristic and not ML. Incidents expose their method and evidence, and the Command Center investigation card states that the returned window and pattern do not establish why the events occurred. Service health bands are printed with their thresholds in the matrix subtitle rather than presented as a verdict. Topology edges are labelled observed request-trail adjacency, not verified infrastructure, in the card subtitle, the screen-reader description and the accessible edge list, and the graph is built over the whole loaded dataset rather than the selected window. Benchmarks state that they are measured on the current machine. Demo Replay is explicitly a bounded, oldest-first dataset replay; the `Live Replay` navigation and page label is a navigation label rather than a claim of real-time capture.
+Patterns are labelled heuristic and not ML. Incidents expose their method and evidence, and the Command Center investigation card states that the returned window and pattern do not establish why the events occurred. Service health bands are printed with their thresholds in the matrix subtitle rather than presented as a verdict. Topology edges are labelled observed request-trail adjacency on dataset surfaces and declared dependencies on simulation surfaces, never as verified infrastructure. Benchmarks state that they are measured on the current machine. Dataset Replay is explicitly a bounded, oldest-first dataset replay and carries a "not real-time" disclosure; the Live Monitor simulation surfaces state that their traffic is generated rather than captured, and the Incident Workbench describes blast radius as a traversal over declared dependencies rather than a confirmed root cause.
 
 See [API.md](API.md), [COMMAND_CENTER.md](COMMAND_CENTER.md), [DATASET.md](DATASET.md) and [13-testing.md](13-testing.md) for the runtime contract and verification limits.

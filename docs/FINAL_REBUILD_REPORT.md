@@ -1,6 +1,6 @@
 # FINAL REBUILD REPORT — TextHack: Advanced Algorithms Laboratory
 
-> Historical phase report. It is retained for traceability and is not the current product contract. For the audited `rebuild/loginsight-v4` implementation, see [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md), [API.md](API.md) and [README.md](../README.md).
+> Historical phase report. It is retained for traceability and is not the current product contract. For the current `main` implementation, see [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md), [API.md](API.md) and [README.md](../README.md).
 
 > **Stale figures in this file.** Every test count, route name and Lab behaviour below is a snapshot of the phase this report describes. The current suite is **877 backend tests** plus **55 frontend tests across 17 files**, and the current UI surface is documented in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md). Do not read the counts, `/labs/:module/:key` deep links, `TextHackPage`, `LabPage`, `CourseMapPage` or the run-launching Lab described here as current.
 
@@ -84,7 +84,7 @@ see [13-testing.md](13-testing.md).
 ## How to verify (current branch)
 
 ```powershell
-.\mvnw.cmd -q verify          # backend: 877 tests, 0 failures
+.\mvnw.cmd -o verify          # backend: 877 tests, 0 failures
 cd frontend ; npm test        # frontend: 55 tests across 17 files
 cd frontend ; npm run build   # tsc + vite production build
 .\mvnw.cmd -q spring-boot:run # then open http://localhost:8080 (or `npm run dev` in frontend/)

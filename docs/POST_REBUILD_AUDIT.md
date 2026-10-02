@@ -3,6 +3,10 @@
 > Historical audit of an earlier phase. It is not the current verification record. See [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) for the current branch and [DEPLOYMENT.md](DEPLOYMENT.md) for the container validation boundary.
 
 > **Stale figures in this file.** Test counts, surefire file counts and bundle sizes below are the snapshot this pass measured. The current branch runs **877 backend tests** and **55 frontend tests across 17 files**; see [13-testing.md](13-testing.md). The `LabPage`, `TextHackPage` and `/labs/:module/:key` surfaces named here no longer exist; the current Algorithm Lab is a catalogue browser, documented in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md).
+>
+> **Note on `docs/screenshots/`.** That directory is referenced throughout this historical audit as the
+> location of eight stale PNGs which the pass removed. It does not exist today. Current screenshots
+> live in [`images/`](../docs/images/) and are listed in `capture-report.json`.
 
 > Scope: verify the complete TextHack rebuild (phases 1-13, commits `f014e5a` → `cf76458` → `b711d94`)
 > on branch `main`, then fix anything that fails the bar, and re-verify. No feature creep - this pass

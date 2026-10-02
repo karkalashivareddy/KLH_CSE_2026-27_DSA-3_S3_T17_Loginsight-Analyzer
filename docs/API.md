@@ -149,9 +149,55 @@ All analytics require the current dataset and are derived from it.
 
 This is an observed request-trail adjacency inferred from log co-occurrence over the **full current dataset** (it is not scoped to the `/api/overview` window). It is not verified infrastructure topology, and a missing edge is not proof that a call did not happen.
 
-### Demo Replay
+### Deterministic simulation
 
-`GET /api/live?batchSize=50&intervalMs=700` returns `text/event-stream`. This is the Demo Replay surface; the route and the navigation label both still read `live` / `Live Replay`, and the payload identifies itself as `source: "demo-replay"`.
+Nine endpoints back the generated simulation. Its traffic is **server-generated from a scenario
+definition and a seed**, not captured telemetry, and every payload says so. This surface is entirely
+separate from the dataset replay below.
+
+| Method | Endpoint | Behavior |
+|---|---|---|
+| GET | `/api/scenarios` | Scenario catalogue with title, description, origin service, affected services, expected signal, expected incident, seed and severity |
+| GET | `/api/scenarios/{id}` | One scenario; unknown id is 400 |
+| GET | `/api/scenarios/default` | The default scenario (`checkout-5xx-cascade`) |
+| GET | `/api/simulation/status` | Capability, scenario count, active sessions, speed/interval/frame bounds and the determinism and persistence statements |
+| GET | `/api/simulation/stream` | `text/event-stream`; emits `start`, then `frame` per tick, then `complete` |
+| GET | `/api/simulation/sample` | Runs a scenario forward without a stream and returns the final frame |
+| GET | `/api/simulation/incidents?sessionId=` | Incidents recorded for a session, so an investigation continues after the stream ends |
+| POST | `/api/simulation/incidents/{id}/transition` | Operator lifecycle action; `409` if the target state is illegal from the current one |
+| GET | `/api/simulation/lifecycle` | Accepted lifecycle states and the legal forward transitions |
+
+**`/api/simulation/stream` parameters.** `scenario` (blank selects the default), `seed` (blank uses the
+scenario's declared seed), `speed` `0.25..8`, `intervalMs` `40..5000`, `maxFrames` `1..20000`.
+Out-of-range values return the normal 400 envelope.
+
+- `speed` changes **delivery pace only**. It never changes which events are produced, so slowing the
+  stream cannot change the outcome of a run.
+- A frame is a pure function of `(scenario, seed, tick)`: the same triple reproduces the same events,
+  signals, health rollup and incidents. Every event in a frame carries a deterministic unique id.
+- `start` carries `sessionId`, `source`, scenario id and title, seed, tick millis, speed, pace,
+  `expectedSignal`, `expectedIncident` and a generated-traffic label.
+- `frame` carries the analytical snapshot: phase, intensity, cumulative and per-window error rate,
+  throughput, average and p95 latency against the measured baseline, matched signatures, that tick's
+  events, measured signals, algorithm evidence with runtimes, service health with blast-radius
+  membership, the current incident list, and the **declared** topology.
+- `complete` carries frames, ticks and a reason (`scenario-window-completed` or `frame-cap-reached`).
+
+**Lifecycle.** `DETECTED → INVESTIGATING → ACKNEGATED → MITIGATED → RESOLVED`. Transitions are
+forward-only; an illegal target is rejected with `409`. The body accepts `sessionId` with either
+`status` (an explicit target) or `advance: true` (one legal step). Lifecycle state is session-scoped
+and in-memory: it is never written to the dataset and does not survive a backend restart.
+
+`GET /api/simulation/sample?frames=` is bounded `1..1000` and pins its origin to the epoch and its
+identity range to the preview range, so two runs of the same `(scenario, seed, frames)` triple return
+identical frames.
+
+### Dataset Replay
+
+`GET /api/live?batchSize=50&intervalMs=700` returns `text/event-stream`. This replays the **loaded
+dataset**; the payload identifies itself as `source: "demo-replay"`. The frontend route is `/replay`
+with the navigation label `Dataset Replay`; the page's own disclosure copy still reads "Demo replay of
+the loaded dataset". `/live` is a different surface — the Live Monitor generated simulation above.
 
 - `batchSize` must be 1–200.
 - `intervalMs` must be 100–60,000 ms. Values outside either range return the normal 400 envelope.

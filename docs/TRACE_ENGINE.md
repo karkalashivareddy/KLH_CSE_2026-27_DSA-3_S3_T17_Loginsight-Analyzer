@@ -48,4 +48,4 @@ Trace search endpoints require an explicit text haystack. Flow and graph payload
 
 `TracePlayer` treats the recorded step list as immutable state. It supports play/pause, previous/next, first/last, a range control, speed selection, an operation ledger and keyboard shortcuts. Shortcuts are ignored in editable controls. `prefers-reduced-motion` is respected by the stylesheet.
 
-The Nginx deployment disables proxy buffering for `/api/` so the two SSE surfaces are not hidden behind a buffered production proxy. There is no WebSocket implementation in the current trace system.
+The Nginx deployment disables proxy buffering for `/api/` so the three SSE surfaces are not hidden behind a buffered production proxy. There is no WebSocket implementation in the current trace system.

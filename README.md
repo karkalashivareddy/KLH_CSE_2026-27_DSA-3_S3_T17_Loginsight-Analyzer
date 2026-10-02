@@ -67,24 +67,64 @@ Ingest a dataset or start a generated scenario, observe service health and live 
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, TypeScript, Vite, React Router, hand-rolled SVG charts, Three.js (lazy-loaded 3D only), Vitest + Testing Library |
-| Backend | Java 21, Spring Boot (REST + Server-Sent Events), in-memory dataset store, JUnit 5 |
+| Frontend | React 18, TypeScript, Vite, React Router, hand-rolled SVG charts, Three.js (lazy-loaded WebGL topology), Vitest + Testing Library |
+| Backend | Java 21, Spring Boot 3.5 (REST + Server-Sent Events), in-memory dataset store, JUnit 5 |
 | Data | Backend-held in-memory dataset, JSONL and pipe-delimited uploads, bundled `sample-data/` samples |
-| Transport | HTTP REST plus SSE. No WebSocket, no external log collector, no cloud integration |
+| Transport | HTTP REST plus three SSE endpoints. No WebSocket, no external log collector, no cloud integration |
 
+## Architecture
 
-## Current implementation
+Three layers, one rule: **all telemetry is server-owned.** The backend generates the scenario, derives
+every metric, runs the algorithms and writes the incident lifecycle. The browser renders what it is
+sent, which is why the numbers on screen can be traced back to a specific algorithm invocation.
 
-The current shell is a dark observability workspace with:
+```text
+Browser (React SPA)
+  ├─ REST  /api/*          dataset, analytics, catalogue, simulation control
+  └─ SSE   /api/simulation/stream   generated simulation frames
+         /api/live                  dataset replay
+         /api/runs/{id}/events      recorded trace replay
+                    │
+        Vite dev proxy / Nginx      (proxy buffering disabled for SSE)
+                    │
+Spring Boot single process
+  ├─ DatasetService · LogIndex         one current in-memory dataset
+  ├─ LiveSimulationService             session, RollingWindow, SimulationDetector,
+  │                                    IncidentLifecycleStore   -> frames + incidents
+  ├─ Analytics · IncidentDetector      dataset-derived windows
+  └─ QueryDispatcher · 35 engines      catalogue, traces, RunStore
+```
 
-- Command Center, Log Explorer, Search, Analytics, Patterns, Detector Windows, Incident Workbench, Services, Datasets and Ingestion views.
-- A **Scenario Lab** that configures and runs the deterministic microservice simulation, a **Live Monitor** that streams it, and a separate **Dataset Replay** for the loaded dataset.
-- An Algorithm Lab with the backend catalogue, measured search benchmark and recorded run sessions.
-- System and Documentation views.
-- A responsive navigation shell with a command palette, breadcrumbs, runtime status and dataset status.
-- Hand-rolled SVG charts and an interactive service topology with a 2D SVG default plus an on-demand Three.js/WebGL 3D view, an accessible service-list and 2D fallback. Topology provenance is labelled: dataset pages show `OBSERVED DEPENDENCIES`, simulation pages show `DECLARED DEPENDENCIES`. There is no WebSocket client.
+Three SSE surfaces, and they are not interchangeable: the **generated simulation**, the **dataset
+replay**, and **recorded trace replay**. Simulation sessions are bounded by a fixed thread pool with a
+bounded queue, retained for a bounded number of sessions for operator actions, and released on shutdown.
 
-The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](docs/IMPLEMENTATION_AUDIT.md). The API contract is [docs/API.md](docs/API.md). See [docs/COMMAND_CENTER.md](docs/COMMAND_CENTER.md) for the Command Center semantics.
+Full detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
+[docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md).
+
+## Features
+
+The shell is a dark observability workspace. Sidebar labels below are the real navigation names.
+
+- **Overview** — selected-window operations view over the loaded dataset, with a live simulation band.
+- **Scenario Lab** — scenario catalogue and run controls for the deterministic generated simulation.
+- **Live Monitor** — the generated simulation stream: stream state, scenario, seed, speed, tick, phase, error rate, throughput, p95, signals, evidence, incident, event stream and topology.
+- **Dataset Replay** — a bounded, labelled replay of the loaded dataset. Not a live collector.
+- **Logs** — indexed explorer with filters, paging and event detail.
+- **Algorithmic Search** — structured fields, KMP free text, typeahead and the Levenshtein suggestion.
+- **Analytics** — timeline, severity, heatmap, HTTP and hosts.
+- **Patterns** and **Detector Windows** — heuristic results with evidence; dataset incident detail is reachable at `/incidents`, `/incidents/:id` and the alias `/investigate/:id`.
+- **Incident Workbench** — the investigation surface: incident navigator, measured detail with lifecycle, timeline and algorithm evidence, and context with origin, affected services, blast radius, topology and health.
+- **Services** — fleet rollups and per-service activity.
+- **Algorithm Lab**, **Algorithms**, **Benchmarks**, **Run Sessions** — the catalogue, the measured matcher benchmark and recorded traces.
+- **Datasets**, **Ingestion**, **System**, **Documentation**.
+
+Hand-rolled SVG charts, and a service topology with a 2D SVG default plus an on-demand Three.js/WebGL
+view, an accessible service list and a 2D fallback. Topology provenance is labelled: dataset surfaces
+show `OBSERVED DEPENDENCIES`, simulation surfaces show `DECLARED DEPENDENCIES`. There is no WebSocket
+client.
+
+The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](docs/IMPLEMENTATION_AUDIT.md). The API contract is [docs/API.md](docs/API.md). See [docs/COMMAND_CENTER.md](docs/COMMAND_CENTER.md) for the Overview semantics.
 
 ## Command Center
 
@@ -94,13 +134,13 @@ The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](d
 - **Window-scoped counts**: `events`, `errors`, `warnings`, `services`, `hosts`, `severity`, `statusCodes`, `topServices`, `topPatterns`, `recentCritical`, the timeline and the heatmap are all computed over that window only.
 - **`datasetEvents`** is the unfiltered size of the loaded dataset. The UI uses it to show selected-window coverage as a percentage of the whole dataset.
 - **`eventsPerMinute`** is `window events / (range width in minutes)`. It is a rate over the nominal range width, not a measured inter-arrival rate over the observed span, so it reads low when events cluster near `windowEnd`.
-- **Real health vs compatibility status**: `OverviewDto.systemStatus` is a compatibility field the backend always sets to `"Operational"`. Runtime health is `GET /api/health/status`, which reports `status`, `uptimeMillis`, `datasetLoaded`, `datasetName`, `datasetSize` and the registered engine count. The Command Center header prefers the real health value and falls back to the compatibility string only when the health request has not resolved.
+- **Real health vs compatibility status**: `OverviewDto.systemStatus` is a compatibility field the backend always sets to `"Operational"`. Runtime health is `GET /api/health/status`, which reports `status`, `uptimeMillis`, `datasetLoaded`, `datasetName`, `datasetSize` and the registered engine count. The Overview header prefers the real health value and falls back to the compatibility string only when the health request has not resolved.
 - **Observed request-trail topology**: nodes and edges come from `GET /api/analytics/dependencies`, which groups events by `requestId` and links consecutive distinct services. Node size follows observed event counts and edge width, opacity and particle count follow the observed adjacency weight. This is co-occurrence inside log data, not verified infrastructure topology.
 - **Deterministic edge particles**: each edge renders `min(8, max(1, ceil(normalizedWeight * 7)))` particles, positions them deterministically along the edge path, and staggers `animateMotion` by a fixed per-particle offset derived from the measured weight. `prefers-reduced-motion` replaces the animation with static particles.
-- **Pipeline story**: a Load → Observe → Detect → Investigate strip links each Command Center number to the page that produced it.
-- **Shared replay context**: Command Center and Demo Replay read one `ReplayProvider` subscription, so a replay started on either screen is visible on both.
+- **Pipeline story**: a Load → Observe → Detect → Investigate strip links each Overview figure to the page that produced it.
+- **Shared replay context**: Overview and Dataset Replay read one `ReplayProvider` subscription, so a replay started on either screen is visible on both.
 
-The topology panel renders a 2D SVG by default. Its optional Three.js/WebGL view is lazy-loaded, uses bounded instanced traffic markers and OrbitControls, and cleans up its renderer, controls, geometry, listeners and animation loop on unmount. If WebGL is unavailable, it reports that and the user can switch back to the same 2D data view. Moving markers communicate normalized observed request-trail intensity, not exact request counts or a live production stream. See [docs/design-system.md](docs/design-system.md) for visual encodings and constraints.
+The topology panel renders a 2D SVG by default. Its optional Three.js/WebGL view is lazy-loaded, uses bounded instanced traffic markers and OrbitControls, and cleans up its renderer, controls, geometry, materials, listeners and animation loop on unmount. If WebGL is unavailable, it reports that and the user can switch back to the same 2D data view. Moving markers communicate normalized observed request-trail intensity, not exact request counts or a live production stream. See [docs/design-system.md](docs/design-system.md) for visual encodings and constraints.
 
 ## Run locally
 
@@ -129,7 +169,7 @@ Open `http://localhost:5173`. The Vite development server preserves the local pr
 
 Load a source from **Datasets** or **Ingestion**. The application starts with no dataset; dataset-backed product endpoints do not invent first-run metrics.
 
-Incident evidence is reachable at `/incidents`, `/incidents/:id` and the alias `/investigate/:id`; all three render the same `IncidentsPage` detail view.
+To see the real-time product without loading data, open **Scenario Lab** and press *Start run*: the backend generates a scenario, streams measured frames, and opens an incident. Then open **Incident Workbench** (`/incidents/workbench`) for the investigation surface. Dataset incident detail is reachable at `/incidents`, `/incidents/:id` and the alias `/investigate/:id`, all of which render the same detail view.
 
 ## Run with Docker Compose
 
@@ -154,8 +194,8 @@ The Compose file was syntax-validated with `docker compose config`. The Docker d
 - **Bundled samples**: committed text and JSONL files under `sample-data/`, selectable from the Datasets screen.
 - **Upload**: multipart JSONL or canonical pipe-delimited text. The parser reports successful and failed line counts.
 - **Current state**: one dataset is held in backend memory at a time. Restarting the backend clears it.
-- **Demo Replay**: a bounded Server-Sent Events replay of the loaded dataset, emitted oldest-first by `(timestamp, id)`. It is labelled `demo-replay` and "not real-time" in the API and UI. It is not an external log collector, WebSocket feed, or live ingestion path.
-- **Shared replay state**: `ReplayProvider` in `frontend/src/replay/ReplayContext.tsx` owns the single subscription, the recent-event buffer (capped at 300) and the dataset-invalidation reset. Command Center and Demo Replay are two views of that one subscription, not two streams.
+- **Dataset Replay**: a bounded Server-Sent Events replay of the loaded dataset, emitted oldest-first by `(timestamp, id)`. It is labelled `demo-replay` and "not real-time" in the API and UI. It is not an external log collector, WebSocket feed, or live ingestion path.
+- **Shared replay state**: `ReplayProvider` in `frontend/src/replay/ReplayContext.tsx` owns the single subscription, the recent-event buffer (capped at 300) and the dataset-invalidation reset. Overview and Dataset Replay are two views of that one subscription, not two streams.
 
 ### Terminology
 
@@ -234,15 +274,31 @@ Results: backend **877 tests**, 0 failures, 0 errors, 0 skipped, jar packaged; f
 
 ## Documentation
 
-- [Current implementation audit](docs/IMPLEMENTATION_AUDIT.md)
-- [Command Center semantics](docs/COMMAND_CENTER.md)
-- [Deployment guide](docs/DEPLOYMENT.md)
+**Product contract**
+
+- [Current implementation audit](docs/IMPLEMENTATION_AUDIT.md) — canonical route and implementation description
+- [Architecture](docs/ARCHITECTURE.md) · [Architecture diagram](docs/ARCHITECTURE_DIAGRAM.md)
 - [API reference](docs/API.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Datasets and replay](docs/DATASET.md)
-- [Algorithms](docs/ALGORITHMS.md)
-- [UI and accessibility](docs/UI-UX.md)
-- [Testing](docs/13-testing.md)
-- [Demo guide](docs/DEMO_GUIDE.md)
+- [Algorithms](docs/ALGORITHMS.md) · [DSA to product mapping](docs/DSA_PRODUCT_MAPPING.md) · [Course map](docs/COURSE_MAP.md)
+- [Overview semantics](docs/COMMAND_CENTER.md) · [Datasets and replay](docs/DATASET.md)
+- [UI, accessibility and design system](docs/UI-UX.md) · [Design system](docs/design-system.md)
+- [Trace engine](docs/TRACE_ENGINE.md) · [Engineering decisions](docs/ENGINEERING_DECISIONS.md)
+- [Deployment](docs/DEPLOYMENT.md)
+
+**Using and verifying it**
+
+- [Demo guide](docs/DEMO_GUIDE.md) — the live demonstration, step by step
+- [Testing and verification](docs/13-testing.md)
 - [Project walkthrough](docs/PROJECT_WALKTHROUGH.md)
-- [Historical reports](docs/REBUILD_BASELINE.md), retained as snapshots rather than current specifications
+- [Portfolio summary](docs/PORTFOLIO_SUMMARY.md) · [Interview guide](docs/INTERVIEW_GUIDE.md)
+
+**Release record**
+
+- [Final submission index](final-submission/FINAL_SUBMISSION_INDEX.md) — deliverables, verified figures and limitations
+- [Final implementation report](FINAL_IMPLEMENTATION_REPORT.md)
+- [Final release readiness](FINAL_RELEASE_READINESS.md)
+- [Final visual QA report](FINAL_VISUAL_QA_REPORT.md) — dated 2026-09-27, retained as a historical snapshot
+- [Release notes 0.1.0](docs/RELEASE_NOTES_0.1.0.md)
+
+Phase reports in `docs/` that carry a historical banner are retained for traceability and are not current
+specifications; they say so at the top.

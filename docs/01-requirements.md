@@ -1,6 +1,13 @@
 # 01 — Requirements Specification
 
 > Historical phase requirements. The current audited scope and non-features are in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md); do not use this file as the current endpoint contract.
+>
+> **Note on the companion documents named below.** This phase specification refers to
+> `docs/15-user-guide.md` and `docs/16-viva-questions.md`. Neither was ever created; they are recorded
+> here as requirements that were planned but not delivered under those filenames. The material they
+> would have covered exists today as [DEMO_GUIDE.md](DEMO_GUIDE.md) (operator walkthrough) and
+> [13-testing.md](13-testing.md) (verification). The original references are left as written so this
+> document still reads as the phase artifact it is.
 
 ## LogInsight Analyzer — DSA-3 Advanced Algorithmic Log Intelligence and Text Analytics System
 

@@ -7,8 +7,9 @@ flowchart TB
     Browser[Browser]
     subgraph UI[React SPA]
         Shell[Layout · routes · command palette]
-        Pages[Overview · Logs · Search · Analytics · Patterns · Incidents · Services]
-        Lab[Datasets · Ingestion · Algorithms · Benchmarks · Runs · Demo Replay]
+        Pages[Overview · Logs · Algorithmic Search · Analytics · Patterns · Detector Windows · Services]
+        Sim[Scenario Lab · Live Monitor · Incident Workbench]
+        Lab[Datasets · Ingestion · Algorithms · Benchmarks · Runs · Dataset Replay]
         API[Typed /api client · REST + SSE]
     end
 
@@ -21,6 +22,7 @@ flowchart TB
         Controllers[Controllers]
         Services[Product services]
         Index[DatasetService · LogIndex]
+        Sim2[LiveSimulationService · RollingWindow · SimulationDetector · IncidentLifecycleStore]
         Engines[QueryDispatcher · engines · DSA]
         Catalog[Algorithm catalogue · traces · RunStore]
     end
@@ -28,8 +30,10 @@ flowchart TB
     Samples[Demo generator · sample-data · upload]
     Browser --> Shell
     Shell --> Pages
+    Shell --> Sim
     Shell --> Lab
     Pages --> API
+    Sim --> API
     Lab --> API
     API --> Vite
     API --> Nginx
@@ -38,6 +42,7 @@ flowchart TB
     Samples --> Index
     Controllers --> Services
     Services --> Index
+    Services --> Sim2
     Services --> Engines
     Services --> Catalog
 ```
@@ -47,7 +52,7 @@ flowchart TB
 - 42 catalogue entries across six modules.
 - 35 registered query engines and 13 traceable algorithms.
 - One current in-memory dataset; no database.
-- Two SSE surfaces: `/api/live` replay and `/api/runs/{id}/events` recorded replay. One `ReplayProvider` subscription backs both Demo Replay views in the frontend.
+- Three SSE surfaces: `/api/simulation/stream` generated simulation, `/api/live` dataset replay and `/api/runs/{id}/events` recorded replay. One `ReplayProvider` subscription backs both Dataset Replay views in the frontend.
 - `/api/overview` returns a selected window anchored on the newest event timestamp, with `windowStart`, `windowEnd`, `scope`, window-scoped counts and the unfiltered `datasetEvents` total.
 - `/api/analytics/dependencies` returns observed `requestId` adjacency over the full current dataset, not verified infrastructure topology and not scoped to the Command Center window. The frontend renders the same result through a default SVG view or an on-demand Three.js/WebGL view with an accessible HTML list fallback.
 - Runtime status comes from `/api/health/status`. The overview DTO's `systemStatus` is a hardcoded compatibility string.

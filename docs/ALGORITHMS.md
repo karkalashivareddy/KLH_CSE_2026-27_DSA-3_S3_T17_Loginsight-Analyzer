@@ -41,6 +41,17 @@ When free text has no result, the product path computes a bounded Levenshtein su
 
 The Command Center reuses this detector over the selected window and labels the result as heuristic. The "Detected incident windows" card counts returned windows, and the health bands shown next to it are fixed error-rate thresholds (healthy <5%, watch 5–<10%, elevated ≥10%, unavailable when the rate is not finite). Neither is a health model or an SLI evaluation.
 
+### Live simulation detection
+
+The generated simulation is a second product path, and it is where four more catalogue algorithms do real work per frame. `SimulationDetector` runs once per tick from `SimulationSession.advance()` and reports the measured runtime of each step in that frame's evidence rows:
+
+1. **Fixed sliding-window aggregation** (`RollingWindow`) keeps a bounded ring of retained events plus per-tick and rolling counters and a fixed-width latency histogram. It produces the per-tick error share and the `p95` that the thresholds compare against the measured baseline. O(n + W) per tick over the retained window.
+2. **Aho-Corasick** (`dsa/string/aho/AhoCorasick`, O(n)) scans the concatenated searchable text of the window once for every signature the selected scenario can emit, returning per-signature occurrence counts. This is what turns raw events into labelled signals.
+3. **KMP** (`dsa/string/KMPMatcher`, O(n + m)) re-counts the dominant signature to confirm the multi-pattern result, so the reported count is derived twice by two different means.
+4. **BFS over the declared dependency graph** (`SimulationTopology.blastRadius`, O(V + E)) walks callers upstream from the origin service; the reachable set becomes the incident's blast radius.
+
+Because each frame carries these runtimes, the claim is checkable on screen rather than asserted. The blast radius is dependency reachability over the scenario's **declared** graph — not observed infrastructure, and not a confirmed root cause. `ReservoirSampling` is deliberately absent from this list: it is reachable through the trace and run-session surfaces only and never runs on this path.
+
 ### Analytics
 
 Pure-Java analyzers provide timeline buckets, severity histograms, a 7×24 UTC heatmap, service/host/HTTP rollups, top-K frequency buckets, error summaries and a service dependency graph. HTTP latency percentiles are measured from response-time fields on the active dataset.

@@ -103,7 +103,7 @@ It is a navigation aid over data already on screen, not a process model of the a
 
 ## Shared replay context
 
-`frontend/src/replay/ReplayContext.tsx` exports `ReplayProvider` and `useReplay`. `App.tsx` wraps the router in one `ReplayProvider`, so Command Center and Demo Replay are two views of a single subscription rather than two competing SSE streams.
+`frontend/src/replay/ReplayContext.tsx` exports `ReplayProvider` and `useReplay`. `App.tsx` wraps the router in one `ReplayProvider`, so Command Center and Dataset Replay are two views of a single subscription rather than two competing SSE streams.
 
 - The provider fetches `GET /api/live/status` once on mount and refetches after a dataset invalidation.
 - `start()` opens one `api.liveStream` subscription. A generation counter invalidates callbacks from a superseded subscription, so a stopped stream cannot update state after a restart.

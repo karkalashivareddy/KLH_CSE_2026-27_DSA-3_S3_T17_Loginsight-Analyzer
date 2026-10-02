@@ -38,11 +38,16 @@ Where algorithms reach the product:
 |---|---|
 | Product search free text | KMP over the rendered candidate text |
 | Zero-hit "Did you mean?" | Bounded Levenshtein over distinct messages |
+| Live simulation signatures | Aho-Corasick over the rolling window, one pass for all scenario signatures |
+| Live simulation confirmation | KMP re-counts the dominant signature |
+| Live simulation thresholds | Fixed sliding-window aggregation in `RollingWindow`, per-tick and rolling |
+| Incident blast radius | BFS over the **declared** dependency graph |
 | Patterns | Deterministic token normalization (not ML) |
-| Incidents | Five-minute baseline thresholding, rule-based |
+| Detector Windows (dataset) | Five-minute baseline thresholding, rule-based |
 | Command Center topology | Group-by-`requestId` ordered adjacency fold over the full dataset, not a catalogue entry |
 | Service health bands | Fixed error-rate thresholds |
 | Search benchmark | Naive / KMP / Z / Rabin-Karp, one measured run each |
 | Run sessions | Recorded execution of a trace-instrumented algorithm, created by `POST /api/runs` and streamed over `GET /api/runs/{id}/events` |
 
-See [COMMAND_CENTER.md](COMMAND_CENTER.md) and [ALGORITHMS.md](ALGORITHMS.md).
+See [COMMAND_CENTER.md](COMMAND_CENTER.md), [ALGORITHMS.md](ALGORITHMS.md) and
+[DSA_PRODUCT_MAPPING.md](DSA_PRODUCT_MAPPING.md).

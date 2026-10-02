@@ -24,7 +24,7 @@ The backend owns the one current dataset. Parser counts and failed lines are ret
 - **Patterns** groups normalized message tokens and labels the result heuristic, not ML.
 - **Incidents** groups elevated ERROR/FATAL windows and exposes the method and evidence events. Evidence is reachable at `/incidents`, `/incidents/:id` and the alias `/investigate/:id`.
 - **Services** provides rollups and a per-service activity view.
-- **Demo Replay** (route `/live`, navigation label `Live Replay`) emits the loaded events over SSE in bounded batches, oldest-first by `(timestamp, id)`. It is explicitly a finite dataset replay, not a live collector. The Command Center and Demo Replay screens share one `ReplayProvider` subscription, so a stream started on either is visible on both.
+- **Dataset Replay** (route `/replay`, navigation label `Dataset Replay`) emits the loaded events over SSE in bounded batches, oldest-first by `(timestamp, id)`. It is explicitly a finite dataset replay, not a live collector. The Command Center and Demo Replay screens share one `ReplayProvider` subscription, so a stream started on either is visible on both.
 
 Full Command Center semantics are in [COMMAND_CENTER.md](COMMAND_CENTER.md).
 
@@ -53,7 +53,7 @@ npm test
 npm run build
 ```
 
-The current audit result is 877 backend tests with no failures or errors, 55 frontend tests across 17 files passed, and a clean frontend production build. CI runs the same three commands, so `npm test` is a merge gate. The frontend has no configured browser-test or lint script. Source-level accessibility features and the focused shell, topology, Command Center and replay tests are documented in [UI-UX.md](UI-UX.md), but no full automated accessibility run is claimed.
+The current audit result is 877 backend tests with no failures or errors, 55 frontend tests across 17 files passed, and a clean frontend production build. CI runs the same goals in `.github/workflows/ci.yml` (`mvn -B verify` in the backend job; `npm ci`, `npm test` and `npm run build` in the frontend job), so `npm test` is a merge gate. The frontend has no configured browser-test or lint script. Source-level accessibility features and the focused shell, topology, Command Center and replay tests are documented in [UI-UX.md](UI-UX.md), but no full automated accessibility run is claimed.
 
 Docker image builds and container smoke tests have not been run: no Docker daemon is available in this environment, so only `docker compose config` has been validated.
 

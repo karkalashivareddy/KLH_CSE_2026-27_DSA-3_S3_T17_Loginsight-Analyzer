@@ -8,7 +8,7 @@ Answers below describe the current `main` implementation. Historical rebuild cou
 A full-stack, single-dataset log investigation workspace. Users load demo, bundled or uploaded logs and then explore, search, analyse, group patterns, inspect incidents, benchmark matchers and replay recorded algorithm steps.
 
 **What is deliberately not real-time?**
-Demo Replay (route `/live`, navigation label `Live Replay`) emits a bounded SSE replay of the current in-memory event list with `source: demo-replay` and a “not real-time” label. There is no external collector, WebSocket path, retention system or production telemetry claim.
+Dataset Replay (route `/replay`, navigation label `Dataset Replay`) emits a bounded SSE replay of the current in-memory event list with `source: demo-replay` and a “not real-time” label. There is no external collector, WebSocket path, retention system or production telemetry claim.
 
 ## Architecture
 
