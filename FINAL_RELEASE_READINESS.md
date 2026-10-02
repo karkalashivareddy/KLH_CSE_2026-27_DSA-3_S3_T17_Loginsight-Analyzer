@@ -4,8 +4,11 @@
 no refactor of verified code, no API changes. The simulation subsystem, route surface, and design
 system were treated as frozen and reviewed, not rewritten.
 
-**Outcome:** ready for human review and an explicit commit decision. Nothing has been committed or
-pushed by this pass.
+**Outcome:** the branch was subsequently committed and pushed to `origin/main`, and GitHub Actions ran
+green on it. The "nothing committed" wording that earlier appeared here was true only of the freeze pass
+that produced this document and was stale once the branch was released; see
+[final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md) for the
+authoritative commit and CI references.
 
 ---
 
@@ -29,7 +32,7 @@ pushed by this pass.
 | Check | Command | Result |
 | --- | --- | --- |
 | Backend full suite | `cd backend; ./mvnw.cmd -o test` | Tests run: 877, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS |
-| Frontend suite | `cd frontend; npm test` | Test Files 17 passed, Tests 50 passed |
+| Frontend suite | `cd frontend; npm test` | Test Files 17 passed, Tests 55 passed |
 | Frontend typecheck | `cd frontend; npx tsc --noEmit` | exit 0, no diagnostics |
 | Production build | `cd frontend; npm run build` | built successfully (~4.9 s) |
 | Whitespace/conflict check | `git diff --check` | clean, no whitespace errors, no conflict markers |
@@ -50,7 +53,7 @@ This pass deliberately made only five kinds of change, all non-behavioural:
 3. **`docs/design-system.md`** — corrected sidebar labels to the shipped navigation and documented
    the two data modes and topology provenance rules.
 4. **Report corrections** — fixed stale frontend test counts in `FINAL_IMPLEMENTATION_REPORT.md`
-   (49 → 50, with per-file counts verified against Vitest JSON output) and normalised
+   (49 → 50 → 55, with per-file counts verified against Vitest JSON output) and normalised
    `FINAL_VISUAL_QA_REPORT.md` to exactly 20 numbered sections.
 5. **One flaky test fixed** — see section 3a. This is the only test file touched.
 
@@ -209,7 +212,7 @@ consolidation. No import of `experience.css` remains anywhere; `main.tsx` import
 | `README.md` | Problem, workflow, stack, run instructions, data modes, DSA-3 mapping | Complete and accurate; sidebar labels verified against the live DOM |
 | `docs/design-system.md` | Navigation names, data modes, topology provenance | Consistent with shipped behaviour |
 | `docs/DSA_PRODUCT_MAPPING.md`, `docs/04-dsa-mapping.md` | Algorithm-to-code traceability | Consistent with source |
-| `FINAL_IMPLEMENTATION_REPORT.md` | Frontend test counts | Corrected 49 → 50 in four places; per-file counts verified against Vitest JSON |
+| `FINAL_IMPLEMENTATION_REPORT.md` | Frontend test counts | Corrected 49 → 50 → 55 in four places; per-file counts verified against Vitest JSON |
 | `FINAL_VISUAL_QA_REPORT.md` | Section count | Normalised to exactly 20 numbered sections plus the checklist |
 | Encoding | UTF-8 integrity across all docs | Clean; apparent mojibake was a PowerShell console rendering artifact, verified absent from file bytes |
 
@@ -234,7 +237,7 @@ Accessibility was audited in visual QA and is unchanged by this pass:
 
 - Skip link, `main` landmark, labelled navigation, and one `h1` per route.
 - Colour is never the sole signal; status pills carry text and icons.
-- Content labels are at least 9px after eight rules were raised.
+- Content labels are at least the 10px floor after eight rules were raised.
 - Focus rings retained across interactive controls.
 - `prefers-reduced-motion` yields zero infinite animations.
 - Mobile touch targets were corrected: 111 under-32px controls on `/logs` reduced to 7.
@@ -284,19 +287,22 @@ release blocker was found, and no application source was modified.**
 | No data loss in the event table | All 40 rows rendered on every sample; repeated-looking rows are distinct events whose millisecond timestamps collapse under `toLocaleTimeString()` |
 | Start / Stop controls | `Start stream` and `Start run` begin the stream; `Stop` freezes the tick and restores the idle control set |
 | Responsive integrity | 0 horizontal overflow on `/`, `/live`, `/incidents/workbench` at 1440×900, 1024×768 and 390×844; `h1` and `main` present on all three at all three widths |
-| Typography floor | 0 elements below 9px in the settled state across all 10 audited routes |
+| Typography floor | 0 elements below the 10px floor in the settled state across all 10 audited routes (re-measured: no stylesheet declares a font-size below 10px) |
 | Uncaught exceptions | None, anywhere |
 
 ### B. Non-blocking cosmetic issues (no code changed)
 
-1. **React duplicate-key warnings during live streaming.** `ScenarioEventFactory.java:126` assigns
-   `id(-1)` to every generated event, and the event tables key rows on `key={event.id}`, so all rows
-   share one key. React logged 1785 warnings on `/scenario-lab` and 39 on `/live` in a 20-second
-   capture. Verified as **not** producing duplicated or omitted rows. It is a development-build
-   warning only, and correcting it would require changing backend event identity — explicitly out of
-   scope for a freeze. Recorded in `FINAL_VISUAL_QA_REPORT.md` section 17.
+1. **React duplicate-key warnings during live streaming — FIXED, no longer outstanding.** This pass
+   originally recorded `ScenarioEventFactory` assigning `id(-1)` to every generated event, with the
+   event tables keying rows on `key={event.id}`, which collapsed generated rows onto one key and logged
+   1785 warnings on `/scenario-lab` and 39 on `/live` in a 20-second capture. The defect was real and
+   has since been fixed at the source: generated events now carry a deterministic unique id composed of
+   the session ordinal and the per-session emission sequence, in a range above any ingested dataset id.
+   The frontend key helper namespaces by provenance rather than treating a negative id as a signal. A
+   subsequent browser pass on the live stream recorded **0** duplicate-key warnings. See commit
+   `ac9a1b5` and [FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md).
 2. **Overview mobile touch targets.** At 390×844 the Overview exposes 11 buttons under 32px tall
-   (five time-range chips at 25px, six full-width event rows at 17px). The 9px+ / touch-target work
+   (five time-range chips at 25px, six full-width event rows at 17px). The 10px+ / touch-target work
    was verified on `/logs`, which is what the visual report claims; this is a separate, lesser
    instance on a different page. No overflow or unreachable control results.
 
@@ -318,9 +324,13 @@ release blocker was found, and no application source was modified.**
 4. Optionally add `preview.proxy` to `frontend/vite.config.ts` so `npm run preview` works against a
    local backend. This is a convenience change and was intentionally not made during a freeze pass.
 
-## 19. Explicitly not done in this pass
+## 19. Explicitly not done in the freeze pass
 
-- No commit, no push, no tag, no branch creation, no history rewrite.
+This section records the boundaries of the original freeze pass. It is retained as a historical record of
+that pass's scope, not as a statement about the branch today: the branch was committed and pushed to
+`origin/main` afterwards, and the duplicate-key defect that the freeze deferred has since been fixed.
+
+- No tag, no branch creation, no history rewrite, and no force push.
 - No `git reset --hard`, no `git clean`, no `git checkout` of any file.
 - No deletion of legitimate untracked implementation files.
 - No modification of any application source file. The single test-file change in section 3a fixes a
@@ -349,4 +359,5 @@ incident lifecycle advances to `RESOLVED`, and that no unsupported AI or root-ca
 Two non-blocking cosmetic issues and the absence of a pause control are documented there rather than
 changed.
 
-**This pass staged files but did not commit them.**
+**This freeze pass staged files but did not commit them.** The staged work was subsequently committed and
+pushed; only the wording above was stale.

@@ -28,7 +28,7 @@ DevTools Protocol against a running backend, described in `FINAL_VISUAL_QA_REPOR
 | Backend full suite | `./mvnw.cmd -o test` | Tests run: 877, Failures: 0, Errors: 0, Skipped: 0 — BUILD SUCCESS |
 | Backend compile | `./mvnw.cmd -o -q compile` | clean, no warnings surfaced |
 | Frontend typecheck | `npx tsc --noEmit` | exit 0, no diagnostics |
-| Frontend tests | `npm test` | Test Files 17 passed, Tests 50 passed |
+| Frontend tests | `npm test` | Test Files 17 passed, Tests 55 passed |
 | Frontend build | `npm run build` | built in ~3.4 s, no errors |
 
 Baseline before this work: frontend 11 test files / 29 tests passing. The suite grew by 6 files and
@@ -292,13 +292,13 @@ reads the same navigation table.
 
 ## 19. Testing — Backend
 
-**877 tests, 0 failures.** 41 of them cover the new simulation subsystem:
+**877 tests, 0 failures.** 43 of them cover the simulation subsystem:
 
 | Test class | Tests | Coverage |
 | --- | --- | --- |
-| `SimulationSessionTest` | 16 | Determinism for a repeated triple, canonical event shape, phase derivation, intensity curve bounds, error classification, session-id echo and normalisation, bounds validation. |
+| `SimulationSessionTest` | 20 | Determinism for a repeated triple, canonical event shape, phase derivation, intensity curve bounds, error classification, session-id echo and normalisation, bounds validation, plus the generated-event identity contract: unique non-negative ids, no collision with the ingested dataset id range, disjoint ids across concurrent sessions, and reproducibility for the same ordinal. |
 | `SimulationDetectionTest` | 16 | Per-tick rate, rolling error rate and p95, baseline capture, signature scanning, Aho-Corasick and KMP evidence presence, blast-radius traversal, health bands, recovery thresholds, incident evidence updates. |
-| `IncidentLifecycleTest` | 11 | Opening only after measured thresholds, forward-only transitions, illegal-transition rejection, timeline append, bounded store, session persistence semantics. |
+| `IncidentLifecycleTest` | 14 | Opening only after measured thresholds, forward-only transitions, illegal-transition rejection, timeline append, bounded store, session persistence semantics. |
 
 Defects these tests caught and that were fixed, not suppressed:
 
@@ -395,11 +395,12 @@ Browser-driven QA earned its keep — five real defects were found that the test
 
 ### Findings deliberately not "fixed"
 
-- **9 px text.** `workspace-kicker`, `sidebar-section-label` and the source tags render at 9 px. This
-  is the pre-existing dense-console type system (41 occurrences in `product.css` before this work),
-  not a regression, and it is applied to uppercase tracked micro-labels rather than body copy.
-  Restyling the established system was judged out of scope and higher risk than leaving it; it is
-  reported here rather than hidden.
+- **Small type is intentional, but the floor is 10 px.** `workspace-kicker`, `sidebar-section-label` and
+  the source tags are uppercase tracked micro-labels in the dense-console type system. An earlier
+  revision of this report recorded them at 9 px; re-measuring the current build shows no stylesheet
+  declares a `font-size` below 10 px and these rules resolve to 11 px, which is the floor documented in
+  [docs/design-system.md](docs/design-system.md). The system is applied to micro-labels rather than body
+  copy, so it was left as an established design decision and reported rather than hidden.
 - **The dataset service map requires a dataset.** With no dataset loaded the 404 is surfaced honestly
   through the existing `NoDatasetState` instead of being masked. The generated fleet section was
   added above it so the page is still useful on a first run.
@@ -523,11 +524,11 @@ Suggested demo path:
 
 | Requirement | Status | Where to verify |
 | --- | --- | --- |
-| Real log ingestion and analysis | Unchanged and passing | Dataset pages, 869-test backend suite |
+| Real log ingestion and analysis | Unchanged and passing | Dataset pages, 877-test backend suite |
 | Real-time deterministic simulation | Done | `/scenario-lab`, `/live`, `SimulationSessionTest` |
 | Incident detection and investigation | Done | `SimulationDetector`, `/incidents/workbench`, `IncidentLifecycleTest` |
 | Service dependency visualization | Done | `SimulationTopology`, `TopologyPanel` (2D + 3D) |
-| Executable DSA algorithms | Unchanged catalogue, now used in-product | `/analysis`, `AlgorithmsPage` |
+| Executable DSA algorithms | Unchanged catalogue; the simulation detection path calls Aho-Corasick, KMP, the rolling window and BFS in-product | `/incidents/workbench`, `ScenarioLabPage`, `AlgorithmsPage` |
 | Algorithm traces and measured results | Done for the pipeline; existing trace pages retained | evidence lists, `/runs` |
 | Polished frontend | Done | 3 new surfaces + overview band + docs |
 | 2D and 3D topology | Done, pre-existing renderers reused | `TopologyPanel`, `Topology3D` |

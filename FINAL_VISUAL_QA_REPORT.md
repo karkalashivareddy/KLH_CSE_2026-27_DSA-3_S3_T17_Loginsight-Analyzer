@@ -1,6 +1,14 @@
 # LogInsight — Final Human-Presentation QA Report
 
-**Date:** 2026-09-27
+> **Historical snapshot — superseded.** This is the QA pass dated 2026-09-27, retained for traceability.
+> It is not the current verification record. Its route-level and viewport-level measurements describe
+> that build. Two of its findings were later resolved and its test and typography figures were later
+> corrected against the current tree; those corrections are marked inline below. For the authoritative
+> current figures see [docs/13-testing.md](docs/13-testing.md),
+> [final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md) and
+> [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md).
+
+**Date:** 2026-09-27 (historical)
 **Scope:** Final visual/interaction/presentation pass across all requested routes and viewports.
 **Stack under test:** Spring Boot backend on `:8085`, Vite production preview on `:4175`, demo dataset loaded (14,000 lines, 0 failed).
 **Method:** Chrome DevTools Protocol automation (Node 24 built-in `WebSocket`) — computed styles, contrast math, element geometry, live-stream observation, and frame-rate sampling.
@@ -12,10 +20,10 @@
 
 A final presentation pass was executed against the running application. **10 confirmed defects were found and fixed**; all were verified in the browser after the fix. After the fixes:
 
-- **16 routes × 3 viewports = 48 route/viewport combinations: 0 horizontal overflow, 0 not-found pages, 0 uncaught exceptions.** Console errors are 0 on passive routes; React duplicate-key warnings are emitted on `/scenario-lab` and `/live` during live streaming and are documented as non-blocking in Section 17.
+- **16 routes × 3 viewports = 48 route/viewport combinations: 0 horizontal overflow, 0 not-found pages, 0 uncaught exceptions.** Console errors are 0 on passive routes; at the time of this pass React duplicate-key warnings were emitted on `/scenario-lab` and `/live` during live streaming. **That defect has since been fixed** — generated simulation events now carry a deterministic unique id, and a later browser pass recorded 0 duplicate-key warnings. See Section 17 and [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md) section B.
 - **Live simulation confirmed working end-to-end** with metrics that move coherently (tick, error rate, p95, throughput, service health, incident lifecycle, algorithm evidence).
 - **No leaks across 3 full start/stop cycles** (DOM nodes and JS heap flat).
-- **Contrast:** 0 confirmed low-contrast text on all audited routes; all body/content text ≥ 9px.
+- **Contrast:** 0 confirmed low-contrast text on all audited routes. The 9px figures quoted in this section are superseded: re-measuring the current tree finds no stylesheet declaring a `font-size` below **10px**, and the micro-label rules cited below resolve to 11px. The floor is documented in [docs/design-system.md](docs/design-system.md).
 - **Accessibility:** reduced-motion honoured, accessible service list present, mobile touch targets corrected.
 - Backend **877 tests / 0 failures / 0 errors**, frontend **55 tests / 17 files**, TypeScript clean, production build successful.
 
@@ -56,22 +64,22 @@ A final presentation pass was executed against the running application. **10 con
 
 ## 5. Typography audit
 
-The application uses a deliberately dense operations-console aesthetic with many small labels. Content text below 9px was treated as unreadable; intentional 9px chrome was preserved.
+The application uses a deliberately dense operations-console aesthetic with many small labels. The table below records the pass as it was measured at the time. **Correction added when this report was re-checked against the current tree:** every "After" value in the 9px column is now 10px or larger. Re-measuring the current build finds no stylesheet declaring a `font-size` below **10px**, and the rules named here — `.log-query-syntax code`, `.workspace-kicker`, `.sidebar-section-label`, `.sidebar-footer-meta` — resolve to 11px. The 10px floor is documented in [docs/design-system.md](docs/design-system.md). The underlying work was real; only the recorded target value was stale.
 
-**Fixed (7 rules, all content-bearing text):**
+**Fixed (8 rules, all content-bearing text):**
 
-| Selector | Before | After | Reason |
+| Selector | Before (as measured then) | Current value | Reason |
 |---|---|---|---|
-| `.log-row-service .badge` | 7px | 9px | Level badge text was unreadably small |
-| `.log-row-service small` | 8px | 9px | Matched sibling row text |
-| `.log-row-time span` | 8px | 9px | Matched sibling + contrast |
-| `.log-row-time time` (mobile) | 8px | 9px | Matched sibling |
-| `.log-query-syntax code` | 8px | 9px | Query syntax reference |
-| `.signal-event-meta .badge` | 8px | 9px | Matched sibling |
-| `.signal-event-foot` | 8px | 9px | Matched sibling |
+| `.log-row-service .badge` | 7px | ≥10px | Level badge text was unreadably small |
+| `.log-row-service small` | 8px | ≥10px | Matched sibling row text |
+| `.log-row-time span` | 8px | ≥10px | Matched sibling + contrast |
+| `.log-row-time time` (mobile) | 8px | ≥10px | Matched sibling |
+| `.log-query-syntax code` | 8px | 11px | Query syntax reference |
+| `.signal-event-meta .badge` | 8px | ≥10px | Matched sibling |
+| `.signal-event-foot` | 8px | ≥10px | Matched sibling |
 | `.source-card-heading` | 8px | 10px | Card heading, tracked caps |
 
-**After the fix:** all content text measures ≥ 9px. Remaining 9px items are deliberate chrome (nav group labels, header context, status strip, topology mode switch, chart axis ticks) and were intentionally left unchanged.
+**After the fix:** no content text falls below the 10px floor. The smallest remaining items are deliberate chrome (nav group labels, header context, status strip, topology mode switch, chart axis ticks), intentionally left unchanged.
 
 ## 6. Colour and contrast
 
@@ -79,7 +87,7 @@ Two confirmed hardcoded-colour failures were found and fixed:
 
 | Selector | Before | Contrast | After | Contrast |
 |---|---|---|---|---|
-| `.sidebar-footer-meta` | `#5f7478` @ 9px | 4.05:1 (fail) | `var(--text-faint)` | 4.81:1 (pass) |
+| `.sidebar-footer-meta` | `#5f7478` @ 9px (historical measurement) | 4.05:1 (fail) | `var(--text-faint)` | 4.81:1 (pass) |
 | `.log-row-time span` | `#63777a` @ 8px | 4.24:1 (fail) | `var(--text-faint)` | 4.81:1 (pass) |
 
 Hand-verified token pair `--text-faint #71858a` on `--bg-elevated #0b1418` = **4.81:1**, which passes WCAG AA for normal text.
@@ -221,7 +229,9 @@ All routes confirmed: mobile nav toggle present, no overflow, dense tables degra
 
 **0 uncaught exceptions** across all audited routes and viewport changes, including stream start/stop and 2D/3D toggling.
 
-**Console errors: 0 on passive routes, but React duplicate-key warnings are emitted on `/scenario-lab` and `/live` while a simulation stream is running** (1785 and 39 occurrences respectively in a 20-second capture). Root cause: every generated simulation event is built with `id(-1)` (`backend/.../simulation/ScenarioEventFactory.java:126`) while the event table keys rows on `key={event.id}`, so all rows share one key. Verified non-observable: the table always rendered all 40 rows, and apparent repeated rows are distinct events whose millisecond timestamps are truncated by `toLocaleTimeString()`, not React duplication. Classified non-blocking — see `FINAL_RELEASE_READINESS.md` section 18a. Fixing it would require changing backend event identity, which is out of scope for the release freeze.
+**Console errors: 0 on passive routes. React duplicate-key warnings were emitted on `/scenario-lab` and `/live` during live streaming at the time of this pass** (1785 and 39 occurrences respectively in a 20-second capture). Root cause: every generated simulation event was built with `id(-1)` (`backend/.../simulation/ScenarioEventFactory.java`) while the event table keyed rows on `key={event.id}`, so all rows shared one key. It was verified non-observable at the time (the table always rendered all 40 rows; apparent repeated rows were distinct events whose millisecond timestamps are truncated by `toLocaleTimeString()`, not React duplication) and was classified non-blocking, with the reference to `FINAL_RELEASE_READINESS.md` corrected from section 18a to section 17a.
+
+**Status update — this defect is now FIXED.** Generated simulation events carry a deterministic unique id composed of the session ordinal and the per-session emission sequence, in a range above any ingested dataset id, and the frontend key helper namespaces by provenance instead of treating a negative id as a signal. A later browser pass on the live stream recorded **0** duplicate-key warnings. See commit `ac9a1b5`.
 
 ## 18. Product honesty check
 
@@ -238,9 +248,9 @@ All routes confirmed: mobile nav toggle present, no overflow, dense tables degra
 
 1. Added missing `/overview` route alias (previously rendered 404).
 2. `.sidebar-footer-meta` hardcoded colour → `var(--text-faint)` (contrast).
-3. `.log-row-time span` hardcoded colour → `var(--text-faint)`, 8px → 9px (contrast + size).
-4. `.log-row-service .badge` 7px → 9px.
-5. `.log-row-service small`, `.log-query-syntax code`, `.signal-event-meta .badge`, `.signal-event-foot`, mobile `.log-row-time time` 8px → 9px.
+3. `.log-row-time span` hardcoded colour → `var(--text-faint)`, 8px → the 10px floor (contrast + size).
+4. `.log-row-service .badge` 7px → the 10px floor.
+5. `.log-row-service small`, `.log-query-syntax code`, `.signal-event-meta .badge`, `.signal-event-foot`, mobile `.log-row-time time` 8px → the 10px floor.
 6. `.source-card-heading` 8px → 10px.
 7. Topology source labelling: `graphKind` prop across `TopologyPanel` + `Topology3D`; simulation pages pass `"declared"`.
 8. Default `title`/`description` made source-aware so the accessible description no longer leaks "dataset-wide events" on simulation pages.
@@ -267,7 +277,7 @@ Each fix is covered by a test where testable (`TopologyPanel.test.tsx` gained a 
 | 1 | Cyan/teal used as accent, not decoration | Pass | Accent reserved for interactive/active state |
 | 2 | Colour not the only signal | Pass | Status pills, text labels, and icons accompany colour |
 | 3 | Backgrounds do not reduce readability | Pass | 0 confirmed low-contrast findings post-fix |
-| 4 | No critical information below 9px | **Fixed** | 8 rules raised; all content ≥ 9px |
+| 4 | No critical information below the type floor | **Fixed** | 8 rules raised; no content below the 10px floor |
 | 5 | Keyboard focus visible | Pass | Visible focus rings retained across controls |
 | 6 | Reachable by keyboard alone | Pass | Accessible service list mirrors every topology node |
 | 7 | Nav landmarks and headings | Pass | `h1` present and correct on all 16 routes |
@@ -291,10 +301,10 @@ Each fix is covered by a test where testable (`TopologyPanel.test.tsx` gained a 
 
 | Metric | Before this pass | After |
 |---|---|---|
-| Frontend tests | 49 | **50** |
+| Frontend tests | 49 | **55** (current) |
 | Not-found routes | 1 (`/overview`) | **0** |
 | Low-contrast content items | 14 | **0** |
-| Content items under 9px | 8 rules | **0** |
+| Content items under the 10px floor | 8 rules | **0** |
 | False source claims on simulation pages | 5 surfaces × 3 pages | **0** |
 | Pages with no way to stop a running stream | 1 | **0** |
 | Mobile controls under 32px (`/logs`) | 111 | **7** |

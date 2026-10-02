@@ -2,7 +2,7 @@
 
 Base path: `/api`.
 
-The Vite development server proxies `/api` to `http://localhost:8080`. The Compose deployment serves the SPA and proxies `/api/` to the backend service through Nginx. API responses are JSON except the two SSE endpoints.
+The Vite development server proxies `/api` to `http://localhost:8080`. The Compose deployment serves the SPA and proxies `/api/` to the backend service through Nginx. API responses are JSON except the three SSE endpoints: `GET /api/simulation/stream` (generated simulation), `GET /api/live` (dataset replay) and `GET /api/runs/{id}/events` (recorded trace replay).
 
 ## Error contract
 
@@ -26,10 +26,11 @@ Stack traces are not returned. `error` is normally the exception class simple na
 | 404 | Missing dataset, unknown event/service/incident/run/sample, or unknown endpoint/resource |
 | 405 | HTTP method not supported |
 | 406 | Request cannot accept the available representation |
+| 409 | An incident lifecycle transition the current state does not allow (`IllegalLifecycleTransitionException`). Lifecycle moves forward only; an illegal target is rejected visibly rather than silently accepted |
 | 415 | Unsupported request content type |
 | 500 | Algorithm execution failure or unexpected server failure, with a sanitized message |
 
-There is no current dedicated `409` mapping. A client-side request timeout is normalized by the frontend as status `408`; it is not a backend response.
+A client-side request timeout is normalized by the frontend as status `408`; it is not a backend response.
 
 Two presence endpoints intentionally use a small 404 body instead of the normal error envelope:
 

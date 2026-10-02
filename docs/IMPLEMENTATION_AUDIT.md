@@ -63,7 +63,7 @@ The current `frontend/src/App.tsx` routes are:
 - `/runs` and `/runs/:id`.
 - `/system`, `/system/status`, `/docs` and a not-found route.
 
-`Layout.tsx` provides grouped navigation, breadcrumbs, runtime/dataset status, a `Ctrl+K` command palette, a skip link and a mobile navigation drawer. `api/client.ts` uses the `/api` base path, normalizes the backend error envelope and parses the two SSE streams. No WebSocket client exists.
+`Layout.tsx` provides grouped navigation, breadcrumbs, runtime/dataset status, a `Ctrl+K` command palette, a skip link and a mobile navigation drawer. `api/client.ts` uses the `/api` base path, normalizes the backend error envelope and parses the three SSE streams: `/api/simulation/stream` (generated simulation), `/api/live` (dataset replay) and `/api/runs/{id}/events` (recorded trace replay). No WebSocket client exists.
 
 `replay/ReplayContext.tsx` adds a `ReplayProvider` around the router in `App.tsx`. It owns the single Demo Replay SSE subscription, the recent-event buffer and the dataset-invalidation reset, so Command Center and the replay screen read the same state instead of opening competing streams.
 
@@ -88,7 +88,7 @@ Full detail is in [COMMAND_CENTER.md](COMMAND_CENTER.md). The audited facts:
 | File | Tests | Covers |
 |---|---:|---|
 | `src/api/client.test.ts` | 3 | SSE frame parsing (chunking, comments, ids, multiline data, unterminated final frame) and multipart boundary handling |
-| `src/components/format.test.ts` | 6 | Millisecond vs nanosecond duration formatting (including fractional values) and `eventKey` stability for dataset and generated events |
+| `src/components/format.test.ts` | 8 | Millisecond vs nanosecond duration formatting (including fractional values) and `eventKey` stability: dataset ids, deterministic generated ids, provenance namespacing, key stability and the malformed-payload fallback |
 | `src/components/Layout.test.tsx` | 4 | Skip navigation, grouped navigation entries and active navigation |
 | `src/components/TopologyPanel.test.tsx` | 7 | Accessible node/edge lists, data-driven radius and particle counts, controlled depth mode, reset view, reduced-motion static particles |
 | `src/pages/AlgorithmsPage.test.tsx` | 3 | Algorithm Lab runs a catalogue `defaultInput` through the runs API, shows the run input, and surfaces a rejected run without navigating |
@@ -137,7 +137,7 @@ The handler returns sanitized messages and does not expose stack traces. The cur
 - `405`, `406` and `415`: unsupported HTTP method or media type.
 - `500`: algorithm execution failure or an unexpected exception, with a safe message.
 
-There is no current dedicated `409` mapping. Dataset presence endpoints have intentional special 404 bodies: `/api/health/dataset` and `/api/datasets/current` return `{ "loaded": false }`, while loading an unknown sample returns `{ "loaded": false, "error": "..." }`. `/api/live/status` remains `200` with `enabled: false` when no dataset is loaded.
+There is one dedicated `409` mapping: `IllegalLifecycleTransitionException` returns `409 Conflict`, so an operator lifecycle action the current state does not allow is visibly rejected rather than silently accepted. Dataset presence endpoints have intentional special 404 bodies: `/api/health/dataset` and `/api/datasets/current` return `{ "loaded": false }`, while loading an unknown sample returns `{ "loaded": false, "error": "..." }`. `/api/live/status` remains `200` with `enabled: false` when no dataset is loaded.
 
 Explicit limits are documented in [API.md](API.md). Important ones include the 64 MB upload ceiling, product-search `size=1..200`, log-list `limit=1..1000`, suggestion cap 50, incident detection cap 200, evidence cap 1,000, replay batch `1..200` with `intervalMs=100..60000`, run history cap 64 and recorder cap 400 steps. Algorithm validators add separate text, DP-cell, pattern-set, reservoir, benchmark and parallelism ceilings.
 
@@ -157,7 +157,11 @@ Explicit limits are documented in [API.md](API.md). Important ones include the 6
 
 `EngineRegistry` registers 35 query engines. The difference between engines and reachable catalogue entries is intentional: suffix build/search share one engine, while several catalogue implementations are library-only.
 
-Product use is narrower than catalogue exposure. KMP is the default product search matcher; Levenshtein is used for zero-hit suggestions; pattern and incident screens use deterministic heuristics; analytics and benchmarks compute from the active dataset. The Command Center topology folds the dataset by `requestId` in `ServiceGraphBuilder`, which is a deterministic adjacency pass rather than a catalogue algorithm driving an independent panel. Other entries are honest algorithm-engine, catalogue, trace or run-session capabilities. The product does not claim WebGL or 3D-engine rendering, WebSocket transport, research-service integration, trained ML or external live ingestion.
+Product use is narrower than catalogue exposure. KMP is the default product search matcher; Levenshtein is used for zero-hit suggestions; pattern and dataset-incident screens use deterministic heuristics; analytics and benchmarks compute from the active dataset. The Command Center topology folds the dataset by `requestId` in `ServiceGraphBuilder`, which is a deterministic adjacency pass rather than a catalogue algorithm driving an independent panel.
+
+The generated-simulation path is a second genuine product use, and it is where four more catalogue algorithms do real work in `SimulationDetector`: **Aho-Corasick** scans the rolling window once for every signature the scenario can emit, **KMP** re-counts the dominant signature to confirm the multi-pattern result, the fixed **sliding-window** aggregate in `RollingWindow` produces the per-tick and rolling baselines the thresholds compare against, and **BFS** over `SimulationTopology` computes the blast radius across the declared dependency graph. Those four, plus product search and the suggestion path, are the algorithms with a product caller. Every other catalogue entry is an honest algorithm-engine, catalogue, trace or run-session capability.
+
+The product does claim Three.js/WebGL rendering: the optional 3D topology is a lazy-loaded WebGL scene over the same backend nodes and edges as the 2D SVG map, with an accessible fallback. It does not claim WebSocket transport, research-service integration, trained ML or external live ingestion.
 
 ### Algorithm Lab surfaces
 
