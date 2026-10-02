@@ -66,6 +66,14 @@ public class LiveSimulationService {
     public static final long MAX_STREAM_DURATION_MS = 15 * 60 * 1000L;
     /** Live sessions retained for operator actions after their stream ended. */
     public static final int RETAINED_SESSIONS = 16;
+    /**
+     * Identity ordinal used by the non-streaming {@link #sample} preview.
+     *
+     * <p>Pinned so preview frames stay byte-identical across runs. Streamed sessions use their own
+     * ordinal so their event identities stay unique; a preview frame and a streamed frame are never
+     * rendered in the same list.</p>
+     */
+    public static final long PREVIEW_SESSION_ORDINAL = 0L;
 
     private final Map<String, SimulationSession> sessions = new ConcurrentHashMap<>();
     private final AtomicBoolean stopping = new AtomicBoolean();
@@ -141,8 +149,9 @@ public class LiveSimulationService {
         QueryValidator.requireBounds(1, maxFrames, 20_000, "maxFrames");
         long resolvedSeed = seed == null ? scenario.seed() : seed;
 
-        String sessionId = "sim-" + sessionCounter.incrementAndGet();
-        SimulationSession session = new SimulationSession(scenario, resolvedSeed, Instant.now(), sessionId);
+        long ordinal = sessionCounter.incrementAndGet();
+        String sessionId = "sim-" + ordinal;
+        SimulationSession session = new SimulationSession(scenario, resolvedSeed, Instant.now(), sessionId, ordinal);
         sessions.put(sessionId, session);
         pruneSessions(sessionId);
 
@@ -222,15 +231,19 @@ public class LiveSimulationService {
     /**
      * Runs a scenario forward without holding a stream open, returning the final frame.
      *
-     * <p>Used by tests and by the Scenario Lab preview. The origin timestamp is fixed to the epoch so
-     * two runs of the same {@code (scenario, seed, frames)} triple produce byte-identical frames.</p>
+     * <p>Used by tests and by the Scenario Lab preview. The origin timestamp is fixed to the epoch and
+     * the identity range is pinned to the preview range, so two runs of the same
+     * {@code (scenario, seed, frames)} triple produce byte-identical frames — event identities
+     * included. That is why this path deliberately does not consume a stream ordinal.</p>
      */
     public SimulationFrameDto sample(String scenarioId, Long seed, int frames) {
         ScenarioDefinition scenario = requireScenario(scenarioId);
         long resolvedSeed = seed == null ? scenario.seed() : seed;
         QueryValidator.requireBounds(1, frames, 1_000, "frames");
-        String sessionId = "sim-" + sessionCounter.incrementAndGet();
-        SimulationSession session = new SimulationSession(scenario, resolvedSeed, Instant.EPOCH, sessionId);
+        long ordinal = sessionCounter.incrementAndGet();
+        String sessionId = "sim-" + ordinal;
+        SimulationSession session = new SimulationSession(scenario, resolvedSeed, Instant.EPOCH, sessionId,
+                PREVIEW_SESSION_ORDINAL);
         SimulationFrameDto frame = null;
         for (int i = 0; i < frames; i++) {
             frame = session.advance();

@@ -79,11 +79,18 @@ public final class SimulationSession {
         this(scenario, seed, origin, "session-local");
     }
 
-    /**
-     * @param sessionId identifier echoed on every frame so a client can address operator actions
-     *     without holding a stream open.
-     */
     public SimulationSession(ScenarioDefinition scenario, long seed, Instant origin, String sessionId) {
+        this(scenario, seed, origin, sessionId, 0L);
+    }
+
+    /**
+     * @param sessionId       identifier echoed on every frame so a client can address operator actions
+     *     without holding a stream open.
+     * @param sessionOrdinal  process-wide session counter, used to give every emitted event a unique
+     *     deterministic id that cannot collide with another session or with an ingested dataset id.
+     */
+    public SimulationSession(ScenarioDefinition scenario, long seed, Instant origin, String sessionId,
+                             long sessionOrdinal) {
         if (scenario == null) {
             throw new IllegalArgumentException("scenario is required");
         }
@@ -94,7 +101,8 @@ public final class SimulationSession {
         this.seed = seed;
         this.origin = origin;
         this.sessionId = sessionId == null || sessionId.isBlank() ? "session-local" : sessionId;
-        this.factory = new ScenarioEventFactory(scenario, DeterministicRandom.forScenario(scenario.id(), seed), origin);
+        this.factory = new ScenarioEventFactory(scenario, DeterministicRandom.forScenario(scenario.id(), seed),
+                origin, sessionOrdinal);
     }
 
     public synchronized ScenarioDefinition scenario() {

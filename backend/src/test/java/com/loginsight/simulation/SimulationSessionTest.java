@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.loginsight.dto.response.LogEventDto;
 import com.loginsight.dto.response.SimulationFrameDto;
 import com.loginsight.model.LogEvent;
 import com.loginsight.model.LogLevel;
@@ -242,6 +243,64 @@ class SimulationSessionTest {
         SimulationSession session = new SimulationSession(scenario, scenario.seed(), Instant.EPOCH, "  ");
         assertThat(session.advance().sessionId()).isEqualTo("session-local");
     }
+
+    @Test
+    @DisplayName("generated events carry a unique identity instead of a shared placeholder")
+    void generatedEventsHaveUniqueIds() {
+        ScenarioDefinition scenario = ScenarioCatalog.defaultScenario();
+        SimulationSession session = new SimulationSession(scenario, 9L, Instant.EPOCH, "sim-ids", 3L);
+        java.util.Set<Long> seen = new java.util.LinkedHashSet<>();
+        int total = 0;
+        for (int tick = 0; tick < 40; tick++) {
+            for (LogEventDto event : session.advance().events()) {
+                assertThat(event.id()).isNotNegative();
+                assertThat(seen.add(event.id())).as("duplicate generated event id %s", event.id()).isTrue();
+                total++;
+            }
+        }
+        assertThat(total).isPositive();
+    }
+
+    @Test
+    @DisplayName("generated identities never collide with an ingested dataset identity")
+    void generatedIdsClearTheDatasetRange() {
+        ScenarioDefinition scenario = ScenarioCatalog.defaultScenario();
+        SimulationSession session = new SimulationSession(scenario, 9L, Instant.EPOCH, "sim-range", 0L);
+        for (LogEventDto event : session.advance().events()) {
+            assertThat(event.id()).isGreaterThanOrEqualTo(ScenarioEventFactory.FIRST_GENERATED_ID);
+        }
+    }
+
+    @Test
+    @DisplayName("two concurrent sessions never share a generated event identity")
+    void concurrentSessionsHaveDisjointIds() {
+        ScenarioDefinition scenario = ScenarioCatalog.defaultScenario();
+        SimulationSession first = new SimulationSession(scenario, 11L, Instant.EPOCH, "sim-a", 1L);
+        SimulationSession second = new SimulationSession(scenario, 11L, Instant.EPOCH, "sim-b", 2L);
+        java.util.Set<Long> firstIds = idsOf(first);
+        java.util.Set<Long> secondIds = idsOf(second);
+        assertThat(firstIds).isNotEmpty();
+        assertThat(secondIds).doesNotContainAnyElementsOf(firstIds);
+    }
+
+    @Test
+    @DisplayName("the same session ordinal reproduces the same identities for the same content")
+    void identitiesAreReproducibleForTheSameOrdinal() {
+        ScenarioDefinition scenario = ScenarioCatalog.defaultScenario();
+        assertThat(idsOf(new SimulationSession(scenario, 13L, Instant.EPOCH, "sim-x", 5L)))
+                .isEqualTo(idsOf(new SimulationSession(scenario, 13L, Instant.EPOCH, "sim-y", 5L)));
+    }
+
+    private static java.util.Set<Long> idsOf(SimulationSession session) {
+        java.util.Set<Long> ids = new java.util.LinkedHashSet<>();
+        for (int tick = 0; tick < 10; tick++) {
+            for (LogEventDto event : session.advance().events()) {
+                ids.add(event.id());
+            }
+        }
+        return ids;
+    }
+
     private static SimulationFrameDto run(ScenarioDefinition scenario, long seed, int ticks) {
         SimulationSession session = new SimulationSession(scenario, seed, Instant.EPOCH);
         SimulationFrameDto frame = null;

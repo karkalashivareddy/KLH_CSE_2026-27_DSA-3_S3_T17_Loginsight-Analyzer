@@ -27,14 +27,26 @@ describe('eventKey', () => {
     expect(eventKey({ id: 0, timestamp: '2026-04-12T10:00:00Z' })).toBe('d0');
   });
 
-  it('keeps generated events distinct even though they all carry the placeholder id', () => {
-    const first = { id: -1, timestamp: '2026-04-12T10:00:00.250Z', requestId: 'req-a-1', message: 'a' };
-    const second = { id: -1, timestamp: '2026-04-12T10:00:00.500Z', requestId: 'req-a-2', message: 'b' };
+  it('keys generated events on their own deterministic id', () => {
+    const first = { id: 16_777_216, timestamp: '2026-04-12T10:00:00.250Z', source: 'live-simulation' };
+    const second = { id: 16_777_217, timestamp: '2026-04-12T10:00:00.500Z', source: 'live-simulation' };
+    expect(eventKey(first)).toBe('s16777216');
     expect(eventKey(first)).not.toBe(eventKey(second));
   });
 
+  it('namespaces the two provenances so ids from different sources never collide', () => {
+    const ingested = { id: 16_777_216, timestamp: '2026-04-12T10:00:00.250Z' };
+    const generated = { id: 16_777_216, timestamp: '2026-04-12T10:00:00.250Z', source: 'live-simulation' };
+    expect(eventKey(ingested)).not.toBe(eventKey(generated));
+  });
+
   it('is stable for the same generated event', () => {
-    const event = { id: -1, timestamp: '2026-04-12T10:00:00.250Z', requestId: 'req-a-1', message: 'a' };
+    const event = { id: 16_777_216, timestamp: '2026-04-12T10:00:00.250Z', source: 'live-simulation', requestId: 'req-a-1' };
     expect(eventKey(event)).toBe(eventKey({ ...event }));
+  });
+
+  it('falls back to request id when a payload carries no usable id', () => {
+    const event = { id: -1, timestamp: '2026-04-12T10:00:00.250Z', requestId: 'req-a-1', source: 'live-simulation' };
+    expect(eventKey(event)).toBe('sreq-a-1-2026-04-12T10:00:00.250Z');
   });
 });

@@ -20,11 +20,39 @@ import com.loginsight.model.LogLevel;
  *
  * <p>All randomness comes from the session's {@link DeterministicRandom}, so a given
  * {@code (scenario, seed)} pair yields an identical event sequence on every run.</p>
+ *
+ * <p>Every generated event also receives a <em>deterministic unique identity</em>. It is composed of
+ * the session ordinal in the high bits and the per-session emission sequence in the low bits, so it is
+ * stable for a given {@code (session, scenario, seed, tick)} and unique across sessions and across
+ * events. A generated event is therefore a first-class {@link LogEvent}, not a placeholder row: it can
+ * be keyed, linked and de-duplicated by a client exactly like an ingested one.</p>
  */
 public final class ScenarioEventFactory {
 
     /** Wall-clock span one simulated tick represents. */
     public static final long TICK_MILLIS = 250L;
+
+    /**
+     * Bits reserved for the per-session emission sequence.
+     *
+     * <p>The worst case a single session can emit is {@code maxFrames (20 000) * MAX_EVENTS_PER_FRAME
+     * (120)} = 2 400 000 events, which fits comfortably in 24 bits. The mask is applied defensively so
+     * an unexpected emission rate degrades into a reported id collision rather than an id that bleeds
+     * into the neighbouring session's range.</p>
+     */
+    public static final int SEQUENCE_BITS = 24;
+
+    /** Highest value the per-session sequence may take before it is wrapped by the mask. */
+    public static final long SEQUENCE_MASK = (1L << SEQUENCE_BITS) - 1L;
+
+    /**
+     * First identity handed out by the generated-simulation range.
+     *
+     * <p>Ingested datasets are assigned sequential ids from 0 by {@code DatasetService}. Generated
+     * identities start far above any dataset, so a generated id can never be confused with an ingested
+     * one even when both are on screen.</p>
+     */
+    public static final long FIRST_GENERATED_ID = 1L << SEQUENCE_BITS;
 
     private static final Map<String, List<Route>> ROUTES = routes();
     private static final List<String> HOST_SUFFIXES = List.of("a", "b", "c");
@@ -71,12 +99,31 @@ public final class ScenarioEventFactory {
     private final ScenarioDefinition scenario;
     private final DeterministicRandom random;
     private final Instant origin;
+    private final long idBase;
     private long sequence;
 
     public ScenarioEventFactory(ScenarioDefinition scenario, DeterministicRandom random, Instant origin) {
+        this(scenario, random, origin, 0L);
+    }
+
+    /**
+     * @param sessionOrdinal process-wide session counter; makes every emitted id unique across
+     *     concurrently running sessions. Identical for a given run, so ids stay reproducible.
+     */
+    public ScenarioEventFactory(ScenarioDefinition scenario, DeterministicRandom random, Instant origin,
+                                long sessionOrdinal) {
         this.scenario = scenario;
         this.random = random;
         this.origin = origin;
+        this.idBase = FIRST_GENERATED_ID + (Math.max(0L, sessionOrdinal) << SEQUENCE_BITS);
+    }
+
+    /**
+     * Deterministic identity for the next emitted event: the session's id range plus its emission
+     * sequence. Never negative, never {@code -1}, and stable for a given run.
+     */
+    public long nextEventId() {
+        return idBase + (sequence & SEQUENCE_MASK);
     }
 
     /**
@@ -109,6 +156,7 @@ public final class ScenarioEventFactory {
         Instant timestamp = origin
                 .plusMillis(tick * TICK_MILLIS)
                 .plusMillis((long) ((index * TICK_MILLIS) / Math.max(1, tickCount)));
+        long eventId = nextEventId();
         sequence++;
 
         Map<String, String> attributes = new LinkedHashMap<>();
@@ -123,7 +171,7 @@ public final class ScenarioEventFactory {
         }
 
         return LogEvent.builder()
-                .id(-1)
+                .id(eventId)
                 .timestamp(timestamp)
                 .level(level)
                 .service(service)

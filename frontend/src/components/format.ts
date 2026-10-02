@@ -59,15 +59,20 @@ export function levelClass(level: string | null): string {
 /**
  * Stable React key for a log event row.
  *
- * `LogEvent.id` is assigned by the dataset layer at ingest time. Events produced by the
- * deterministic simulation are never ingested, so they all carry the placeholder `id: -1`.
- * Keying a streamed table on `id` alone therefore collapses every generated row onto the same
- * key, which React rejects. The simulation's own `requestId` is unique per emitted event, so this
- * helper falls back to `requestId` + `timestamp` when `id` is not a real dataset identity.
+ * Every event the product renders carries a real identity. Ingested events get a sequential dataset
+ * id at load time; events produced by the deterministic simulation get a deterministic unique id
+ * composed of the session ordinal and the per-session emission sequence, in a range that starts above
+ * any dataset id. So the id alone is a sufficient key and generated rows never collapse onto one
+ * another.
+ *
+ * The `source` field namespaces the two provenances so a generated id and an ingested id can never
+ * render as the same key even if they somehow meet in one list. The `requestId` branch is a
+ * defensive fallback for a malformed payload, not the normal path.
  */
-export function eventKey(event: { id: number; timestamp: string; requestId?: string | null; message?: string | null }): string {
-  if (event.id >= 0) return `d${event.id}`;
-  return `s${event.requestId ?? ''}-${event.timestamp}-${(event.message ?? '').length}`;
+export function eventKey(event: { id: number; timestamp: string; requestId?: string | null; source?: string | null }): string {
+  const namespace = event.source === 'live-simulation' ? 's' : 'd';
+  if (Number.isInteger(event.id) && event.id >= 0) return `${namespace}${event.id}`;
+  return `${namespace}${event.requestId ?? ''}-${event.timestamp}`;
 }
 
 /** Badge colour mapping for log levels. */
