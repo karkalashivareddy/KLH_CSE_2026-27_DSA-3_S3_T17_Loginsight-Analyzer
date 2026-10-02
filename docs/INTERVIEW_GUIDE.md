@@ -73,6 +73,6 @@ These are the places where a portfolio project usually overstates itself. The cu
 - **`eventsPerMinute` is a window rate.** It divides window events by the nominal range width, not by the observed span of the events, so a clustered window reads low.
 - **`OverviewDto.systemStatus` is a hardcoded string.** Real runtime status is `/api/health/status`; the UI prefers it and keeps the DTO field only as a pre-resolution fallback.
 - **Health bands are error-rate thresholds.** Healthy <5%, watch 5–<10%, elevated ≥10%. Not a health model, not an SLI evaluation.
-- **"Live Replay" is a navigation label.** The stream is a finite, oldest-first replay of the loaded dataset labelled `demo-replay`; these documents call it Demo Replay.
+- **The dataset replay and the simulation are different things.** The dataset replay is a finite, oldest-first replay of the loaded dataset labelled `demo-replay`; these documents call it **Dataset Replay**, and it lives at `/replay`. The `/live` route is the Live Monitor, which is a server-generated deterministic simulation reported as `live-simulation`. They are never interchangeable.
 - **A detected window is not a cause.** The incident method is a five-minute baseline heuristic, and the UI states the window does not explain the events.
 - **Catalogue exposure is not product usage.** 42 entries, 35 engines and 13 traceable algorithms do not mean 42 panels; several entries are library-only.

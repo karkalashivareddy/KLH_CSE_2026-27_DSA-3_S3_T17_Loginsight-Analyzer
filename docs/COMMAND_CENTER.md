@@ -112,7 +112,7 @@ It is a navigation aid over data already on screen, not a process model of the a
 - `subscribeDatasetInvalidation` resets the stream and reloads status, so switching datasets cannot leave a replay pointing at the previous one.
 - The Command Center card mirrors `emitted / total`, progress, the dataset name and the `demo-replay` source label, and can start, stop or restart the shared stream.
 
-The backend side of this stream is a bounded replay of the loaded dataset, sorted by `(timestamp, id)` and emitted oldest-first. It is labelled `demo-replay` and is not real-time capture; see [API.md](API.md) and [DATASET.md](DATASET.md). The screen is called Demo Replay in these documents; its route is `/live` and the current navigation and page label is `Live Replay`.
+The backend side of this stream is a bounded replay of the loaded dataset, sorted by `(timestamp, id)` and emitted oldest-first. It is labelled `demo-replay` and is not real-time capture; see [API.md](API.md) and [DATASET.md](DATASET.md). These documents call the surface **Dataset Replay**; its route is `/replay` and its navigation and page label is `Dataset Replay`. It is not the `/live` route — that is the Live Monitor generated simulation.
 
 ## Route note
 
