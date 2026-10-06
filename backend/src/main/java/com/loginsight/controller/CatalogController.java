@@ -10,7 +10,7 @@ import com.loginsight.exception.InvalidQueryException;
 import com.loginsight.service.CatalogService;
 
 /**
- * Read-only metadata endpoints for the Algorithm Laboratory (docs/REBUILD_BASELINE Phase-2):
+ * Read-only metadata endpoints for the Algorithm Laboratory (docs/archive/REBUILD_BASELINE Phase-2):
  * module descriptions with computed counts and the flat algorithm catalogue. The front-end uses
  * these to render the sidebar, the course map and the per-module labs.
  */

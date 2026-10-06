@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
- * Run lifecycle and SSE replay (docs/REBUILD_BASELINE Phase-4): a run records genuine steps, the
+ * Run lifecycle and SSE replay (docs/archive/REBUILD_BASELINE Phase-4): a run records genuine steps, the
  * history is bounded and the event stream replays them as meta/step/complete events.
  */
 @SpringBootTest

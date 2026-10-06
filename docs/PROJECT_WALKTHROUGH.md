@@ -53,7 +53,7 @@ npm test
 npm run build
 ```
 
-The current audit result is 877 backend tests with no failures or errors, 55 frontend tests across 17 files passed, and a clean frontend production build. CI runs the same goals in `.github/workflows/ci.yml` (`mvn -B verify` in the backend job; `npm ci`, `npm test` and `npm run build` in the frontend job), so `npm test` is a merge gate. The frontend has no configured browser-test or lint script. Source-level accessibility features and the focused shell, topology, Command Center and replay tests are documented in [UI-UX.md](UI-UX.md), but no full automated accessibility run is claimed.
+The current audit result is 878 backend tests with no failures or errors, 55 frontend tests across 17 files passed, and a clean frontend production build. CI runs the same goals in `.github/workflows/ci.yml` (`mvn -B verify` in the backend job; `npm ci`, `npm test` and `npm run build` in the frontend job), so `npm test` is a merge gate. The frontend has no configured browser-test or lint script. Source-level accessibility features and the focused shell, topology, Command Center and replay tests are documented in [UI-UX.md](UI-UX.md), but no full automated accessibility run is claimed.
 
 Docker image builds and container smoke tests have not been run: no Docker daemon is available in this environment, so only `docker compose config` has been validated.
 

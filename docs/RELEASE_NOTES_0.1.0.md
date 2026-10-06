@@ -28,7 +28,7 @@ This is the current single-node release shape for the academic/portfolio project
 
 | Check | Result |
 |---|---|
-| `cd backend; .\mvnw.cmd -o verify` | 877 tests, 0 failures, 0 errors |
+| `cd backend; .\mvnw.cmd -o verify` | 878 tests, 0 failures, 0 errors |
 | `cd frontend; npm test` | 55 tests across 17 files passed |
 | `cd frontend; npm run build` | Clean TypeScript/Vite production build |
 | `docker compose config --quiet` | Passed |

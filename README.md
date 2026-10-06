@@ -2,6 +2,11 @@
 
 **Real-Time Log Intelligence & Incident Investigation Platform**
 
+Academic project for **Data Structures and Algorithms-3 (`25CS2103E`)**, 2026-2027 odd
+semester, Koneru Lakshmaiah Education Foundation (KL University), KLH Campus.
+The submission deliverables, student roster and course record are in
+[final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md).
+
 LogInsight is a full-stack, in-memory log investigation workspace. It combines a React 18 + TypeScript + Vite shell with a Java 21 Spring Boot REST/SSE API, classical data-structure and algorithm engines, and a backend-owned dataset lifecycle.
 
 The platform ingests a dataset or runs a deterministic generated scenario, streams it live, detects elevated-error windows with measured evidence, and presents an investigation surface where every number on screen can be traced back to the algorithm that produced it.
@@ -228,7 +233,12 @@ The current handler maps validation and malformed requests to `400`, missing dat
 
 The six catalogue modules map directly onto the DSA-3 subject groupings: **Strings**, **Dynamic Programming**, **Graph & Flow**, **Approximation**, **Randomized**, and **Parallel**. Each descriptor is classified as a **product feature** (genuinely exercised by a product path), an **algorithm engine** (a real REST or trace endpoint that a user or a run session can invoke), or an **academic lab** entry (implemented and tested, but not wired into a product panel). The per-algorithm classification is in [docs/DSA_PRODUCT_MAPPING.md](docs/DSA_PRODUCT_MAPPING.md), and the subject-by-subject breakdown is in [docs/04-dsa-mapping.md](docs/04-dsa-mapping.md). No algorithm is presented as a product capability unless a product path actually calls it.
 
-The backend catalogue currently contains 42 descriptors across six modules, 35 registered query engines, 36 catalogue entries reachable through a REST or trace endpoint, and 13 trace-instrumented algorithms. Product-facing algorithm use is intentionally narrower:
+The backend catalogue contains **42 descriptors** across six modules, **36** reachable through a REST or trace endpoint, **35** registered dispatch keys, and **13** trace-instrumented. The four numbers describe different things, so they are reconciled here rather than left to look like a contradiction:
+
+- **42 → 36 reachable**: the remaining 6 are library-only implementations with no endpoint (`kasai_lcp`, `bounded_vertex_cover`, `vertex_cover_kernelization`, `knapsack_fptas`, `vc_is_reduction`, `perfect_hash`). They are tested and catalogued, and the UI marks them as not reachable rather than offering a panel that would fail.
+- **36 → 35 dispatch keys**: `suffix_array` and `suffix_search` are two catalogue entries served by **one** engine, since they are the same algorithm's build and query phases.
+
+Product-facing algorithm use is intentionally narrower than any of those counts:
 
 - KMP powers free-text product search.
 - Levenshtein powers the zero-result “Did you mean?” suggestion.
@@ -255,9 +265,20 @@ npm test
 npm run build
 ```
 
-Results: backend **877 tests**, 0 failures, 0 errors, 0 skipped, jar packaged; frontend Vitest **55 tests** across **17 files** passed; TypeScript and the Vite production build clean. The backend produces JaCoCo reports under `backend/target/site/jacoco/`. The 17 frontend test files are `api/client.test.ts`, `components/format.test.ts`, `components/Layout.test.tsx`, `components/TopologyPanel.test.tsx`, `pages/AlgorithmsPage.test.tsx`, `pages/AnalyticsPage.test.tsx`, `pages/IncidentWorkbench.test.tsx`, `pages/LivePage.test.tsx`, `pages/LogsPage.test.tsx`, `pages/MonitorPage.test.tsx`, `pages/OverviewPage.test.tsx`, `pages/PatternsPage.test.tsx`, `pages/ScenarioLabPage.test.tsx`, `pages/ServicesPage.test.tsx`, `replay/ReplayContext.test.tsx`, `telemetry/adapters.test.ts` and `telemetry/SimulationBand.test.tsx`; `docs/13-testing.md` tables every one of them.
+Results: backend **878 tests**, 0 failures, 0 errors, 0 skipped, jar packaged; frontend Vitest **55 tests** across **17 files** passed; TypeScript and the Vite production build clean. The backend produces JaCoCo reports under `backend/target/site/jacoco/`. The 17 frontend test files are `api/client.test.ts`, `components/format.test.ts`, `components/Layout.test.tsx`, `components/TopologyPanel.test.tsx`, `pages/AlgorithmsPage.test.tsx`, `pages/AnalyticsPage.test.tsx`, `pages/IncidentWorkbench.test.tsx`, `pages/LivePage.test.tsx`, `pages/LogsPage.test.tsx`, `pages/MonitorPage.test.tsx`, `pages/OverviewPage.test.tsx`, `pages/PatternsPage.test.tsx`, `pages/ScenarioLabPage.test.tsx`, `pages/ServicesPage.test.tsx`, `replay/ReplayContext.test.tsx`, `telemetry/adapters.test.ts` and `telemetry/SimulationBand.test.tsx`; `docs/13-testing.md` tables every one of them.
 
-**GitHub Actions verification** — `.github/workflows/ci.yml` runs on every push to `main`: the backend job runs `mvn -B verify`, and the frontend job runs `npm ci`, `npm test` and `npm run build`. The authoritative merge gate is the workflow run, not the local run above; the two are recorded separately. Earlier phase reports in `docs/` carry smaller backend counts from their own snapshots and are labelled as such.
+**GitHub Actions verification** — `.github/workflows/ci.yml` runs on every push to `main`: the backend job runs `mvn -B verify`, and the frontend job runs `npm ci`, `npm test` and `npm run build`. The authoritative merge gate is the workflow run, not the local run above; the two are recorded separately.
+
+Two facts about those numbers, so they are not over-read:
+
+- `npm run build` runs `tsc` before Vite, so the TypeScript compile is part of the
+  production build. There is deliberately no separate `typecheck` script.
+- There is **no browser-level E2E suite**. The frontend is covered by Vitest and
+  Testing Library at the component level, and the Compose deployment is validated
+  as configuration only. Nothing in this repository asserts that the assembled
+  application was driven in a real browser, so no such result is claimed.
+
+Earlier phase reports under `docs/archive/` carry smaller backend counts from their own snapshots and are labelled as historical rather than current.
 
 ## Limitations
 
@@ -295,10 +316,7 @@ Results: backend **877 tests**, 0 failures, 0 errors, 0 skipped, jar packaged; f
 **Release record**
 
 - [Final submission index](final-submission/FINAL_SUBMISSION_INDEX.md) — deliverables, verified figures and limitations
-- [Final implementation report](FINAL_IMPLEMENTATION_REPORT.md)
-- [Final release readiness](FINAL_RELEASE_READINESS.md)
-- [Final visual QA report](FINAL_VISUAL_QA_REPORT.md) — dated 2026-09-27, retained as a historical snapshot
 - [Release notes 0.1.0](docs/RELEASE_NOTES_0.1.0.md)
+- [Archived phase and release reports](docs/archive/README.md) — historical snapshots, not current specifications
 
-Phase reports in `docs/` that carry a historical banner are retained for traceability and are not current
-specifications; they say so at the top.
+Older reports are kept under `docs/archive/`; the current implementation and test contract is in the links above.

@@ -44,9 +44,15 @@ Screenshots referenced by the report live in `docs/images/`; the ones also used 
 reproduced in the README visual section.
 
 The `.pptx`, `.docx` and `.pdf` in this directory were synchronized before the documentation pass: their
-figures now read 877 and 55, the 11 embedded screenshots are the current ones, and they carry none of
-the stale claims the pass corrected. That synchronization required no regeneration by this pass, so the
-three files are preserved exactly as verified.
+figures read **877** backend tests and **55** frontend tests, the 11 embedded screenshots are the
+current ones, and they carry none of the stale claims the pass corrected. That synchronization required
+no regeneration by this pass, so the three files are preserved exactly as verified.
+
+**The submitted documents therefore show 877, while the repository now runs 878.** The difference is one
+test added afterwards, `AlgorithmCatalogTest.publishedCatalogueFiguresMatchTheImplementation`, which
+pins the 42 / 36 / 35 / 13 catalogue figures this README publishes so they cannot drift from the code
+again. No product code changed. Regenerate the three documents only if the institute requires the
+report to state the live test count.
 
 ## Verification figures
 
@@ -58,9 +64,10 @@ separately because they are separate records.
 | Backend | `mvn -B verify` | GitHub Actions, run 36963789589 | **877 tests**, 0 failures, 0 errors, 0 skipped; BUILD SUCCESS |
 | Frontend tests | `npm test` | GitHub Actions, run 36963789589 | **17 test files passed** |
 | Frontend build | `npm run build` | GitHub Actions, run 36963789589 | Succeeds |
-| Backend | `.\mvnw.cmd -o verify` | local | **877 tests**, 0 failures, 0 errors, 0 skipped |
+| Backend | `.\mvnw.cmd -o verify` | local, pre-documentation commit | **877 tests**, 0 failures, 0 errors, 0 skipped |
 | Frontend tests | `npm test` | local | **55 tests across 17 files**, 0 failures |
 | TypeScript + build | `npm run build` | local | Clean (`tsc && vite build`) |
+| Backend | `.\mvnw.cmd -o verify` | local, after adding the catalogue-count guard | **878 tests**, 0 failures, 0 errors, 0 skipped; BUILD SUCCESS |
 
 The workflow is `.github/workflows/ci.yml`: the backend job runs `mvn -B verify`; the frontend job runs
 `npm ci`, `npm test` and `npm run build`. The local and workflow figures agree. Run 36963789589 is the

@@ -4304,7 +4304,6 @@ code {
 .chart-y-label {
   fill: var(--text-faint);
   font-family: var(--font-ui);
-$110px;
 }
 
 @media (max-width: 1120px) {

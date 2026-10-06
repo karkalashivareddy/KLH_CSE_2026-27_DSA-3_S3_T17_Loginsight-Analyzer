@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * One recorded algorithm run (docs/REBUILD_BASELINE Phase-4). A run always belongs to a
+ * One recorded algorithm run (docs/archive/REBUILD_BASELINE Phase-4). A run always belongs to a
  * trace-instrumented algorithm; {@code steps} are the genuinely recorded steps of the execution
  * (bounded by the recorder ceiling) and {@code truncated} is set by the recorder, never guessed.
  *

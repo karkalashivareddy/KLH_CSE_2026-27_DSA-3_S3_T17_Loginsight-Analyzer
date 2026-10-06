@@ -3,7 +3,7 @@ package com.loginsight.catalog;
 import java.util.List;
 
 /**
- * Module metadata for the Algorithm Laboratory sidebar and course map (docs/REBUILD_BASELINE
+ * Module metadata for the Algorithm Laboratory sidebar and course map (docs/archive/REBUILD_BASELINE
  * Phase-2 <em>course map / module framing</em>). Counts are computed from the real catalogue, never
  * hard-coded, so they cannot drift from the algorithm list.
  *

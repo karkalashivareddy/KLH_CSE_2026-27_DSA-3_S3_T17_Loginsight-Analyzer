@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 /**
- * Course scope guard for the {@code dsa} package (docs/REBUILD_BASELINE Phase-5).
+ * Course scope guard for the {@code dsa} package (docs/archive/REBUILD_BASELINE Phase-5).
  *
  * <p>DSA-3 forbids {@code java.util} collections inside the hand-built algorithm engines. The
  * pre-rebuild codebase already imports a bounded set of {@code java.util} types (verified during the

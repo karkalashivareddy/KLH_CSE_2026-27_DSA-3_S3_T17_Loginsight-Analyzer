@@ -25,7 +25,7 @@ import com.loginsight.run.RunStore;
 import jakarta.annotation.PreDestroy;
 
 /**
- * Run lifecycle + SSE replay (docs/REBUILD_BASELINE Phase-4). Runs are executed synchronously
+ * Run lifecycle + SSE replay (docs/archive/REBUILD_BASELINE Phase-4). Runs are executed synchronously
  * against the real trace-instrumented algorithms, stored in the bounded {@link RunStore}, and
  * replayed over {@code GET /api/runs/{id}/events} as an SSE stream of the genuinely recorded steps
  * plus a meta and a complete event. Replay is a faithful emission of recorded events; it never

@@ -15,7 +15,7 @@ npm run build
 
 Results:
 
-- Backend: **877 tests, 0 failures, 0 errors**; Spring Boot jar packaged successfully.
+- Backend: **878 tests, 0 failures, 0 errors**; Spring Boot jar packaged successfully.
 - Frontend: **55 tests across 17 files passed** with Vitest.
 - Frontend build: TypeScript compilation and Vite production build passed.
 - JaCoCo: report generated under `backend/target/site/jacoco/`; no numeric coverage threshold is configured in the POM.

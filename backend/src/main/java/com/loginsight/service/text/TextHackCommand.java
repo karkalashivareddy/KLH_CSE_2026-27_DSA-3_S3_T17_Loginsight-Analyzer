@@ -3,7 +3,7 @@ package com.loginsight.service.text;
 import com.loginsight.exception.InvalidQueryException;
 
 /**
- * The six TextHack query classes (docs/REBUILD_BASELINE Phase-3). Each class routes to a fixed,
+ * The six TextHack query classes (docs/archive/REBUILD_BASELINE Phase-3). Each class routes to a fixed,
  * course-valid engine; the caller only picks the class and supplies input.
  */
 public enum TextHackCommand {

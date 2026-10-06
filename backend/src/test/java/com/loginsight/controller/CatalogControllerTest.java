@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Catalogue and module metadata endpoints (docs/REBUILD_BASELINE Phase-2).
+ * Catalogue and module metadata endpoints (docs/archive/REBUILD_BASELINE Phase-2).
  */
 @SpringBootTest
 @AutoConfigureMockMvc

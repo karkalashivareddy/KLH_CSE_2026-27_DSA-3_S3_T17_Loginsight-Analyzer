@@ -1,8 +1,8 @@
 # FINAL REBUILD REPORT — TextHack: Advanced Algorithms Laboratory
 
-> Historical phase report. It is retained for traceability and is not the current product contract. For the current `main` implementation, see [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md), [API.md](API.md) and [README.md](../README.md).
+> Historical phase report. It is retained for traceability and is not the current product contract. For the current `main` implementation, see [IMPLEMENTATION_AUDIT.md](../IMPLEMENTATION_AUDIT.md), [API.md](../API.md) and [README.md](../../README.md).
 
-> **Stale figures in this file.** Every test count, route name and Lab behaviour below is a snapshot of the phase this report describes. The current suite is **877 backend tests** plus **55 frontend tests across 17 files**, and the current UI surface is documented in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md). Do not read the counts, `/labs/:module/:key` deep links, `TextHackPage`, `LabPage`, `CourseMapPage` or the run-launching Lab described here as current.
+> **Stale figures in this file.** Every test count, route name and Lab behaviour below is a snapshot of the phase this report describes. The current suite is **877 backend tests** plus **55 frontend tests across 17 files**, and the current UI surface is documented in [IMPLEMENTATION_AUDIT.md](../IMPLEMENTATION_AUDIT.md). Do not read the counts, `/labs/:module/:key` deep links, `TextHackPage`, `LabPage`, `CourseMapPage` or the run-launching Lab described here as current.
 
 Transforms **LogInsight Analyzer** into a DSA-3 lab where real algorithms, real traces, and real
 benchmarks are surfaced through a six-module catalogue, a natural-style query facade, and recorded
@@ -13,7 +13,7 @@ run sessions. Verification at that phase: **696 backend tests / 0 failures**, `m
 
 | Phase | Deliverable | Evidence |
 |---|---|---|
-| 1 | Baseline audit + research (`docs/REBUILD_BASELINE.md`, `docs/RESEARCH.md`) | commits `e5dd233` |
+| 1 | Baseline audit + research (`docs/archive/REBUILD_BASELINE.md`, `docs/RESEARCH.md`) | commits `e5dd233` |
 | 2 | Algorithm catalogue + module metadata API (`/api/modules`, `/api/algorithms`) + `RequestFactory` guards | `AlgorithmCatalogTest`, `RequestFactoryTest` — commit `76ff967`, service/test refiled in `f014e5a` |
 | 3 | TextHack unified query API (6 query classes → real KMP/Levenshtein/Needleman-Wunsch/Dinic/VC/Miller-Rabin) | `TextHackControllerTest` (7) — commit `67ef612` |
 | 4 | Run lifecycle + SSE replay (`/api/runs`, `/api/runs/{id}/events`) with bounded in-memory `RunStore` | `RunControllerTest` (3) — commit `b613b3f` |
@@ -79,7 +79,7 @@ rebuild and fixed all findings:
 Result: verification unchanged for that phase — **696 tests / 0 failures** (`mvn -q verify`),
 `npm run build` clean, and the rebuilt jar passed the live smoke matrix (catalogue, searches without
 scope, TextHack, runs/SSE). The current gate is 877 backend tests plus the 53-test frontend suite across 10 files;
-see [13-testing.md](13-testing.md).
+see [13-testing.md](../13-testing.md).
 
 ## How to verify (current branch)
 

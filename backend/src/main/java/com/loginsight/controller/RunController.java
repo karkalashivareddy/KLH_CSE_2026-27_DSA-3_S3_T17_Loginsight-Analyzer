@@ -20,7 +20,7 @@ import com.loginsight.run.RunRecord;
 import com.loginsight.service.RunService;
 
 /**
- * Run history and SSE trace replay (docs/REBUILD_BASELINE Phase-4). Runs are created synchronously
+ * Run history and SSE trace replay (docs/archive/REBUILD_BASELINE Phase-4). Runs are created synchronously
  * against a real trace-instrumented algorithm and their recorded steps are replayed as an SSE
  * stream of {@code meta / step / complete} events.
  */

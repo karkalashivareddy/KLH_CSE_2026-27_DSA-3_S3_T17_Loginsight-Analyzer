@@ -399,7 +399,7 @@ Browser-driven QA earned its keep — five real defects were found that the test
   the source tags are uppercase tracked micro-labels in the dense-console type system. An earlier
   revision of this report recorded them at 9 px; re-measuring the current build shows no stylesheet
   declares a `font-size` below 10 px and these rules resolve to 11 px, which is the floor documented in
-  [docs/design-system.md](docs/design-system.md). The system is applied to micro-labels rather than body
+  [design system](../design-system.md). The system is applied to micro-labels rather than body
   copy, so it was left as an established design decision and reported rather than hidden.
 - **The dataset service map requires a dataset.** With no dataset loaded the 404 is surfaced honestly
   through the existing `NoDatasetState` instead of being masked. The generated fleet section was

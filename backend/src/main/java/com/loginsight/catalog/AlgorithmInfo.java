@@ -1,7 +1,7 @@
 package com.loginsight.catalog;
 
 /**
- * Static metadata for one algorithm in the laboratory catalogue (docs/REBUILD_BASELINE §Phase-2).
+ * Static metadata for one algorithm in the laboratory catalogue (docs/archive/REBUILD_BASELINE §Phase-2).
  *
  * <p>Every value is derived from the implemented source (complexity strings follow the class-level
  * javadoc of the owning DSA class, endpoint paths follow the verified REST surface). The catalogue

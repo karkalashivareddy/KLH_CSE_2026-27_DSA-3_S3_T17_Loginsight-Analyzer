@@ -15,7 +15,7 @@
 |---|---|
 | Project | LogInsight Analyzer |
 | Type | DSA-3 Advanced Algorithmic Log Intelligence and Text Analytics System |
-| Repository | `KLR_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer` |
+| Repository | `KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer` |
 | Academic context | University DSA-3 (Text Analytics / Advanced Algorithms) project |
 | Student badge | Must be explainable under source-code inspection and viva questioning |
 

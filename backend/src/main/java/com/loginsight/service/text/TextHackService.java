@@ -26,7 +26,7 @@ import com.loginsight.service.CatalogService;
 import com.loginsight.service.LogService;
 
 /**
- * The TextHack natural-style query facade (docs/REBUILD_BASELINE Phase-3). Six fixed query classes
+ * The TextHack natural-style query facade (docs/archive/REBUILD_BASELINE Phase-3). Six fixed query classes
  * each route to one hand-built engine through the existing {@link QueryDispatcher}; no execution
  * path is duplicated and every number in the response is produced by the real algorithm.
  */

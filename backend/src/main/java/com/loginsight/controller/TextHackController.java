@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.loginsight.service.text.TextHackService;
 
 /**
- * TextHack unified query endpoint (docs/REBUILD_BASELINE Phase-3). {@code queryClass} selects one of
+ * TextHack unified query endpoint (docs/archive/REBUILD_BASELINE Phase-3). {@code queryClass} selects one of
  * six course-scoped classes; {@code input} mirrors the request DTO of the underlying engine.
  */
 @RestController

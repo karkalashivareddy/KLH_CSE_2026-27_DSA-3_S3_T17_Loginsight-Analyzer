@@ -8,7 +8,7 @@ import java.util.Optional;
 import com.loginsight.trace.TraceCatalog;
 
 /**
- * Static catalogue of every implemented algorithm in the laboratory (docs/REBUILD_BASELINE
+ * Static catalogue of every implemented algorithm in the laboratory (docs/archive/REBUILD_BASELINE
  * Phase-2). Six DSA-3 modules: String Algorithms, Advanced DP, Network Flow, Approximation /
  * NP-Completeness, Randomized, Parallel.
  *

@@ -16,7 +16,7 @@ import com.loginsight.dto.request.SearchRequest;
 import com.loginsight.exception.InvalidQueryException;
 
 /**
- * RequestFactory conversions and guards (docs/REBUILD_BASELINE Phase-2): the same typed records as
+ * RequestFactory conversions and guards (docs/archive/REBUILD_BASELINE Phase-2): the same typed records as
  * the canonical endpoints, with laboratory bounds enforced before any engine runs.
  */
 class RequestFactoryTest {

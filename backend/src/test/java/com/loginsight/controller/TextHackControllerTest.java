@@ -12,7 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * TextHack unified query endpoint (docs/REBUILD_BASELINE Phase-3): each query class routes to its
+ * TextHack unified query endpoint (docs/archive/REBUILD_BASELINE Phase-3): each query class routes to its
  * real engine and carries honest labels (approximate/expected) through the response.
  */
 @SpringBootTest

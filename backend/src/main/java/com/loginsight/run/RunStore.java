@@ -9,7 +9,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
- * Bounded in-memory run history (docs/REBUILD_BASELINE Phase-4). Keeps the {@code maxRuns} most
+ * Bounded in-memory run history (docs/archive/REBUILD_BASELINE Phase-4). Keeps the {@code maxRuns} most
  * recent completed runs with thread-safe access; older runs are evicted FIFO. Deliberately
  * in-memory: history is diagnostic and resets with the process - the docs state this honestly.
  */

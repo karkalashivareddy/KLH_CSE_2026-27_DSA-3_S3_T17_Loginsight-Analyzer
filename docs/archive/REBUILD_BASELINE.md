@@ -1,8 +1,8 @@
 # Rebuild Baseline — Forensic Repository Audit
 
-> Historical snapshot taken before the later rebuild. It intentionally records the old baseline and is not a current API or UI specification. See [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) for the current branch.
+> Historical snapshot taken before the later rebuild. It intentionally records the old baseline and is not a current API or UI specification. See [IMPLEMENTATION_AUDIT.md](../IMPLEMENTATION_AUDIT.md) for the current branch.
 
-> Counts, route lists and CI steps in this file describe the pre-rebuild tree. The current branch runs `mvn -B verify` (see [13-testing.md](13-testing.md) for the current verified count), `npm ci`, `npm test` and `npm run build`.
+> Counts, route lists and CI steps in this file describe the pre-rebuild tree. The current branch runs `mvn -B verify` (see [13-testing.md](../13-testing.md) for the current verified count), `npm ci`, `npm test` and `npm run build`.
 
 Date: 2026-09-23
 Scope: full checkout at `main` (HEAD after fast-forward to `ead2f86`).
@@ -124,7 +124,7 @@ Engineering:
    syllabus is not enforced, and previously-unmeasured licenses vary by class.
    *(Resolved on the current branch: `EngineScopeGuardTest` freezes a per-file
    `java.util` manifest, fails the build on any new `dsa/**` import, and lets the
-   ledger shrink. See [13-testing.md](13-testing.md).)*
+   ledger shrink. See [13-testing.md](../13-testing.md).)*
 7. **Frontend has no tests, no lint, no a11y pass.**
 8. **Stale doc links**: `docs/04` cites `05-string-algorithms.md` and
    `07-network-flow.md`, which do not exist in the tree.

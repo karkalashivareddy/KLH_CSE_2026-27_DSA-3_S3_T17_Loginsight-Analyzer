@@ -12,7 +12,11 @@ The current backend exposes a 42-entry algorithm catalogue across six modules. T
 | Parallel | 3 | 3 | 0 |
 | **Total** | **42** | **36** | **13** |
 
-`EngineRegistry` contains 35 query engines. The count differs from reachable catalogue entries because suffix build/search share one engine and several entries are library-only.
+`QueryDispatcher` registers **35 dispatch keys** for the **36** reachable catalogue entries. The single difference is `suffix_array` and `suffix_search`, which are two catalogue entries (the build phase and the query phase of one algorithm) served by one engine registered under `SUFFIX_ANALYSIS|SUFFIX_ARRAY`.
+
+The 6 entries absent from both columns — `kasai_lcp`, `bounded_vertex_cover`, `vertex_cover_kernelization`, `knapsack_fptas`, `vc_is_reduction`, `perfect_hash` — are library-only. They have no endpoint, so they contribute to neither the reachable count nor the dispatch-key count; they are catalogued and unit-tested, and `AlgorithmCatalogTest` requires `exposed == false` for exactly this set.
+
+All four figures above are derived from `AlgorithmCatalog` at runtime rather than hand-maintained, and `CatalogControllerTest` asserts the endpoint-served API reports the same numbers.
 
 ## Product-facing algorithms
 

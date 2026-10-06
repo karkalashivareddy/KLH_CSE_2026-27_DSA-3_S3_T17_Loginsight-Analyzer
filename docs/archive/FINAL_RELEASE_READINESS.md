@@ -7,7 +7,7 @@ system were treated as frozen and reviewed, not rewritten.
 **Outcome:** the branch was subsequently committed and pushed to `origin/main`, and GitHub Actions ran
 green on it. The "nothing committed" wording that earlier appeared here was true only of the freeze pass
 that produced this document and was stale once the branch was released; see
-[final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md) for the
+[final-submission/FINAL_SUBMISSION_INDEX.md](../../final-submission/FINAL_SUBMISSION_INDEX.md) for the
 authoritative commit and CI references.
 
 ---
@@ -300,7 +300,7 @@ release blocker was found, and no application source was modified.**
    the session ordinal and the per-session emission sequence, in a range above any ingested dataset id.
    The frontend key helper namespaces by provenance rather than treating a negative id as a signal. A
    subsequent browser pass on the live stream recorded **0** duplicate-key warnings. See commit
-   `ac9a1b5` and [FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md).
+   `ac9a1b5` and [FINAL_SUBMISSION_INDEX.md](../../final-submission/FINAL_SUBMISSION_INDEX.md).
 2. **Overview mobile touch targets.** At 390×844 the Overview exposes 11 buttons under 32px tall
    (five time-range chips at 25px, six full-width event rows at 17px). The 10px+ / touch-target work
    was verified on `/logs`, which is what the visual report claims; this is a separate, lesser

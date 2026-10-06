@@ -11,7 +11,7 @@ import com.loginsight.catalog.AlgorithmInfo;
 import com.loginsight.catalog.ModuleInfo;
 
 /**
- * Read-only service over the algorithm catalogue (docs/REBUILD_BASELINE Phase-2). Computed module
+ * Read-only service over the algorithm catalogue (docs/archive/REBUILD_BASELINE Phase-2). Computed module
  * counts (implemented / exposed / traceable) are derived from {@link AlgorithmCatalog} so they
  * cannot drift from the data.
  */

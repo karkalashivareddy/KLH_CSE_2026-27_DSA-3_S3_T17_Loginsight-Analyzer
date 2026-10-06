@@ -195,7 +195,7 @@ export interface ApiError {
   path: string;
 }
 
-/* ── RESTART · TextHack laboratory surface (backend docs/REBUILD_BASELINE Phase 2-4) ───────── */
+/* ── RESTART · TextHack laboratory surface (backend docs/archive/REBUILD_BASELINE Phase 2-4) ───────── */
 
 /** GET /api/modules — module framing with computed counts (backend ModuleInfo). */
 export interface ModuleInfo {

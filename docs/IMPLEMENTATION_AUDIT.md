@@ -2,7 +2,7 @@
 
 Audit snapshot: refreshed against `main`.
 
-This is the canonical description of the checked-out implementation. It is based on the current source, tests, frontend routes, build files and API controllers. Historical rebuild reports remain in `docs/` as snapshots; they are not the current contract.
+This is the canonical description of the checked-out implementation. It is based on the current source, tests, frontend routes, build files and API controllers. Historical rebuild reports remain in [`docs/archive/`](archive/); they are not the current contract.
 
 **Terminology.** These documents use **Dataset Replay** for the bounded replay of the loaded dataset served by `GET /api/live`. Its frontend route is `/replay`, its sidebar entry and page heading read `Dataset Replay`, the backend reports `source: "demo-replay"` and the UI shows a "not real-time" disclosure. The `/live` route is a different surface: **Live Monitor**, the deterministic server-generated simulation served by `GET /api/simulation/stream` and reporting `source: "live-simulation"`. The two are never interchangeable.
 
@@ -10,7 +10,7 @@ This is the canonical description of the checked-out implementation. It is based
 
 | Gate | Command | Result |
 |---|---|---|
-| Backend | `cd backend; .\mvnw.cmd -o verify` | 877 tests, 0 failures, 0 errors; Spring Boot jar packaged |
+| Backend | `cd backend; .\mvnw.cmd -o verify` | 878 tests, 0 failures, 0 errors; Spring Boot jar packaged |
 | Frontend tests | `cd frontend; npm test` | 55 tests across 17 files passed |
 | Frontend build | `cd frontend; npm run build` | TypeScript and Vite production build passed |
 | Compose syntax | `docker compose config --quiet` | Passed |
@@ -155,7 +155,7 @@ Explicit limits are documented in [API.md](API.md). Important ones include the 6
 | Parallel | 3 | 3 | 0 |
 | **Total** | **42** | **36** | **13** |
 
-`EngineRegistry` registers 35 query engines. The difference between engines and reachable catalogue entries is intentional: suffix build/search share one engine, while several catalogue implementations are library-only.
+`QueryDispatcher` registers 35 dispatch keys for the 36 reachable entries. `suffix_array` and `suffix_search` are two catalogue entries served by one engine (build and query phases). The 6 entries not counted as reachable at all — `kasai_lcp`, `bounded_vertex_cover`, `vertex_cover_kernelization`, `knapsack_fptas`, `vc_is_reduction`, `perfect_hash` — are library-only, with `exposed == false` enforced by `AlgorithmCatalogTest`.
 
 Product use is narrower than catalogue exposure. KMP is the default product search matcher; Levenshtein is used for zero-hit suggestions; pattern and dataset-incident screens use deterministic heuristics; analytics and benchmarks compute from the active dataset. The Command Center topology folds the dataset by `requestId` in `ServiceGraphBuilder`, which is a deterministic adjacency pass rather than a catalogue algorithm driving an independent panel.
 

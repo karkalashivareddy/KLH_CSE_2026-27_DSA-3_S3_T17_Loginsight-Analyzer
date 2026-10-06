@@ -20,7 +20,7 @@ import com.loginsight.exception.InvalidQueryException;
 /**
  * Converts the free-form {@code Map} input of TextHack queries and run requests into the same typed
  * request records the canonical REST endpoints accept, so both surfaces share one validation path
- * (docs/REBUILD_BASELINE Phase-2/3). Guards keep every converted input within the laboratory
+ * (docs/archive/REBUILD_BASELINE Phase-2/3). Guards keep every converted input within the laboratory
  * bounds: {@code maxElements} entries in arrays and {@code maxTextLength} chars in haystacks.
  */
 public final class RequestFactory {

@@ -4,8 +4,8 @@
 > It is not the current verification record. Its route-level and viewport-level measurements describe
 > that build. Two of its findings were later resolved and its test and typography figures were later
 > corrected against the current tree; those corrections are marked inline below. For the authoritative
-> current figures see [docs/13-testing.md](docs/13-testing.md),
-> [final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md) and
+> current figures see [testing guide](../13-testing.md),
+> [final-submission/FINAL_SUBMISSION_INDEX.md](../../final-submission/FINAL_SUBMISSION_INDEX.md) and
 > [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md).
 
 **Date:** 2026-09-27 (historical)
@@ -23,7 +23,7 @@ A final presentation pass was executed against the running application. **10 con
 - **16 routes × 3 viewports = 48 route/viewport combinations: 0 horizontal overflow, 0 not-found pages, 0 uncaught exceptions.** Console errors are 0 on passive routes; at the time of this pass React duplicate-key warnings were emitted on `/scenario-lab` and `/live` during live streaming. **That defect has since been fixed** — generated simulation events now carry a deterministic unique id, and a later browser pass recorded 0 duplicate-key warnings. See Section 17 and [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md) section B.
 - **Live simulation confirmed working end-to-end** with metrics that move coherently (tick, error rate, p95, throughput, service health, incident lifecycle, algorithm evidence).
 - **No leaks across 3 full start/stop cycles** (DOM nodes and JS heap flat).
-- **Contrast:** 0 confirmed low-contrast text on all audited routes. The 9px figures quoted in this section are superseded: re-measuring the current tree finds no stylesheet declaring a `font-size` below **10px**, and the micro-label rules cited below resolve to 11px. The floor is documented in [docs/design-system.md](docs/design-system.md).
+- **Contrast:** 0 confirmed low-contrast text on all audited routes. The 9px figures quoted in this section are superseded: re-measuring the current tree finds no stylesheet declaring a `font-size` below **10px**, and the micro-label rules cited below resolve to 11px. The floor is documented in [design system](../design-system.md).
 - **Accessibility:** reduced-motion honoured, accessible service list present, mobile touch targets corrected.
 - Backend **877 tests / 0 failures / 0 errors**, frontend **55 tests / 17 files**, TypeScript clean, production build successful.
 
@@ -64,7 +64,7 @@ A final presentation pass was executed against the running application. **10 con
 
 ## 5. Typography audit
 
-The application uses a deliberately dense operations-console aesthetic with many small labels. The table below records the pass as it was measured at the time. **Correction added when this report was re-checked against the current tree:** every "After" value in the 9px column is now 10px or larger. Re-measuring the current build finds no stylesheet declaring a `font-size` below **10px**, and the rules named here — `.log-query-syntax code`, `.workspace-kicker`, `.sidebar-section-label`, `.sidebar-footer-meta` — resolve to 11px. The 10px floor is documented in [docs/design-system.md](docs/design-system.md). The underlying work was real; only the recorded target value was stale.
+The application uses a deliberately dense operations-console aesthetic with many small labels. The table below records the pass as it was measured at the time. **Correction added when this report was re-checked against the current tree:** every "After" value in the 9px column is now 10px or larger. Re-measuring the current build finds no stylesheet declaring a `font-size` below **10px**, and the rules named here — `.log-query-syntax code`, `.workspace-kicker`, `.sidebar-section-label`, `.sidebar-footer-meta` — resolve to 11px. The 10px floor is documented in [design system](../design-system.md). The underlying work was real; only the recorded target value was stale.
 
 **Fixed (8 rules, all content-bearing text):**
 
