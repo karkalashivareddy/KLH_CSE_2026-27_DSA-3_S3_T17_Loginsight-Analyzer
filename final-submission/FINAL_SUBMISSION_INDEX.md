@@ -5,8 +5,9 @@
 The repository now includes the Signal in Motion light-first frontend and a route-based guided
 demonstration. Local verification for this revision reports **878 backend tests passed** and **56
 frontend tests across 18 files passed**; TypeScript and the production build pass, with a Vite warning
-for the 576.56 kB minified lazy topology chunk. No browser visual checks, fresh screenshots, or GitHub
-Actions result were available for this revision. The report, PDF, presentation, and images below are
+for the 576.56 kB minified lazy topology chunk. GitHub Actions run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637)
+for commit `e09c49fda898c2edb28ff4109bd61403096d29ca` passed both jobs. No browser visual checks or
+fresh screenshots were available for this revision. The report, PDF, presentation, and images below are
 historical artifacts and do not depict the redesigned interface. The verification table that follows
 is preserved as historical evidence for its named commit.
 

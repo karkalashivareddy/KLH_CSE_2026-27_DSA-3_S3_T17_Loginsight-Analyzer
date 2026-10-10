@@ -20,6 +20,8 @@ CI mirrors these gates: the backend job runs `mvn -B verify` and the frontend jo
 
 Backend verify completed locally: 878 tests, 0 failures, 0 errors, 0 skipped, and the Spring Boot jar was packaged. The frontend test result includes the guided-demo regression. The TypeScript and production build passed; the production build emits a 576.56 kB minified lazy topology chunk (145.44 kB gzip) and warns about chunks over 500 kB. Docker is unavailable (`docker info` cannot reach `docker_engine`), so image builds and container smoke tests remain unexecuted and unclaimed. Browser visual verification and viewport screenshots were not run; no current screenshots are represented as evidence.
 
+GitHub Actions run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637), for commit `e09c49fda898c2edb28ff4109bd61403096d29ca`, completed successfully. Its Backend tests and Frontend tests and build jobs both passed.
+
 The Maven build targets Java 21 and uses Spring Boot 3.5.16. The frontend uses React 18, TypeScript, Vite, React Router and Vitest 5; the Vitest suite requires Node 22.12 or newer. The frontend has no configured browser-test or lint command.
 
 ## Runtime shape

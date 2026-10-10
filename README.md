@@ -227,7 +227,7 @@ npm.cmd run build
 
 Results on the final source revision: backend **878 tests**, 0 failures, 0 errors, 0 skipped; frontend Vitest **56 tests across 18 files** passed; TypeScript and Vite production build passed. The build reports the lazy topology chunk at 576.56 kB minified (145.44 kB gzip), above Vite's 500 kB chunk warning threshold. These are local results, not GitHub Actions evidence. The backend produces JaCoCo reports under `backend/target/site/jacoco/`.
 
-**GitHub Actions verification** — `.github/workflows/ci.yml` runs on every push to `main`: backend `mvn -B verify`; frontend `npm ci`, `npm test`, and `npm run build`. GitHub Actions status for this revision was not available from the execution environment and is not claimed here.
+**GitHub Actions verification** — workflow run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637) on commit `e09c49fda898c2edb28ff4109bd61403096d29ca` completed successfully. Both **Backend tests** and **Frontend tests and build** jobs passed.
 
 Two facts about those numbers, so they are not over-read:
 
