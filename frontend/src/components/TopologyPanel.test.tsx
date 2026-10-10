@@ -41,7 +41,7 @@ describe('TopologyPanel', () => {
     expect(screen.getByText('Observed request-trail adjacency')).toBeInTheDocument();
     expect(screen.getByText(/api → auth/)).toHaveTextContent('8 observed weight');
     expect(container.querySelector('[data-node-id="api"]')).toHaveAttribute('data-events', '100');
-    expect(container.querySelector('[data-edge-weight="8"]')).toHaveAttribute('data-particle-count', '7');
+    expect(container.querySelector('[data-edge-weight="8"]')).toHaveAttribute('data-marker-count', '7');
     expect(Number(container.querySelector('[data-node-id="api"]')?.getAttribute('data-radius'))).toBeGreaterThan(Number(container.querySelector('[data-node-id="auth"]')?.getAttribute('data-radius')));
   });
 
@@ -108,15 +108,69 @@ describe('TopologyPanel', () => {
     expect(container.querySelector('.topology-svg')).toHaveAttribute('viewBox', '0 0 760 440');
   });
 
-  it('marks static particles when reduced motion is requested', () => {
+  it('keeps weighted edge markers static for a dataset rather than implying ongoing traffic', () => {
     const original = window.matchMedia;
     Object.defineProperty(window, 'matchMedia', { configurable: true, value: vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }) });
 
     const { container } = render(<TopologyPanel nodes={nodes} edges={edges} />);
 
     expect(container.querySelector('.topology-stage')).toHaveAttribute('data-reduced-motion', 'true');
-    expect(container.querySelectorAll('.topology-particle--static')).toHaveLength(7);
+    expect(container.querySelectorAll('.topology-weight-marker')).toHaveLength(7);
+    expect(container.querySelector('animateMotion')).not.toBeInTheDocument();
 
     Object.defineProperty(window, 'matchMedia', { configurable: true, value: original });
+  });
+
+  it('zooms and resets the 2D canvas with bounded view extents', () => {
+    const { container } = render(<TopologyPanel nodes={nodes} edges={edges} />);
+    const svg = container.querySelector('.topology-svg')!;
+    expect(svg).toHaveAttribute('viewBox', '0 0 760 440');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }));
+    const zoomed = svg.getAttribute('viewBox')!;
+    expect(zoomed).not.toBe('0 0 760 440');
+    expect(Number(zoomed.split(' ')[2])).toBeGreaterThanOrEqual(230);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Fit to view' }));
+    expect(svg).toHaveAttribute('viewBox', '0 0 760 440');
+  });
+
+  it('drops malformed and dangling graph entries while coalescing duplicate directed edges', () => {
+    const { container } = render(<TopologyPanel
+      nodes={[{ id: 'api', events: 10 }, { id: 'api', events: 99 }, { id: 'broken', events: Number.NaN }, { id: 'auth', events: 3 }]}
+      edges={[{ source: 'api', target: 'auth', weight: 2 }, { source: 'api', target: 'auth', weight: 4 }, { source: 'missing', target: 'api', weight: 20 }, { source: 'api', target: 'auth', weight: Number.NaN }]}
+    />);
+
+    expect(container.querySelectorAll('[data-node-id]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-edge-weight]')).toHaveLength(1);
+    expect(container.querySelector('[data-edge-weight]')).toHaveAttribute('data-edge-weight', '6');
+    expect(screen.getByRole('list', { name: 'Observed request-trail adjacency edges' })).toHaveTextContent('6 observed weight');
+  });
+
+  it('caps excessive graph rendering and reports the omitted input records', () => {
+    const manyNodes = Array.from({ length: 252 }, (_, index) => ({ id: `service-${index}`, events: index }));
+    const manyEdges = Array.from({ length: 2_501 }, (_, index) => ({
+      source: `service-${Math.floor(index / 249)}`,
+      target: `service-${1 + (index % 249)}`,
+      weight: index + 1
+    }));
+    const { container } = render(<TopologyPanel nodes={manyNodes} edges={manyEdges} />);
+
+    expect(container.querySelectorAll('[data-node-id]')).toHaveLength(250);
+    expect(container.querySelectorAll('.topology-service-button')).toHaveLength(250);
+    expect(screen.getByRole('status')).toHaveTextContent('2 additional node records omitted');
+    expect(screen.getByRole('status')).toHaveTextContent('additional edge records omitted');
+    expect(container.querySelectorAll('.topology-edge-item')).toHaveLength(2_500);
+  });
+
+  it('supports selecting a node with the keyboard and clearing the selection', () => {
+    const onSelect = vi.fn();
+    const { container } = render(<TopologyPanel nodes={nodes} edges={edges} onSelect={onSelect} />);
+    const node = container.querySelector('[data-node-id="api"]')!;
+
+    fireEvent.keyDown(node, { key: 'Enter' });
+    expect(onSelect).toHaveBeenCalledWith('api');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear selection' }));
+    expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 });

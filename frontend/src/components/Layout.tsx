@@ -459,6 +459,19 @@ function CommandPalette({ open, onClose, onToggleSidebar, sidebarCollapsed }: {
 
 export default function Layout() {
   const location = useLocation();
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
+    const targets = [...document.querySelectorAll<HTMLElement>('.app-main .page > section, .app-main .page > .card, .app-main .page > .overview-metrics, .app-main .page > .overview-main-grid, .app-main .page > .overview-lower-grid')];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('atlas-scroll-revealed');
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+    targets.forEach((target) => observer.observe(target));
+    return () => observer.disconnect();
+  }, [location.pathname]);
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false;
     try {

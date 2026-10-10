@@ -1,4 +1,6 @@
 {
+  "historical": true,
+  "historicalNote": "Legacy capture report from the previous interface revision. Current Signal Atlas screenshots and their reproducible capture script are in docs/images/signal-atlas/ and frontend/scripts/capture-visuals.mjs.",
   "taken": [
     "overview",
     "scenario-lab",

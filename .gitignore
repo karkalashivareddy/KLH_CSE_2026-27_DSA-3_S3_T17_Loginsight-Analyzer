@@ -13,6 +13,8 @@ build/
 *.tsbuildinfo
 coverage/
 .vite/
+frontend/playwright-report/
+frontend/test-results/
 
 # Environment & secrets
 .env

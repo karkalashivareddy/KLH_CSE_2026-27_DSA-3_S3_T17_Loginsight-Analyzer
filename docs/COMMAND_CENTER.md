@@ -50,11 +50,11 @@ What the graph is not:
 - A missing edge is not evidence of a missing call. Services that never shared a `requestId`, or that logged under different names, will not appear.
 - Node size follows observed event counts. It is not a capacity or traffic-share value.
 
-### Deterministic edge-weight particles
+### Static edge-weight markers
 
-Each edge draws `min(8, max(1, ceil(normalizedWeight * 7)))` particles, where `normalizedWeight = weight / maxEdgeWeight` over the currently rendered edge set. Particle count, edge stroke width (`1 + normalized * 4`), stroke opacity (`0.3 + normalized * 0.55`), curvature offset and animation duration (`max(1.2, 3.2 - normalized * 1.8)`) are all pure functions of the returned weight, so the same data always produces the same picture.
+Edge stroke width (`1 + normalized * 4`), stroke opacity (`0.3 + normalized * 0.55`), curvature and static marker count are derived from the returned edge weight. Markers are positioned deterministically on the quadratic curve and do not move, so a dataset graph cannot be mistaken for ongoing traffic.
 
-Particle positions are computed analytically on the quadratic Bézier control path at `(particleIndex + 1) / (particleCount + 1)`, and each `animateMotion` is staggered by `particleIndex * duration / particleCount`. Nothing is random or time-seeded. `prefers-reduced-motion: reduce` drops `animateMotion` and marks the particles `topology-particle--static`; opacity-only CSS animation is also disabled.
+The 2D renderer caps the graph at 250 services and 2,500 edge records. It reports omitted records, keeps the accessible node/edge lists aligned with the rendered subset, and shows the strongest 18 edges by default. `Show all` expands to the full returned subset. The 3D scene renders at most 500 strongest edges from that same graph response. Reduced motion disables nonessential SVG and camera movement.
 
 ### Display modes
 
@@ -63,7 +63,7 @@ Particle positions are computed analytically on the quadratic Bézier control pa
 | `2d` | Default flat SVG on a 760×440 viewBox. The accessible service and edge lists remain visible beneath it. |
 | `3d` | Lazy-loaded Three.js/WebGL scene with perspective camera, orbit/zoom controls, hover details, selected-service focus and fit/reset camera actions. It uses the same API-derived nodes and edges as 2D. |
 
-The 3D canvas is supplementary and lazy-loaded; if WebGL initialization or context is unavailable, the panel displays a fallback notice and the SVG view remains available. The canvas is hidden from assistive technology because the service/edge lists are the semantic view. The optional scene maps event volume to node size, heuristic health to node state, and observed adjacency weight to edge thickness and normalized moving marker density/speed. Those markers are representative visual signals, not exact request counts or a live external stream. The observed graph remains request-trail co-occurrence, not verified infrastructure or proven causality.
+The 3D canvas is supplementary and lazy-loaded; if WebGL initialization or context is unavailable, the panel displays a fallback notice and the 2D view remains available. The canvas is hidden from assistive technology because the service/edge lists are the semantic view. Node size follows event volume, health reflects the existing heuristic band, and static edge geometry/markers follow observed request-trail weight. The graph is co-occurrence, not verified infrastructure or proven causality.
 
 ### Interaction and accessibility
 

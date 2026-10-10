@@ -1,5 +1,7 @@
 # LogInsight 0.1.0 — Real-Time Log Intelligence & Incident Investigation Platform
 
+Historical 0.1.0 release snapshot. Its verification counts and UI descriptions are preserved for that release and do not describe the later Signal Atlas rebuild; see [13-testing.md](13-testing.md) and [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) for the current implementation.
+
 ## Status
 
 This is the current single-node release shape for the academic/portfolio project. It is not a public or production deployment. The backend, frontend and Compose artifacts are present in the repository; the audit environment did not have a running Docker daemon, so image build/runtime smoke tests remain a local follow-up.

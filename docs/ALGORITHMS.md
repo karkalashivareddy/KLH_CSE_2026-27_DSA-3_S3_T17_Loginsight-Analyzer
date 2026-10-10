@@ -69,7 +69,7 @@ Pure-Java analyzers provide timeline buckets, severity histograms, a 7×24 UTC h
 3. For each event, link the previous service to the current one whenever the two differ, and increment the `a->b` trail counter.
 4. `nodeCountsFrom` counts events per service for node sizing; `topNodes` returns the descending frequency order with a name tiebreak.
 
-Edge `weight` is the observed pair count, which is what drives the topology's stroke width, opacity, curvature and deterministic particle count. The output is an observation of adjacency inside the loaded logs over the full current dataset; it is not verified infrastructure topology, and a missing edge is not evidence that a call did not occur. `ServiceGraphBuilderTest` covers the fold, the ordering and the request-trail counts.
+Edge `weight` is the observed pair count and drives the topology's static stroke width and marker size. The output is an observation of adjacency inside the loaded logs over the full current dataset; it is not verified infrastructure topology, and a missing edge is not evidence that a call did not occur. `ServiceGraphBuilderTest` covers the fold, the ordering and the request-trail counts.
 
 ### Search benchmark
 

@@ -16,7 +16,7 @@ const health: SystemStatus = { status: 'UP', service: 'loginsight', timestamp: '
 
 function renderPage() { return render(<MemoryRouter><GuidedDemoProvider><ReplayProvider><OverviewPage /></ReplayProvider></GuidedDemoProvider></MemoryRouter>); }
 
-describe('System overview', () => {
+describe('Command Center', () => {
   afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
   it('prioritizes selected-window signals, observed relationships and investigation evidence', async () => {
@@ -28,7 +28,7 @@ describe('System overview', () => {
     vi.spyOn(api, 'liveStatus').mockResolvedValue({ enabled: true, dataset: 'sample', total: 400, source: 'sample', label: 'Ready' });
     renderPage();
 
-    expect(await screen.findByRole('heading', { name: 'System overview' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Command center' })).toBeInTheDocument();
     expect(screen.getByText('Events observed')).toBeInTheDocument();
     expect(screen.getByText('Observed rate')).toBeInTheDocument();
     expect(screen.getByText('6.00%')).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('System overview', () => {
     vi.spyOn(api, 'liveStatus').mockResolvedValue({ enabled: true, dataset: 'sample', total: 400, source: 'demo-replay', label: 'Ready' });
     renderPage();
 
-    expect(await screen.findByText('REPLAY READY')).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Replay status: ready' })).toBeInTheDocument();
     expect(screen.getByLabelText('Bounded SSE replay of this dataset; not live production telemetry')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /request <\*> failed/ })).toHaveAttribute('href', '/logs?q=request%20failed');
   });

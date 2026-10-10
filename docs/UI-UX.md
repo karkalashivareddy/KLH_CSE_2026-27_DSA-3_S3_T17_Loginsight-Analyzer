@@ -41,8 +41,8 @@ The `Algorithm Lab` navigation group contains Lab overview (`/analysis`, aliased
 - **Layout**: nodes sit on a ring sized by node count. There is no force-directed or hierarchical layout.
 - **Encoding**: node radius is `12 + sqrt(normalizedEvents) * 22`; the health dot color and CSS class follow the heuristic error-rate band; the label below the node shows observed events and error percentage.
 - **Edges**: quadratic Bézier paths with an arrowhead marker. Stroke width, opacity and curvature all scale with `weight / maxEdgeWeight`, so the picture is a pure function of the returned data.
-- **Particles**: `min(8, max(1, ceil(normalized * 7)))` circles per edge, positioned analytically on the path and staggered by a fixed per-particle offset. No randomness or time seeding, so the same payload renders identically each time. `prefers-reduced-motion: reduce` removes `animateMotion` and marks the particles `topology-particle--static`, with the CSS opacity drift animation disabled.
-- **Modes**: `2D` is a flat 760×440 SVG. `3D WebGL` lazy-loads a Three.js scene with a perspective camera and OrbitControls. The 3D node positions are deterministically derived from the same service node list; node size follows dataset event volume, node color follows the existing heuristic health band and edges follow observed request-trail weight. Instanced moving markers show normalized edge intensity and are explicitly labelled illustrative rather than exact/live requests.
+- **Topology edges** use static weight encoding. This avoids suggesting live traffic when the graph is a dataset-derived request-trail observation. Motion remains available for selection, camera transitions and graph entry, and honors `prefers-reduced-motion`.
+- **Modes**: `2D` is an interactive SVG. `3D WebGL` lazy-loads a Three.js scene with a perspective camera and OrbitControls. Node positions are deterministically derived from the same service node list; node size follows dataset event volume and edges follow observed request-trail weight. Edges remain static to avoid implying that recorded relationships are live traffic.
 - **Lifecycle and fallback**: the renderer caps device pixel ratio, renders only while its panel is visible and the tab is active, pauses animation for reduced motion, observes resize and visibility changes, and disposes the animation loop, controls, geometries, materials and listeners on unmount. WebGL initialization/context failure displays a recovery message; the SVG view and accessible service/edge lists remain available.
 - **Controls**: mode switch, `Focus selected`, `Fit graph` in 3D and `Reset view`. The panel is controlled or uncontrolled via `mode`/`onModeChange`, `selectedId`/`onSelect` and `defaultMode`.
 
@@ -68,7 +68,7 @@ The current source provides:
 - Visible `:focus-visible` outlines and keyboard-operable controls.
 - Text alternatives for SVG charts and heatmap cells.
 - Topology nodes exposed as `role="button"` with `tabIndex=0`, `aria-pressed` selection and an `aria-label` carrying service name, observed event count and health band. An accessible service list and an accessible edge list mirror the SVG, since the graph is not readable from the shapes alone.
-- `prefers-reduced-motion` handling in CSS and in the topology particle rendering.
+- `prefers-reduced-motion` handling across page and topology transitions.
 - The 3D canvas is hidden from assistive technology because the visible accessible service list and edge list carry the same semantic data; pointer hover is supplementary and not required to inspect services.
 - Responsive rules at 1120 px, 860 px and 680 px, including a mobile navigation drawer and stacked small-screen grids.
 

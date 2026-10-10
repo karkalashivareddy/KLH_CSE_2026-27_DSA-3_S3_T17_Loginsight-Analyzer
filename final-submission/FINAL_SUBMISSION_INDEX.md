@@ -2,14 +2,7 @@
 
 ## Current frontend revision update
 
-The repository now includes the Signal in Motion light-first frontend and a route-based guided
-demonstration. Local verification for this revision reports **878 backend tests passed** and **56
-frontend tests across 18 files passed**; TypeScript and the production build pass, with a Vite warning
-for the 576.56 kB minified lazy topology chunk. GitHub Actions run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637)
-for commit `e09c49fda898c2edb28ff4109bd61403096d29ca` passed both jobs. No browser visual checks or
-fresh screenshots were available for this revision. The report, PDF, presentation, and images below are
-historical artifacts and do not depict the redesigned interface. The verification table that follows
-is preserved as historical evidence for its named commit.
+The repository now includes the **Signal Atlas** light-first product redesign, interactive topology hardening, and an instructor presentation mode. Local verification reports **878 backend tests**, **61 frontend tests across 18 files**, **7 Playwright workflows**, a successful TypeScript/production build, and **0 npm audit vulnerabilities**. The optional 571.82 kB minified topology chunk remains above Vite's warning threshold. Nine screenshots were captured from the running app; browser overflow checks covered 1440×900, 1280×800, 1024×768, 768×1024, 390×844 and 360×800. Docker Compose syntax passes, but no Docker daemon was available for image/runtime testing. GitHub Actions run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637) on `e09c49fda898c2edb28ff4109bd61403096d29ca` is historical and validates only that earlier commit. The report, PDF and presentation below remain historical artifacts and do not depict this redesign. Current UI captures are in `docs/images/signal-atlas/`; legacy images directly under `docs/images/` are historical. The verification table that follows is retained as historical evidence for its named commit.
 
 **Project:** LogInsight — Real-Time Log Intelligence & Incident Investigation Platform
 **Course:** Data Structures and Algorithms-3 (25CS2103E) · 2026-2027, Odd Semester
@@ -21,8 +14,9 @@ is preserved as historical evidence for its named commit.
 | **Content verification commit** | `53814c1cfc7f762641a6b51ab2c0ea603e1181ba` |
 | **Submission-index commit** | the commit that carries this file (reported in the push output; a commit cannot contain its own hash) |
 
-The content verification commit is the SHA the verification figures below were measured against, and
-the commit GitHub Actions ran green on. Everything after it is this index file alone.
+The content verification commit below identifies the source of the historical verification table. It
+does not identify the current Signal Atlas verification; the current local results above were rerun on
+the rebuild source. Check the Actions run on the final release commit for current remote CI evidence.
 
 ## Student
 
@@ -51,7 +45,7 @@ Course instructor: Dr. J Sirisha Devi, Professor, Department of Computer Science
 | `LogInsight_Final_Project_Report.docx` | Full project report built on the institutional PBL template: case study, algorithm and pseudocode, code excerpts and results with captured screenshots. |
 | `LogInsight_Final_Project_Report.pdf` | PDF rendering of the same report. |
 
-Screenshots referenced by the submitted report live in `docs/images/`. They depict the earlier dark visual revision. They were removed from the README and are not evidence of the current light-first UI.
+Screenshots referenced by the submitted report live in the legacy `docs/images/` set and depict the earlier dark visual revision. They are not evidence of the current UI; current captures are under `docs/images/signal-atlas/`.
 
 The `.pptx`, `.docx` and `.pdf` in this directory predate the light-first redesign. Their test counts and embedded screenshots are historical; the binary documents were not regenerated or visually updated in this pass.
 

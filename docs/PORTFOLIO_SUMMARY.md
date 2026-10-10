@@ -8,7 +8,7 @@ Current branch: `main`. These summaries use only the current implementation and 
 
 ## Resume version
 
-> **LogInsight Analyzer — Algorithmic Log Intelligence Workspace** · Java 21 / Spring Boot 3.5 with React 18, TypeScript and Vite. KMP powers product search, Levenshtein powers zero-hit suggestions, and heuristic pattern extraction and evidence-backed incident grouping remain explicitly non-ML; a six-module catalogue exposes real algorithm engines and recorded runs, and a frozen `java.util` manifest keeps the `dsa` engines inside the course scope rule. The Command Center is a selected-window operations view over an observed request-trail topology derived from `requestId` co-occurrence (not verified infrastructure), with an accessible 2D SVG default and optional Three.js/WebGL view, error-rate health bands, and a pipeline story linking metrics to product pages. The runtime is single-process and in-memory; Demo Replay is a bounded, labelled dataset replay shared by one `ReplayProvider` subscription, not production telemetry.
+> **LogInsight Analyzer — Signal Atlas Log Intelligence Workspace** · Java 21 / Spring Boot 3.5 with React 18, TypeScript and Vite. KMP powers product search, Levenshtein powers zero-hit suggestions, and heuristic pattern extraction and evidence-backed incident grouping remain explicitly non-ML; a six-module catalogue exposes real algorithm engines and recorded runs, and a frozen `java.util` manifest keeps the `dsa` engines inside the course scope rule. The Command Center is a selected-window operations view over an observed request-trail topology derived from `requestId` co-occurrence (not verified infrastructure), with an accessible 2D SVG default and optional Three.js/WebGL view, error-rate health bands, and a pipeline story linking metrics to product pages. The runtime is single-process and in-memory; Dataset Replay is a bounded, labelled dataset replay shared by one `ReplayProvider` subscription, not production telemetry.
 
 ## Technical version
 
@@ -32,5 +32,5 @@ Current branch: `main`. These summaries use only the current implementation and 
 | Demo versus replay | `DemoDatasetGenerator`, `LiveStreamService`, `demo-replay` labels |
 | Academic `java.util` scope guard | `EngineScopeGuardTest` frozen manifest over `dsa/**` |
 | Deployment | `backend/Dockerfile`, `frontend/Dockerfile`, `frontend/nginx.conf`, `docker-compose.yml` |
-| Verification | `.\mvnw.cmd -o verify` (878 backend tests), `npm test` (55 tests across 17 files), `npm run build`, `docker compose config`. CI runs `mvn -B verify` plus `npm ci`, `npm test` and `npm run build` |
+| Verification | `.\mvnw.cmd -o verify` (878 backend tests), `npm test` (61 tests across 18 files), `npm run build`, `npm audit` (0 vulnerabilities), `docker compose config`, and Playwright (7 browser workflows). CI also provisions Chromium for browser workflows |
 | Docker limitation | daemon still unreachable in the audit environment; image/runtime smoke not claimed |

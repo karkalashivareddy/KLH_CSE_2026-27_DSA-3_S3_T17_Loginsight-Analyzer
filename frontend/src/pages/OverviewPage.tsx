@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { Activity, ArrowUpRight, Database, ExternalLink, Play, Radio, RefreshCw, Search, ShieldAlert, Timer } from 'lucide-react';
+import { Activity, ArrowUpRight, Database, ExternalLink, Network, Play, Radio, RefreshCw, Search, ShieldAlert, Timer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import type { IncidentDto, LogEvent, ObjectApiResponse, OverviewDto, SystemStatus } from '../api/types';
@@ -7,7 +7,7 @@ import { useApi, type UseApiResult } from '../hooks/useApi';
 import { TopologyPanel, type TopologyMode } from '../components/TopologyPanel';
 import { useReplay } from '../replay/ReplayContext';
 import { SimulationBand } from '../telemetry/SimulationBand';
-import { Badge, Card, EmptyState, ErrorBox, EventDrawer, LevelBadge, NoDatasetState, PageHeader, Spinner, StatusPill, TimeChart } from '../components/ui';
+import { Card, EmptyState, ErrorBox, EventDrawer, LevelBadge, NoDatasetState, PageHeader, Spinner, StatusPill, TimeChart } from '../components/ui';
 import { formatMillis, formatNumber, formatTs } from '../components/format';
 import { useGuidedDemo } from '../presentation/GuidedDemo';
 
@@ -77,26 +77,28 @@ export default function OverviewPage() {
     <div className="page experience-page overview-page">
       <PageHeader
         eyebrow="LOGINSIGHT / OBSERVE"
-        title="System overview"
+        title="Command center"
         description={data ? <><strong>{data.dataset}</strong> · {scopeText(data)} · {windowText(data)}</> : 'A workspace for reading operational signals, following service relationships and inspecting evidence.'}
-        actions={<><button className="btn btn-sm guided-demo-launch" type="button" onClick={guidedDemo.start}><Play size={14} aria-hidden="true" /> Start guided demo</button><button className="btn btn-sm" type="button" onClick={refreshAll} disabled={overview.refreshing || dependencies.refreshing || incidents.refreshing || health.refreshing}><RefreshCw size={14} aria-hidden="true" /> Refresh</button><Link className="btn btn-sm" to="/replay"><Radio size={14} aria-hidden="true" /> Dataset replay</Link><Link className="btn btn-primary" to="/live"><Radio size={14} aria-hidden="true" /> Live monitor</Link></>}
+        actions={<><button className="btn btn-sm" type="button" onClick={refreshAll} disabled={overview.refreshing || dependencies.refreshing || incidents.refreshing || health.refreshing}><RefreshCw size={14} aria-hidden="true" /> Refresh</button><Link className="btn btn-sm" to="/replay"><Radio size={14} aria-hidden="true" /> Dataset replay</Link><Link className="btn btn-primary" to="/live"><Radio size={14} aria-hidden="true" /> Live monitor</Link></>}
       />
-
-      <div className="page">
-        <SimulationBand />
-      </div>
 
       <section className="overview-intro" aria-label="LogInsight overview">
         <div className="overview-intro-copy">
-          <div className="overview-kicker"><span className="signal-mark" aria-hidden="true"><Activity size={15} /></span> SIGNALS · IMPACT · EVIDENCE</div>
-          <h2>See the signal.<br /><span>Follow the evidence.</span></h2>
-          <p>Move from observed activity to the logs and algorithms behind an investigation.</p>
+          <div className="overview-kicker"><span className="signal-mark" aria-hidden="true"><Activity size={15} /></span> LOGINSIGHT / SIGNAL ATLAS</div>
+          <h2>Turn raw logs<br /><span>into evidence.</span></h2>
+          <p>Trace the path from structured events to searchable signals, observed relationships, and incident evidence.</p>
+          <div className="signal-atlas-actions"><button className="btn btn-primary guided-demo-launch" type="button" onClick={guidedDemo.start}><Play size={14} aria-hidden="true" /> Start guided demo</button><Link className="btn btn-quiet" to="/services"><Network size={14} aria-hidden="true" /> Explore topology</Link></div>
+          <div className="overview-source-card">
+            <div className="source-card-heading"><span className="source-pulse" aria-hidden="true" /><span>{data ? 'SOURCE IN VIEW' : 'WORKSPACE READY'}</span></div>
+            {data ? <><strong>{data.dataset}</strong><span>{scopeText(data)} · {formatNumber(data.datasetEvents)} dataset events</span><div className="source-card-actions"><Link to="/datasets">Change source <ArrowUpRight size={13} aria-hidden="true" /></Link>{replay.liveStatus?.enabled && <><span className="source-replay-provenance" aria-label="Bounded SSE replay of this dataset; not live production telemetry">Bounded dataset replay</span><Link to="/replay">Replay status: {replay.statusLabel.toLowerCase()}</Link></>}</div></> : <><strong>No investigation data yet</strong><span>Load a bundled dataset or upload logs. Metrics appear when the backend has a source.</span><div className="source-card-actions"><Link to="/datasets">Choose a source</Link><Link to="/ingestion">Ingest logs</Link></div></>}
+          </div>
         </div>
-        <div className="overview-source-card">
-          <div className="source-card-heading"><span className="source-pulse" aria-hidden="true" /><span>{data ? 'SOURCE IN VIEW' : 'WORKSPACE READY'}</span></div>
-          {data ? <><strong>{data.dataset}</strong><span>{scopeText(data)} · {formatNumber(data.datasetEvents)} dataset events</span><div className="source-card-actions"><Link to="/datasets">Change source <ArrowUpRight size={13} aria-hidden="true" /></Link><Link to="/live">Open dataset replay</Link></div>{replay.liveStatus?.enabled && <Badge tone="info" label="Bounded SSE replay of this dataset; not live production telemetry">REPLAY {replay.statusLabel.toUpperCase()}</Badge>}</> : <><strong>No investigation data yet</strong><span>Choose a source to populate this workspace.</span><div className="source-card-actions"><Link to="/live">Replay data</Link><Link to="/datasets">Choose a source</Link></div></>}
-        </div>
+        <SignalPipeline data={data} serviceCount={dependencies.data?.nodeCount ?? null} edgeCount={dependencies.data?.edgeCount ?? null} />
       </section>
+
+      <div className="page overview-simulation-band">
+        <SimulationBand />
+      </div>
 
       <div className="overview-window-bar">
         <div className="window-label"><span className="window-label-dot" /> OBSERVED WINDOW</div>
@@ -144,6 +146,30 @@ export default function OverviewPage() {
       <EventDrawer event={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </div>
   );
+}
+
+function SignalPipeline({ data, serviceCount, edgeCount }: { data: OverviewDto | null; serviceCount: number | null; edgeCount: number | null }) {
+  const stages = [
+    { number: '01', label: 'Dataset', value: data ? formatNumber(data.datasetEvents) : '—', detail: data ? 'parsed events' : 'awaiting source', to: '/datasets', tone: 'blue' },
+    { number: '02', label: 'Window', value: data ? formatNumber(data.events) : '—', detail: data ? `${data.range} selected` : 'load data first', to: '/analytics', tone: 'cyan' },
+    { number: '03', label: 'Services', value: serviceCount === null ? '—' : formatNumber(serviceCount), detail: serviceCount === null ? 'graph unavailable' : `${edgeCount ?? 0} observed edges`, to: '/services', tone: 'violet' },
+    { number: '04', label: 'Detector', value: data ? formatNumber(data.activeIncidents) : '—', detail: data ? 'heuristic windows' : 'load data first', to: '/incidents', tone: 'coral' }
+  ] as const;
+
+  return <figure className="signal-pipeline" aria-labelledby="signal-pipeline-title">
+    <figcaption className="signal-pipeline-heading"><span id="signal-pipeline-title">FROM EVENT TO EVIDENCE</span><span>{data ? `SOURCE · ${data.dataset}` : 'WAITING FOR A BACKEND DATASET'}</span></figcaption>
+    <div className="signal-pipeline-track" role="list" aria-label="Log investigation workflow">
+      <svg className="signal-pipeline-connector" viewBox="0 0 760 100" preserveAspectRatio="none" aria-hidden="true"><path d="M78 51 C145 51 145 51 222 51 S300 51 380 51 S458 51 538 51 S615 51 682 51" /><path d="M78 51 C145 51 145 51 222 51 S300 51 380 51 S458 51 538 51 S615 51 682 51" className="signal-pipeline-trace" /></svg>
+      {stages.map((stage) => <Link className={`signal-stage signal-stage--${stage.tone}${data ? ' signal-stage--ready' : ''}`} role="listitem" key={stage.number} to={stage.to} aria-label={`${stage.number} ${stage.label}: ${stage.value}, ${stage.detail}`}>
+        <span className="signal-stage-index">{stage.number}</span>
+        <span className="signal-stage-label">{stage.label}</span>
+        <strong>{stage.value}</strong>
+        <small>{stage.detail}</small>
+        <span className="signal-stage-corner" aria-hidden="true"><ArrowUpRight size={13} /></span>
+      </Link>)}
+    </div>
+    <div className="signal-pipeline-foot"><span><i className={data ? 'signal-key signal-key--ready' : 'signal-key'} /> {data ? 'Backend-derived source and selected-window values' : 'No telemetry is shown until a source is loaded'}</span><Link to="/docs">How data moves <ArrowUpRight size={13} aria-hidden="true" /></Link></div>
+  </figure>;
 }
 
 function Metric({ label, value, note, tone, icon }: { label: string; value: string; note: string; tone: 'cyan' | 'blue' | 'green' | 'amber' | 'violet'; icon: ReactNode }) {

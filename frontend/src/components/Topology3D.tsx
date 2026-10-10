@@ -9,6 +9,7 @@ interface Topology3DProps {
   selectedId: string | null;
   incidentServiceIds: string[];
   focusToken: number;
+  fitToken: number;
   resetToken: number;
   reducedMotion: boolean;
   graphKind?: 'observed' | 'declared';
@@ -22,13 +23,6 @@ type SceneNode = {
   incidentRing?: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>;
   position: THREE.Vector3;
   health: NonNullable<TopologyNode['health']>;
-};
-
-type FlowParticle = {
-  curve: THREE.QuadraticBezierCurve3;
-  offset: number;
-  speed: number;
-  edgeIndex: number;
 };
 
 const HEALTH_COLORS: Record<NonNullable<TopologyNode['health']>, number> = {
@@ -50,7 +44,7 @@ function graphPositions(nodes: TopologyNode[]): Map<string, THREE.Vector3> {
   return positions;
 }
 
-export default function Topology3D({ nodes, edges, selectedId, incidentServiceIds, focusToken, resetToken, reducedMotion, graphKind = 'observed', onSelect }: Topology3DProps) {
+export default function Topology3D({ nodes, edges, selectedId, incidentServiceIds, focusToken, fitToken, resetToken, reducedMotion, graphKind = 'observed', onSelect }: Topology3DProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const latestSelectionRef = useRef(selectedId);
   const onSelectRef = useRef(onSelect);
@@ -87,7 +81,7 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 60);
     camera.position.set(0, 8.4, 20.5);
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = !reducedMotion;
+    controls.enableDamping = false;
     controls.dampingFactor = 0.08;
     controls.minDistance = 6;
     controls.maxDistance = 30;
@@ -169,61 +163,23 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
       nodeObjects.set(node.id, { group, core, halo, incidentRing, position: position.clone(), health });
     });
 
-    const curves: THREE.QuadraticBezierCurve3[] = [];
-    const particles: FlowParticle[] = [];
-    edges.forEach((edge, edgeIndex) => {
+    edges.forEach((edge) => {
       const from = positions.get(edge.source);
       const to = positions.get(edge.target);
       if (!from || !to) return;
       const midpoint = from.clone().add(to).multiplyScalar(0.5);
       midpoint.y += 0.62 + (Math.max(0, edge.weight) / maxWeight) * 0.42;
       const curve = new THREE.QuadraticBezierCurve3(from.clone(), midpoint, to.clone());
-      curves.push(curve);
-
-      const sourceHealth = nodes.find((node) => node.id === edge.source)?.health ?? 'unknown';
-      const targetHealth = nodes.find((node) => node.id === edge.target)?.health ?? 'unknown';
-      const edgeHealth = sourceHealth === 'elevated' || targetHealth === 'elevated'
-        ? 'elevated'
-        : sourceHealth === 'watch' || targetHealth === 'watch' ? 'watch' : 'healthy';
-      const color = HEALTH_COLORS[edgeHealth];
       const normalized = Math.max(0, edge.weight) / maxWeight;
       const tube = new THREE.Mesh(
         new THREE.TubeGeometry(curve, 32, 0.007 + normalized * 0.014, 5, false),
-        new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.28, transparent: true, opacity: 0.32 + normalized * 0.35 })
+        new THREE.MeshStandardMaterial({ color: 0x72a8c7, emissive: 0x367ca3, emissiveIntensity: 0.12, transparent: true, opacity: 0.3 + normalized * 0.35 })
       );
       scene.add(tube);
-
-      const count = edge.weight > 0 ? Math.min(14, Math.max(1, Math.ceil(normalized * 12))) : 0;
-      for (let index = 0; index < count; index += 1) {
-        particles.push({ curve, offset: (index + 1) / (count + 1), speed: 0.09 + normalized * 0.16, edgeIndex });
-      }
     });
-
-    let flowMesh: THREE.InstancedMesh | null = null;
-    const particleGeometry = new THREE.SphereGeometry(0.045, 8, 6);
-    const particleMaterial = new THREE.MeshBasicMaterial({ color: 0x77deec, transparent: true, opacity: 0.9 });
-    if (particles.length > 0) {
-      flowMesh = new THREE.InstancedMesh(particleGeometry, particleMaterial, particles.length);
-      const dummy = new THREE.Object3D();
-      const particleColor = new THREE.Color();
-      particles.forEach((particle, index) => {
-        const edge = edges[particle.edgeIndex];
-        const sourceHealth = nodes.find((node) => node.id === edge?.source)?.health ?? 'healthy';
-        const targetHealth = nodes.find((node) => node.id === edge?.target)?.health ?? 'healthy';
-        particleColor.setHex(sourceHealth === 'elevated' || targetHealth === 'elevated' ? HEALTH_COLORS.elevated : sourceHealth === 'watch' || targetHealth === 'watch' ? HEALTH_COLORS.watch : 0x73d9e8);
-        dummy.position.copy(particle.curve.getPointAt(particle.offset));
-        dummy.updateMatrix();
-        flowMesh?.setMatrixAt(index, dummy.matrix);
-        flowMesh?.setColorAt(index, particleColor);
-      });
-      flowMesh.instanceMatrix.needsUpdate = true;
-      if (flowMesh.instanceColor) flowMesh.instanceColor.needsUpdate = true;
-      scene.add(flowMesh);
-    }
 
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-    const dummy = new THREE.Object3D();
     const bounds = new THREE.Sphere(new THREE.Vector3(), 1);
     const worldUp = new THREE.Vector3(0, 1, 0);
     const cameraGoal = { position: camera.position.clone(), target: controls.target.clone(), active: false };
@@ -231,7 +187,6 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
     let height = 1;
     let visible = true;
     let pageVisible = !document.hidden;
-    let lastRender = 0;
     let pointerPosition = { x: 0, y: 0 };
 
     const updateHighlights = () => {
@@ -248,37 +203,25 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
       updateHighlights();
       renderer.render(scene, camera);
     };
-    const animationFrame = (time: number) => {
-      if (!visible || !pageVisible || reducedMotion || time - lastRender < 32) return;
-      lastRender = time;
+    const animationFrame = () => {
+      if (!visible || !pageVisible || reducedMotion || !cameraGoal.active) {
+        renderer.setAnimationLoop(null);
+        renderOnce();
+        return;
+      }
       controls.update();
       if (cameraGoal.active) {
         camera.position.lerp(cameraGoal.position, 0.09);
         controls.target.lerp(cameraGoal.target, 0.09);
         if (camera.position.distanceTo(cameraGoal.position) < 0.035) cameraGoal.active = false;
       }
-      const selection = latestSelectionRef.current;
-      const normalizedTime = time / 1000;
       updateHighlights();
-      nodeObjects.forEach((entry) => {
-        const period = entry.health === 'elevated' ? 1.6 : entry.health === 'watch' ? 2.6 : 4;
-        const amplitude = entry.health === 'elevated' ? 0.018 : entry.health === 'watch' ? 0.012 : entry.health === 'healthy' ? 0.006 : 0;
-        const pulse = amplitude ? Math.sin((normalizedTime * Math.PI * 2) / period) * amplitude : 0;
-        entry.group.scale.setScalar(1 + pulse);
-      });
-      particles.forEach((particle, index) => {
-        const progress = (particle.offset + normalizedTime * particle.speed) % 1;
-        dummy.position.copy(particle.curve.getPointAt(progress));
-        dummy.scale.setScalar(selection && edges[particle.edgeIndex] && (edges[particle.edgeIndex].source === selection || edges[particle.edgeIndex].target === selection) ? 1.15 : 1);
-        dummy.updateMatrix();
-        flowMesh?.setMatrixAt(index, dummy.matrix);
-      });
-      if (flowMesh) flowMesh.instanceMatrix.needsUpdate = true;
       renderer.render(scene, camera);
+      if (!cameraGoal.active) renderer.setAnimationLoop(null);
     };
 
     const startLoop = () => {
-      if (visible && pageVisible && !reducedMotion) renderer.setAnimationLoop(animationFrame);
+      if (visible && pageVisible && !reducedMotion && cameraGoal.active) renderer.setAnimationLoop(animationFrame);
       else {
         renderer.setAnimationLoop(null);
         renderOnce();
@@ -318,6 +261,7 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
         controls.target.copy(cameraGoal.target);
       }
       renderOnce();
+      startLoop();
     };
     const onFocusRequest = () => setCameraGoal(latestSelectionRef.current);
     const onFitRequest = () => setCameraGoal(null);
@@ -331,6 +275,7 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
         controls.target.copy(cameraGoal.target);
       }
       renderOnce();
+      startLoop();
     };
     const onPointerLeave = () => {
       stage.classList.remove('topology-stage--node-hover');
@@ -338,6 +283,7 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
       setHovered(null);
     };
     const onPointerMove = (event: PointerEvent) => {
+      const previousHover = hoveredIdRef.current;
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -353,7 +299,7 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
         hoveredIdRef.current = null;
         setHovered(null);
       }
-      if (reducedMotion) renderOnce();
+      if (previousHover !== nextId) renderOnce();
     };
     const onClick = (event: MouseEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
@@ -369,7 +315,7 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
       renderer.setAnimationLoop(null);
       setRendererError(true);
     };
-    const onControlChange = () => { if (reducedMotion) renderOnce(); };
+    const onControlChange = () => renderOnce();
 
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerleave', onPointerLeave);
@@ -424,6 +370,11 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
   }, [focusToken, nodes.length]);
 
   useEffect(() => {
+    if (fitToken <= 0) return;
+    stageRef.current?.dispatchEvent(new CustomEvent('topology-fit-view'));
+  }, [fitToken]);
+
+  useEffect(() => {
     stageRef.current?.dispatchEvent(new CustomEvent('topology-selection-changed'));
   }, [selectedId, nodes.length]);
 
@@ -453,7 +404,7 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
         <button className="btn btn-sm" type="button" onClick={() => stageRef.current?.dispatchEvent(new CustomEvent('topology-fit-view'))}>Fit graph</button>
         <span>Drag to orbit · scroll to zoom</span>
       </div>}
-      <p className="topology-three-note">{graphKind === 'declared' ? 'Node size represents simulated events in the selected window. Edges and moving signals represent declared scenario dependencies; particle motion is illustrative, not a measured live request stream.' : 'Node size represents dataset event volume. Edges and moving signals represent observed request-trail weight; particle motion is illustrative, not a measured live request stream.'}</p>
+      <p className="topology-three-note">{graphKind === 'declared' ? 'Node size represents simulated events in the selected window. Static edge paths represent declared scenario dependencies and their returned weights.' : 'Node size represents dataset event volume. Static edge paths represent observed request-trail associations and returned weights, not verified infrastructure or causality.'}</p>
     </div>
   );
 }

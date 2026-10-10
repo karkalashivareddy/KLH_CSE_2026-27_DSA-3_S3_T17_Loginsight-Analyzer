@@ -1,6 +1,6 @@
 # LogInsight — Current Implementation Audit
 
-Audit snapshot: frontend redesign and guided-demo revision. The exact commit carrying this snapshot is the repository HEAD that contains this file.
+Audit snapshot: Signal Atlas visual rebuild, topology hardening, guided presentation and browser verification. The exact commit carrying this snapshot is the repository HEAD that contains this file.
 
 This is the canonical description of the checked-out implementation. It is based on the current source, tests, frontend routes, build files and API controllers. Historical rebuild reports remain in [`docs/archive/`](archive/); they are not the current contract.
 
@@ -11,18 +11,20 @@ This is the canonical description of the checked-out implementation. It is based
 | Gate | Command | Result |
 |---|---|---|
 | Backend | `cd backend; .\mvnw.cmd -o verify` | 878 tests, 0 failures, 0 errors; Spring Boot jar packaged |
-| Frontend tests | `cd frontend; npm.cmd test -- --reporter=dot` | 56 tests across 18 files passed |
-| Frontend build | `cd frontend; npm run build` | TypeScript and Vite production build passed |
+| Frontend tests | `cd frontend; npm.cmd test -- --reporter=dot` | 61 tests across 18 files passed |
+| Browser E2E | `cd frontend; npm run test:e2e` | 7 Playwright workflows passed against the local frontend/backend |
+| Frontend build | `cd frontend; npm run build` | TypeScript and Vite production build passed; optional topology chunk 571.82 kB minified |
+| Dependency audit | `cd frontend; npm audit` | 0 vulnerabilities after React Router 7.18.4 update |
 | Compose syntax | `docker compose config --quiet` | Passed |
 | Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable in this environment |
 
-CI mirrors these gates: the backend job runs `mvn -B verify` and the frontend job runs `npm ci`, `npm test` and `npm run build`.
+CI now runs backend verification, frontend tests/build, a full npm audit and a real-browser workflow job. The previous successful workflow cited below belongs to the earlier `e09c49f` redesign and is historical; the current workflow result must be read from the final release commit's run.
 
-Backend verify completed locally: 878 tests, 0 failures, 0 errors, 0 skipped, and the Spring Boot jar was packaged. The frontend test result includes the guided-demo regression. The TypeScript and production build passed; the production build emits a 576.56 kB minified lazy topology chunk (145.44 kB gzip) and warns about chunks over 500 kB. Docker is unavailable (`docker info` cannot reach `docker_engine`), so image builds and container smoke tests remain unexecuted and unclaimed. Browser visual verification and viewport screenshots were not run; no current screenshots are represented as evidence.
+Backend verify completed locally: 878 tests, 0 failures, 0 errors, 0 skipped, and the Spring Boot jar was packaged. Vitest passed 61 tests in 18 files; Playwright passed seven workflows, including direct route refresh, real API search, topology selection/fallback, guided evidence/exit, reduced motion and six responsive viewport sizes. Nine screenshots were captured from the running application; desktop 1440×900 and mobile 390×844, incident, analytics, topology and presentation views were inspected. The build emits a 571.82 kB minified optional topology chunk (144.15 kB gzip), above the 500 kB warning threshold. Docker is unavailable (`docker info` cannot reach `docker_engine`), so image builds and container smoke tests remain unexecuted and unclaimed.
 
 GitHub Actions run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637), for commit `e09c49fda898c2edb28ff4109bd61403096d29ca`, completed successfully. Its Backend tests and Frontend tests and build jobs both passed.
 
-The Maven build targets Java 21 and uses Spring Boot 3.5.16. The frontend uses React 18, TypeScript, Vite, React Router and Vitest 5; the Vitest suite requires Node 22.12 or newer. The frontend has no configured browser-test or lint command.
+The Maven build targets Java 21 and uses Spring Boot 3.5.16. The frontend uses React 18, TypeScript, Vite, React Router 7.18.4, Vitest 5 and Playwright; the Vitest suite requires Node 22.12 or newer. There is no separate lint script or axe audit.
 
 ## Runtime shape
 
@@ -77,22 +79,22 @@ Full detail is in [COMMAND_CENTER.md](COMMAND_CENTER.md). The audited facts:
 - **eventsPerMinute.** `window events / (range width in minutes)`. The denominator is the nominal range width, not the observed in-window span, so a clustered window reads low. It is a normalized window rate, not an inter-arrival measurement.
 - **Health vs compatibility field.** `OverviewDto.systemStatus` is hardcoded to `"Operational"` by the service and carries no runtime information. Real status is `GET /api/health/status` (`uptimeMillis`, `datasetLoaded`, `datasetName`, `datasetSize`, `engines`). `OverviewPage` renders `health.data?.status ?? data.systemStatus`, so the compatibility string appears only as a pre-resolution fallback.
 - **Observed request-trail topology.** `TopologyPanel` renders `GET /api/analytics/dependencies` over the **full current dataset**, not the selected window. `ServiceGraphBuilder` groups by `requestId`, sorts each group by `(timestamp, id)` and links consecutive distinct services; edge `weight` is the observed pair count. This is co-occurrence inside logs, not verified infrastructure, and the panel says so in its card subtitle, its screen-reader description and its accessible edge list.
-- **Deterministic particles.** Particle count is `min(8, max(1, ceil(normalized * 7)))`; positions, stroke width, opacity, curvature and animation duration are pure functions of the returned weight, and `animateMotion` start offsets are staggered by a fixed per-particle fraction. Nothing is random. `prefers-reduced-motion` removes `animateMotion` and marks particles static.
-- **Display modes.** `2d` is the default 760×440 SVG view. `3d` lazy-loads a Three.js/WebGL scene over the same API-derived nodes and edges, with OrbitControls, normalized illustrative traffic markers, hover details, focus/fit camera actions, reduced-motion handling and a clean SVG fallback. The canvas is supplementary; a semantic service list and observed-edge list remain present. It does not imply a live external request stream.
+- **Static edge encoding.** Weight controls visible 2D path width/opacity and a bounded set of markers; markers do not move and cannot imply incoming traffic. Node/edge input is validated and deduplicated, render sizes are capped, and omitted data is reported.
+- **Display modes.** `2d` is the default interactive SVG view with pan/zoom/fit/reset, selection, bounded rendering, an inspector and accessible service/edge lists. `3d` lazy-loads Three.js over the same API-derived nodes/edges, caps edge instances, provides camera controls and cleans up renderer resources. Browser verification confirmed the unavailable-WebGL fallback and continued 2D access; GPU-backed rendering was not verified in this headless browser.
 - **Accessibility.** Nodes are `role="button"` with `tabIndex=0`, respond to `Enter`/`Space` and carry an `aria-label` of name, event count and health band. An accessible service list and an accessible edge list mirror the SVG; "Focus selected" narrows the `viewBox`, "Reset view" restores it.
 - **Heuristic health bands.** `healthy` < 5% error rate, `watch` 5–<10%, `elevated` ≥ 10%, `unknown` when the rate is not finite. Fixed thresholds over a top-N rollup, not a health model or SLI evaluation.
 - **Pipeline story.** A Load → Observe → Detect → Investigate strip links each displayed number to `/ingestion`, `/analytics`, `/incidents` and `/logs`. It is navigation over already-returned data, not a process model.
 
 ## Frontend test inventory
 
-`npm test` runs Vitest over 55 tests in 17 files:
+`npm test` runs Vitest over 61 tests in 18 files:
 
 | File | Tests | Covers |
 |---|---:|---|
 | `src/api/client.test.ts` | 3 | SSE frame parsing (chunking, comments, ids, multiline data, unterminated final frame) and multipart boundary handling |
 | `src/components/format.test.ts` | 8 | Millisecond vs nanosecond duration formatting (including fractional values) and `eventKey` stability: dataset ids, deterministic generated ids, provenance namespacing, key stability and the malformed-payload fallback |
 | `src/components/Layout.test.tsx` | 4 | Skip navigation, grouped navigation entries and active navigation |
-| `src/components/TopologyPanel.test.tsx` | 7 | Accessible node/edge lists, data-driven radius and particle counts, controlled depth mode, reset view, reduced-motion static particles |
+| `src/components/TopologyPanel.test.tsx` | 10 | Accessible node/edge lists, static weight markers, declared/observed semantics, graph input validation and caps, WebGL fallback, bounded zoom/reset and keyboard selection |
 | `src/pages/AlgorithmsPage.test.tsx` | 3 | Algorithm Lab runs a catalogue `defaultInput` through the runs API, shows the run input, and surfaces a rejected run without navigating |
 | `src/pages/AnalyticsPage.test.tsx` | 1 | Analytics tablist association: `aria-selected`, `aria-controls` and tabpanel labelling follow the selected tab |
 | `src/pages/IncidentWorkbench.test.tsx` | 4 | Related-event rendering, evidence sections, and stable keys for generated event rows |
@@ -107,7 +109,7 @@ Full detail is in [COMMAND_CENTER.md](COMMAND_CENTER.md). The audited facts:
 | `src/telemetry/adapters.test.ts` | 4 | Dataset vs generated-event normalization, including identity fields used for React keys |
 | `src/telemetry/SimulationBand.test.tsx` | 2 | Simulation control band labelling and connection-status exposure |
 
-This is focused component coverage. It is not browser QA.
+Focused component coverage complements the Playwright suite in `frontend/e2e/product.spec.ts`. Playwright runs a real local backend and frontend; it does not mock the APIs.
 
 ## Dataset audit
 
@@ -181,7 +183,7 @@ The current source includes a skip link, semantic `header`/`nav`/`main` landmark
 
 `TopologyPanel` adds `role="button"` nodes with `tabIndex=0`, `Enter`/`Space` activation, per-node `aria-label`s including the health band, `aria-pressed` selection state, and paired accessible service and edge lists that mirror the SVG. It honours `prefers-reduced-motion` by removing edge animation. It does not implement arrow-key roving focus between nodes; `Tab` order follows document order.
 
-This is a source-level audit supported by the focused Layout and TopologyPanel component tests. No automated axe run, screen-reader test or fresh browser QA is configured in this checkout, so those broader claims are not made.
+This source-level audit is supported by focused component tests, the Playwright browser suite and current screenshot captures. No automated axe run or full screen-reader test is configured, so those broader accessibility claims are not made.
 
 ## Current limitations
 
@@ -195,5 +197,5 @@ This is a source-level audit supported by the focused Layout and TopologyPanel c
 - The `java.util` scope guard freezes the `dsa` usage that already existed instead of removing it, so recorded `ArrayList`/`List`/`Map` imports remain in the manifest until someone deletes them. New usage fails the build; existing usage is a visible, shrinkable ledger.
 - Some legacy laboratory controllers have different request shapes and validator paths; clients should use the endpoint-specific contract rather than assuming one universal body. Product analytics, pattern, service and replay controls are explicitly bounded.
 - Benchmarks are measured on the current host and input; they are not universal performance claims.
-- The optional topology WebGL renderer requires browser/device WebGL support. The default SVG topology remains usable when it is unavailable. Particle movement visualizes normalized observed adjacency weight and is not an exact or live request count.
+- The optional topology WebGL renderer requires browser/device WebGL support. The default SVG topology remains usable when it is unavailable. Static edge encoding represents observed adjacency weight and does not imply live traffic.
 - Docker deployment has not been runtime-smoke-tested in the audit environment because no Docker daemon was available. `docker compose config` validated the Compose model only.

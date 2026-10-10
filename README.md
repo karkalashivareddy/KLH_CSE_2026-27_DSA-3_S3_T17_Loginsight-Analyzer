@@ -9,17 +9,19 @@ The submission deliverables, student roster and course record are in
 
 LogInsight is a full-stack, in-memory log investigation workspace. It combines a React 18 + TypeScript + Vite shell with a Java 21 Spring Boot REST/SSE API, classical data-structure and algorithm engines, and a backend-owned dataset lifecycle.
 
-The platform ingests a dataset or runs a deterministic generated scenario, streams it live, detects elevated-error windows with measured evidence, and presents an investigation surface where every number on screen can be traced back to the algorithm that produced it.
+The platform ingests a dataset or runs a deterministic generated scenario, streams it as a distinct simulation mode, detects elevated-error windows with supporting evidence, and presents results with source, scope and provenance context.
 
 > Academic/portfolio software. The Docker artifacts are a single-node deployment shape, not a claim of production scale or public deployment.
 
 ## Visual direction
 
-The current interface uses **Signal in Motion**, a light-first porcelain and cobalt design system with a dark, optional 3D topology surface. Start **Guided Demo** from the Command Center to walk through the real dataset, search, analytics, observed topology, incident evidence, and algorithm catalogue APIs. Existing screenshots under `docs/images/` were captured before this visual revision and are retained only for historical submission artifacts; they do not depict the current UI. No new screenshot is published until it can be captured from the final running frontend in a browser.
+The current interface uses **Signal Atlas**, a light-first porcelain and cobalt design system with an optional dark 3D topology surface. Start **Guided Demo** from the Command Center to walk through real dataset, search, analytics, observed topology, incident, and algorithm trace APIs. Current screenshots are in [`docs/images/signal-atlas/`](docs/images/signal-atlas/); older images are historical and do not depict this revision.
+
+![LogInsight Signal Atlas Command Center with real demo dataset context and event-to-evidence workflow](docs/images/signal-atlas/command-center-desktop.png)
 
 ## The problem
 
-During an outage, the log lines needed to explain what happened are spread across services, arrive interleaved and out of order, and are queried far faster than a human can read them. LogInsight applies classical algorithms to that work — multi-pattern and exact-substring search, bounded edit distance, streaming window aggregation, and dependency-graph traversal — and presents the result as an investigation surface where every number on screen can be traced back to the algorithm that produced it.
+During an outage, the log lines needed to explain what happened are spread across services, arrive interleaved and out of order, and are queried far faster than a human can read them. LogInsight applies classical algorithms to that work — multi-pattern and exact-substring search, bounded edit distance, streaming window aggregation, and dependency-graph traversal — and presents returned events, aggregates and algorithm evidence with their source and scope.
 
 The intended workflow is:
 
@@ -31,16 +33,14 @@ Ingest a dataset or start a generated scenario, observe service health and live 
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, TypeScript, Vite, React Router, hand-rolled SVG charts, Three.js (lazy-loaded WebGL topology), Vitest + Testing Library |
+| Frontend | React 18, TypeScript, Vite, React Router, hand-rolled SVG charts, Three.js (lazy-loaded WebGL topology), Vitest + Testing Library, Playwright |
 | Backend | Java 21, Spring Boot 3.5 (REST + Server-Sent Events), in-memory dataset store, JUnit 5 |
 | Data | Backend-held in-memory dataset, JSONL and pipe-delimited uploads, bundled `sample-data/` samples |
 | Transport | HTTP REST plus three SSE endpoints. No WebSocket, no external log collector, no cloud integration |
 
 ## Architecture
 
-Three layers, one rule: **all telemetry is server-owned.** The backend generates the scenario, derives
-every metric, runs the algorithms and writes the incident lifecycle. The browser renders what it is
-sent, which is why the numbers on screen can be traced back to a specific algorithm invocation.
+Three layers, one rule: **telemetry is server-owned.** The backend generates deterministic scenarios, computes product aggregates, executes algorithm paths and manages process-local incident state. The browser renders API responses with their scope and provenance; only the features that invoke an algorithm claim its execution evidence.
 
 ```text
 Browser (React SPA)
@@ -100,12 +100,12 @@ The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](d
 - **`datasetEvents`** is the unfiltered size of the loaded dataset. The UI uses it to show selected-window coverage as a percentage of the whole dataset.
 - **`eventsPerMinute`** is `window events / (range width in minutes)`. It is a rate over the nominal range width, not a measured inter-arrival rate over the observed span, so it reads low when events cluster near `windowEnd`.
 - **Real health vs compatibility status**: `OverviewDto.systemStatus` is a compatibility field the backend always sets to `"Operational"`. Runtime health is `GET /api/health/status`, which reports `status`, `uptimeMillis`, `datasetLoaded`, `datasetName`, `datasetSize` and the registered engine count. The Overview header prefers the real health value and falls back to the compatibility string only when the health request has not resolved.
-- **Observed request-trail topology**: nodes and edges come from `GET /api/analytics/dependencies`, which groups events by `requestId` and links consecutive distinct services. Node size follows observed event counts and edge width, opacity and particle count follow the observed adjacency weight. This is co-occurrence inside log data, not verified infrastructure topology.
-- **Deterministic edge particles**: each edge renders `min(8, max(1, ceil(normalizedWeight * 7)))` particles, positions them deterministically along the edge path, and staggers `animateMotion` by a fixed per-particle offset derived from the measured weight. `prefers-reduced-motion` replaces the animation with static particles.
+- **Observed request-trail topology**: nodes and edges come from `GET /api/analytics/dependencies`, which groups events by `requestId` and links consecutive distinct services. Node size follows observed event counts and edge width/opacity follow the observed adjacency weight. This is co-occurrence inside log data, not verified infrastructure topology.
+- **Static topology encoding**: node size and edge weight reflect backend values; markers are static so a loaded dataset is not mistaken for ongoing traffic. The render budget caps at 250 nodes and 2,500 edge records and discloses omitted input records.
 - **Pipeline story**: a Load → Observe → Detect → Investigate strip links each Overview figure to the page that produced it.
 - **Shared replay context**: Overview and Dataset Replay read one `ReplayProvider` subscription, so a replay started on either screen is visible on both.
 
-The topology panel renders a 2D SVG by default. Its optional Three.js/WebGL view is lazy-loaded, uses bounded instanced traffic markers and OrbitControls, and cleans up its renderer, controls, geometry, materials, listeners and animation loop on unmount. If WebGL is unavailable, it reports that and the user can switch back to the same 2D data view. Moving markers communicate normalized observed request-trail intensity, not exact request counts or a live production stream. See [docs/design-system.md](docs/design-system.md) for visual encodings and constraints.
+The topology panel renders an interactive 2D SVG by default. Its optional Three.js/WebGL view is lazy-loaded and disposes renderer resources, controls, geometry, materials, observers and listeners on unmount. If WebGL is unavailable, the same backend data remains available through 2D and accessible lists. Edges describe request-trail associations, not verified infrastructure or causality. See [docs/design-system.md](docs/design-system.md) for visual encodings and constraints.
 
 ## Run locally
 
@@ -131,6 +131,19 @@ npm run dev
 ```
 
 Open `http://localhost:5173`. The Vite development server preserves the local proxy: `/api` is forwarded to `http://localhost:8080`, so the browser uses same-origin API paths in development.
+
+### Browser E2E checks
+
+With the backend and frontend running as above, install the browser once and run the real browser workflows:
+
+```powershell
+cd frontend
+npx playwright install chromium
+npm run test:e2e
+npm run capture:visuals
+```
+
+The suite loads the reproducible backend demo corpus, then checks the Command Center, direct route refresh, dataset-backed search and event details, service selection, WebGL fallback, guided-presentation exit, mobile navigation, reduced motion and all six requested viewport sizes. It is sequential because the backend keeps one active in-memory dataset. CI provisions Chromium and both services automatically. Test output and failure traces are written under `frontend/test-results/`. The capture script saves current desktop, mobile, topology, incident and guided-presentation screenshots from the running backend/frontend into `docs/images/signal-atlas/`.
 
 Load a source from **Datasets** or **Ingestion**. The application starts with no dataset; dataset-backed product endpoints do not invent first-run metrics.
 
@@ -225,7 +238,7 @@ npm.cmd test -- --reporter=dot
 npm.cmd run build
 ```
 
-Results on the final source revision: backend **878 tests**, 0 failures, 0 errors, 0 skipped; frontend Vitest **56 tests across 18 files** passed; TypeScript and Vite production build passed. The build reports the lazy topology chunk at 576.56 kB minified (145.44 kB gzip), above Vite's 500 kB chunk warning threshold. These are local results, not GitHub Actions evidence. The backend produces JaCoCo reports under `backend/target/site/jacoco/`.
+Results on the rebuilt source: backend **878 tests**, 0 failures, 0 errors, 0 skipped; frontend Vitest **61 tests across 18 files** passed; Playwright browser suite **7 workflows passed** after the final viewport and reduced-motion checks; TypeScript and Vite production build passed. The optional lazy topology chunk is 571.82 kB minified (144.15 kB gzip), above Vite's 500 kB chunk warning threshold. Current screenshots were captured from the running app at 1440×900 and 390×844; browser layout/overflow assertions cover 1440×900, 1280×800, 1024×768, 768×1024, 390×844 and 360×800. These are local results, not GitHub Actions evidence. The backend produces JaCoCo reports under `backend/target/site/jacoco/`.
 
 **GitHub Actions verification** — workflow run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637) on commit `e09c49fda898c2edb28ff4109bd61403096d29ca` completed successfully. Both **Backend tests** and **Frontend tests and build** jobs passed.
 
@@ -233,12 +246,12 @@ Two facts about those numbers, so they are not over-read:
 
 - `npm run build` runs `tsc` before Vite, so the TypeScript compile is part of the
   production build. There is deliberately no separate `typecheck` script.
-- There is **no browser-level E2E suite**. The frontend is covered by Vitest and
-  Testing Library at the component level, and the Compose deployment is validated
-  as configuration only. Nothing in this repository asserts that the assembled
-  application was driven in a real browser, so no such result is claimed.
+- Playwright drives the real local backend and frontend for route navigation,
+  search, topology selection/fallback, the guided presentation, keyboard/mobile
+  navigation, reduced motion and responsive overflow. It does not verify Docker
+  execution or GPU-backed WebGL rendering.
 
-Earlier phase reports under `docs/archive/` carry smaller backend counts from their own snapshots and are labelled as historical rather than current. The report, PDF, presentation, and PNGs under `final-submission/` and `docs/images/` have not been regenerated for this light-first redesign; their screenshots show the earlier interface.
+Earlier phase reports under `docs/archive/` carry smaller backend counts from their own snapshots and are labelled as historical rather than current. The report, PDF and presentation under `final-submission/` have not been regenerated for this redesign and may show the earlier interface. Current screenshots are in `docs/images/signal-atlas/`; the older images directly under `docs/images/` are historical.
 
 ## Limitations
 
