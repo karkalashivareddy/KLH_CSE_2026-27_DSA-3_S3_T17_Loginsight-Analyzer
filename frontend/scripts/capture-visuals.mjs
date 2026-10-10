@@ -31,6 +31,9 @@ try {
   await page.getByRole('heading', { name: 'Observed service map' }).waitFor();
   await page.locator('.topology-node').first().waitFor();
   await capture('topology-2d-desktop.png');
+  await page.locator('.topology-node').first().click();
+  await page.locator('.service-inspector-title').waitFor();
+  await capture('topology-selection-desktop.png');
 
   await page.goto(new URL('/analytics', baseURL).href);
   await page.getByRole('heading', { name: 'Analytics', exact: true }).waitFor();
@@ -72,7 +75,7 @@ try {
   await page.getByRole('button', { name: /Begin walkthrough/ }).click();
   await page.getByText(/Product explanation/).waitFor();
   await capture('guided-presentation-mobile.png');
-  console.log(`Captured nine current-application screenshots in ${output}`);
+  console.log(`Captured ten current-application screenshots in ${output}`);
 } finally {
   await browser.close();
 }

@@ -23,7 +23,7 @@
   --text: #172522;
   --text-soft: #344843;
   --text-muted: #536761;
-  --text-faint: #697b74;
+  --text-faint: #5b6d66;
   --text-disabled: #88968f;
   --accent: #315cf5;
   --accent-strong: #2449d1;
@@ -88,7 +88,7 @@ code,pre,.mono,.ts { font-family: var(--mono); font-variant-numeric: tabular-num
 .brand-mark { width: 38px; height: 38px; flex-basis: 38px; border: 1px solid #d7e0ff; border-radius: 12px; background: linear-gradient(150deg,#e8edff,#fff); color: #315cf5; box-shadow: 0 5px 12px rgba(49,92,245,.1); }
 .brand-mark svg { width: 25px; height: 25px; }
 .brand-text { color: #1a2b27; font-family: var(--font-display); font-size: 16px; font-weight: 740; letter-spacing: -.045em; }
-.brand-tagline { color: #697b74; font-size: 10px; }
+.brand-tagline { color: var(--text-muted); font-size: 10px; }
 .sidebar-workspace { margin: 13px 12px 9px; padding: 11px 12px; border: 1px solid #dfe5e1; border-radius: 12px; background: linear-gradient(120deg,#fffefa,#f5f7f3); }
 .sidebar-workspace:hover { border-color: #c2ceff; background: #f7f8ff; }
 .workspace-kicker,.sidebar-section-label,.nav-group-label { color: #687871; font-size: 10px; font-weight: 720; letter-spacing: .105em; }
@@ -490,6 +490,24 @@ code,pre,.mono,.ts { font-family: var(--mono); font-variant-numeric: tabular-num
   html { scroll-behavior:auto; }
   *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
   .page,.page > *, .overview-metric strong,.guided-demo { animation:none !important; }
+}
+
+/* Legibility floor for dense operational metadata and semantic text on light surfaces. */
+.workspace-version,.sidebar-footer-meta,.breadcrumbs a,.header-status-chip > svg,.status-chip-label,
+.input::placeholder,.log-query-input::placeholder,.incident-detail-source,.signal-stage-index,
+.signal-stage small,.signal-stage-corner,.overview-metric small,.topology-edge-scope,
+.service-inspector-kicker,.guided-demo-provenance,.guided-demo-rail li small,
+.guided-demo-shortcuts { color:var(--text-muted); }
+.status-chip-label,.source-card-heading,.signal-pipeline-heading,.signal-pipeline-heading span:last-child,
+.signal-pipeline-foot,.signal-stage-index,.signal-stage-label,.signal-stage small,.window-label,
+.overview-metric small,.log-table th,.info-table th,.state-table th,.topology-renderer-note,
+.topology-node .node-count,.service-inspector-kicker,.guided-demo-source-tag,.guided-demo-kicker,
+.guided-demo-progress-copy,.guided-demo-count,.guided-demo-rail-head,.guided-demo-step-marker,
+.guided-demo-rail li strong,.guided-demo-rail li small,.guided-demo-rail-note strong,
+.guided-demo-rail-note span,.guided-demo-shortcuts,.guided-demo-shortcuts kbd { font-size:10px; }
+.signal-stage-corner { opacity:1; }
+@media (max-width:390px) {
+  .app-shell .overview-metric-label,.app-shell .overview-metric small,.app-shell .guided-demo-rail li strong { font-size:10px; }
 }
 
 /* Full presentation is a work surface with the active route visible behind it,

@@ -32,6 +32,15 @@ test('command center presents a backend source and responds at desktop and mobil
 });
 
 test('direct route refresh reaches the primary product surfaces', async ({ page }) => {
+  const pageErrors: string[] = [];
+  const consoleErrors: string[] = [];
+  const failedRequests: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); });
+  page.on('requestfailed', (request) => {
+    const failure = request.failure()?.errorText ?? '';
+    if (!/ERR_ABORTED|NS_BINDING_ABORTED|aborted/i.test(failure)) failedRequests.push(`${request.url()} (${failure})`);
+  });
   const routes = [
     '/', '/scenario-lab', '/logs', '/search', '/analytics', '/patterns', '/incidents',
     '/incidents/workbench', '/services', '/live', '/replay', '/datasets', '/ingestion',
@@ -43,6 +52,51 @@ test('direct route refresh reaches the primary product surfaces', async ({ page 
     await expect(page.locator('main h1').first(), `route ${route} should render a page heading`).toBeVisible();
     await expect(page.getByText('Page not found')).toHaveCount(0);
   }
+  expect(pageErrors, 'no uncaught errors while rendering documented routes').toEqual([]);
+  expect(consoleErrors, 'no browser console errors while rendering documented routes').toEqual([]);
+  expect(failedRequests, 'no unexpected failed browser requests while rendering documented routes').toEqual([]);
+  const icon = await page.request.get('/loginsight-mark.svg');
+  expect(icon.ok(), 'the app icon is served by the frontend').toBeTruthy();
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/loginsight-mark.svg');
+});
+
+test('Signal Atlas semantic text colors meet WCAG AA against their intended surfaces', async ({ page }) => {
+  await page.goto('/');
+  const ratios = await page.evaluate(() => {
+    const style = getComputedStyle(document.documentElement);
+    const color = (name: string) => style.getPropertyValue(name).trim();
+    const channels = (hex: string) => hex.replace('#', '').match(/.{2}/g)!.map((part) => parseInt(part, 16) / 255);
+    const luminance = (hex: string) => channels(hex).map((channel) => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4).reduce((total, channel, index) => total + channel * [.2126, .7152, .0722][index], 0);
+    const pairs = [
+      ['--text', '--surface-0'], ['--text-soft', '--surface-0'], ['--text-muted', '--surface-0'],
+      ['--text-faint', '--surface-0'], ['--accent-strong', '--surface-0'], ['--accent', '--surface-0'],
+      ['--ok', '--ok-dim'], ['--warn', '--warn-dim'], ['--danger', '--danger-dim'],
+      ['--info', '--info-dim'], ['--purple', '--surface-0']
+    ];
+    return pairs.map(([foreground, background]) => {
+      const a = luminance(color(foreground));
+      const b = luminance(color(background));
+      return { pair: `${foreground} on ${background}`, ratio: (Math.max(a, b) + .05) / (Math.min(a, b) + .05) };
+    });
+  });
+  expect(ratios.filter(({ ratio }) => ratio < 4.5), JSON.stringify(ratios)).toEqual([]);
+});
+
+test('scroll reveals trigger from real scrolling and remain visible with reduced motion', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 500 });
+  await page.goto('/');
+  const lowerSection = page.locator('.overview-lower-grid');
+  await expect(lowerSection).toBeVisible();
+  await expect.poll(() => lowerSection.evaluate((element) => element.classList.contains('atlas-scroll-revealed'))).toBeFalsy();
+  await lowerSection.scrollIntoViewIfNeeded();
+  await expect.poll(() => lowerSection.evaluate((element) => element.classList.contains('atlas-scroll-revealed'))).toBeTruthy();
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const reducedMotionSection = page.locator('.overview-lower-grid');
+  await reducedMotionSection.scrollIntoViewIfNeeded();
+  await expect(reducedMotionSection).toBeVisible();
+  await expect.poll(() => reducedMotionSection.evaluate((element) => element.classList.contains('atlas-scroll-revealed'))).toBeFalsy();
 });
 
 test('search executes against the dataset and opens real event details', async ({ page }) => {
@@ -105,9 +159,8 @@ test('mobile navigation and reduced-motion presentation remain operable', async 
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const analyticsTabs = page.getByRole('tablist', { name: 'Analytics views' });
-  await analyticsTabs.evaluate((element) => {
-    element.classList.add('atlas-scroll-revealed');
-  });
+  await analyticsTabs.scrollIntoViewIfNeeded();
+  await expect(analyticsTabs).toBeVisible();
   const animation = await analyticsTabs.evaluate((element) => getComputedStyle(element).animationDuration);
   expect(Number.parseFloat(animation)).toBeLessThanOrEqual(0.00001);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(391);

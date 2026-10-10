@@ -461,7 +461,8 @@ export default function Layout() {
   const location = useLocation();
   useEffect(() => {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
-    const targets = [...document.querySelectorAll<HTMLElement>('.app-main .page > section, .app-main .page > .card, .app-main .page > .overview-metrics, .app-main .page > .overview-main-grid, .app-main .page > .overview-lower-grid')];
+    const main = document.querySelector('.app-main');
+    if (!main) return;
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
@@ -469,8 +470,18 @@ export default function Layout() {
         observer.unobserve(entry.target);
       });
     }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
-    targets.forEach((target) => observer.observe(target));
-    return () => observer.disconnect();
+    const observed = new WeakSet<Element>();
+    const observeTargets = () => {
+      main.querySelectorAll<HTMLElement>('.page > section, .page > .card, .page > .overview-metrics, .page > .overview-main-grid, .page > .overview-lower-grid').forEach((target) => {
+        if (observed.has(target)) return;
+        observed.add(target);
+        observer.observe(target);
+      });
+    };
+    const mutations = new MutationObserver(observeTargets);
+    observeTargets();
+    mutations.observe(main, { childList: true, subtree: true });
+    return () => { mutations.disconnect(); observer.disconnect(); };
   }, [location.pathname]);
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -587,7 +598,7 @@ export default function Layout() {
         <aside ref={sidebarRef} id="primary-navigation" className="sidebar" aria-label="Primary navigation" aria-hidden={mobileViewport && !mobileOpen}>
           <div className="sidebar-brand">
             <Link className="brand-link" to="/" aria-label="LogInsight Analyzer home">
-              <span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36" focusable="false"><path d="M4 19h7l4-10 7 19 4-9h6" /><circle cx="27" cy="19" r="2.2" /></svg></span>
+              <span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="M9 27h8l4-11 7 18 4-10h7" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" /><circle cx="38" cy="24" r="3.1" fill="#00A8C7" stroke="#fff" strokeWidth="1.8" /></svg></span>
               <span className="brand-copy">
                 <span className="brand-text">LogInsight</span>
                 <span className="brand-tagline">Real-time log intelligence</span>

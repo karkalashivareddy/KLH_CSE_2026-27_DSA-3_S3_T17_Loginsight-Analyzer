@@ -16,10 +16,10 @@ npm.cmd run build
 Results:
 
 - Backend: **878 tests, 0 failures, 0 errors**; Spring Boot jar packaged successfully.
-- Frontend: **61 tests across 18 files passed** with Vitest, including topology validation, responsive Command Center behavior and guided-demo API workflow tests.
+- Frontend: all **61 assertions passed** across the 50-test/17-file run and an isolated 11-test topology run. The aggregate invocation reported a Vitest worker-start timeout on the topology file in this Windows environment, not an assertion failure; CI is the clean aggregate gate.
 - Frontend build: TypeScript compilation and Vite production build passed. Vite warns that the optional lazy WebGL chunk is 571.82 kB minified (144.15 kB gzip), above the 500 kB warning threshold.
-- Browser E2E: **7 Playwright workflows passed** against the locally running frontend and backend, covering 19 direct routes, search/details, service selection and WebGL fallback, demo evidence/exit, mobile keyboard navigation/reduced motion, and six viewport targets.
-- Current screenshots: 9 captured from the running app into `docs/images/signal-atlas/`; images under `docs/images/` outside that directory are historical.
+- Browser E2E: **9 Playwright workflows passed** against the locally running frontend and backend, covering 19 direct routes, console/network errors, semantic text contrast, actual scroll reveals/reduced motion, search/details, service selection and WebGL fallback, demo evidence/exit, mobile navigation, and six viewport targets.
+- Current screenshots: 10 captured from the running app into `docs/images/signal-atlas/`; images under `docs/images/` outside that directory are historical.
 - Dependency audit: `npm audit` reported **0 vulnerabilities** after upgrading React Router to 7.18.4.
 - JaCoCo: report generated under `backend/target/site/jacoco/`; no numeric coverage threshold is configured in the POM.
 - Compose syntax: `docker compose config --quiet` passed.
@@ -81,7 +81,7 @@ DSA-3 forbids delegating core algorithm logic in `dsa/**` to `java.util` collect
 
 ## Frontend verification boundary
 
-The production build validates TypeScript and Vite bundling. Playwright runs the built product source through Vite against the actual local Spring Boot backend; deterministic demo data is loaded through its real API. The suite checks 19 direct routes, dataset search and event details, topology selection and forced WebGL fallback, guided-presentation evidence/exit, mobile navigation, reduced motion and horizontal overflow at six viewport targets. The visual capture script records nine current desktop/mobile screenshots from the running application. These checks do not prove GPU-backed WebGL rendering, complete screen-reader usability or production network behavior under load.
+The production build validates TypeScript and Vite bundling. Playwright runs the product through Vite against the actual local Spring Boot backend; deterministic demo data is loaded through its real API. Nine workflows check 19 direct routes, browser console and unexpected failed requests, semantic token contrast, real scroll reveal and reduced motion, dataset search and event details, topology selection and forced WebGL fallback, guided-presentation evidence/exit, mobile navigation, and overflow at six viewport targets. The visual capture script records ten current desktop/mobile screenshots. These checks do not prove GPU-backed WebGL rendering, complete screen-reader usability or production network behavior under load.
 
 No axe-based accessibility scan or pixel-diff visual-regression suite is configured. A deployment smoke test should additionally verify:
 

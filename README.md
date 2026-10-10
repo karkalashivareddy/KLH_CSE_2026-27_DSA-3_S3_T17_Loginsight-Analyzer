@@ -238,7 +238,7 @@ npm.cmd test -- --reporter=dot
 npm.cmd run build
 ```
 
-Results on the rebuilt source: backend **878 tests**, 0 failures, 0 errors, 0 skipped; frontend Vitest **61 tests across 18 files** passed; Playwright browser suite **7 workflows passed** after the final viewport and reduced-motion checks; TypeScript and Vite production build passed. The optional lazy topology chunk is 571.82 kB minified (144.15 kB gzip), above Vite's 500 kB chunk warning threshold. Current screenshots were captured from the running app at 1440×900 and 390×844; browser layout/overflow assertions cover 1440×900, 1280×800, 1024×768, 768×1024, 390×844 and 360×800. These are local results, not GitHub Actions evidence. The backend produces JaCoCo reports under `backend/target/site/jacoco/`.
+Latest local verification: backend **878 tests** and **9 Playwright workflows** passed against the running Spring backend. The 61 frontend assertions passed across a 50-test/17-file run and a separate 11-test topology run; the aggregate Vitest invocation reported a worker-start timeout for that topology file, not an assertion failure. The browser suite checks all documented routes, browser console and failed requests, semantic token contrast, actual scrolling/reduced motion, search, topology selection/WebGL fallback and six viewport sizes. TypeScript and the Vite production build pass. The optional lazy topology chunk is 571.82 kB minified (144.15 kB gzip), above Vite's 500 kB warning threshold. Ten genuine screenshots were recaptured from the running application; local results are not GitHub Actions evidence. The backend produces JaCoCo reports under `backend/target/site/jacoco/`.
 
 **GitHub Actions verification** — workflow run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637) on commit `e09c49fda898c2edb28ff4109bd61403096d29ca` completed successfully. Both **Backend tests** and **Frontend tests and build** jobs passed.
 
@@ -251,7 +251,7 @@ Two facts about those numbers, so they are not over-read:
   navigation, reduced motion and responsive overflow. It does not verify Docker
   execution or GPU-backed WebGL rendering.
 
-Earlier phase reports under `docs/archive/` carry smaller backend counts from their own snapshots and are labelled as historical rather than current. The report, PDF and presentation under `final-submission/` have not been regenerated for this redesign and may show the earlier interface. Current screenshots are in `docs/images/signal-atlas/`; the older images directly under `docs/images/` are historical.
+Earlier phase reports under `docs/archive/` carry smaller backend counts from their own snapshots and are labelled as historical rather than current. The report, PDF and checked-in presentation under `final-submission/` remain historical. A refreshed editable presentation is generated locally outside Git for this submission; it uses the KLH logo and current screenshots. Current screenshots are in `docs/images/signal-atlas/`; the older images directly under `docs/images/` are historical.
 
 ## Limitations
 
