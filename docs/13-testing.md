@@ -25,7 +25,7 @@ Results:
 - Compose syntax: `docker compose config --quiet` passed.
 - Container image build/runtime: not executed because the Docker daemon was unavailable. That limitation still holds; `docker info` cannot reach the Docker engine in this environment, so no image build or container smoke test has been run on this branch.
 
-The checked-in CI workflow runs `mvn -B verify`, frontend tests/build, a full npm audit and a browser E2E job that provisions Chromium and starts both services. Run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637) on commit `e09c49fda898c2edb28ff4109bd61403096d29ca` is historical evidence for that earlier redesign only; inspect the Actions run on the final release commit for the current workflow result. The frontend job pins Node 22 because Vitest 5 declares `engines: ^22.12.0 || ^24.0.0 || >=26.0.0`.
+The checked-in CI workflow runs `mvn -B verify`, frontend tests/build, a full npm audit and a browser E2E job that provisions Chromium and starts both services. GitHub Actions [run 38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711) passed all three jobs for implementation commit `c6349c77f3f755c231e1172efec14b01009bf1ef`. The frontend job pins Node 22 because Vitest 5 declares `engines: ^22.12.0 || ^24.0.0 || >=26.0.0`.
 
 ### Guided-demo backend integration smoke
 

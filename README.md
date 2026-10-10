@@ -240,7 +240,7 @@ npm.cmd run build
 
 Latest local verification: backend **878 tests** and **9 Playwright workflows** passed against the running Spring backend. The 61 frontend assertions passed across a 50-test/17-file run and a separate 11-test topology run; the aggregate Vitest invocation reported a worker-start timeout for that topology file, not an assertion failure. The browser suite checks all documented routes, browser console and failed requests, semantic token contrast, actual scrolling/reduced motion, search, topology selection/WebGL fallback and six viewport sizes. TypeScript and the Vite production build pass. The optional lazy topology chunk is 571.82 kB minified (144.15 kB gzip), above Vite's 500 kB warning threshold. Ten genuine screenshots were recaptured from the running application; local results are not GitHub Actions evidence. The backend produces JaCoCo reports under `backend/target/site/jacoco/`.
 
-**GitHub Actions verification** — workflow run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637) on commit `e09c49fda898c2edb28ff4109bd61403096d29ca` completed successfully. Both **Backend tests** and **Frontend tests and build** jobs passed.
+**GitHub Actions verification** — workflow run [38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711) on implementation commit `c6349c77f3f755c231e1172efec14b01009bf1ef` completed successfully. Backend, frontend tests/build/dependency audit, and browser workflows passed.
 
 Two facts about those numbers, so they are not over-read:
 

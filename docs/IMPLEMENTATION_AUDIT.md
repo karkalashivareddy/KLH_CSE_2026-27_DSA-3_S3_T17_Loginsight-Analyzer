@@ -11,18 +11,18 @@ This is the canonical description of the checked-out implementation. It is based
 | Gate | Command | Result |
 |---|---|---|
 | Backend | `cd backend; .\mvnw.cmd -o verify` | 878 tests, 0 failures, 0 errors; Spring Boot jar packaged |
-| Frontend tests | `cd frontend; npm.cmd test -- --reporter=dot` | 61 tests across 18 files passed |
-| Browser E2E | `cd frontend; npm run test:e2e` | 7 Playwright workflows passed against the local frontend/backend |
+| Frontend tests | `cd frontend; npm.cmd test -- --reporter=dot` | 61 assertions passed across 17-file full run and separate topology run; local full invocation hit worker startup timeout |
+| Browser E2E | `cd frontend; npm run test:e2e` | 9 Playwright workflows passed against local frontend/backend |
 | Frontend build | `cd frontend; npm run build` | TypeScript and Vite production build passed; optional topology chunk 571.82 kB minified |
 | Dependency audit | `cd frontend; npm audit` | 0 vulnerabilities after React Router 7.18.4 update |
 | Compose syntax | `docker compose config --quiet` | Passed |
 | Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable in this environment |
 
-CI now runs backend verification, frontend tests/build, a full npm audit and a real-browser workflow job. The previous successful workflow cited below belongs to the earlier `e09c49f` redesign and is historical; the current workflow result must be read from the final release commit's run.
+CI runs backend verification, frontend tests/build, a full npm audit and a real-browser workflow job. Run [38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711) passed all three jobs on implementation commit `c6349c77f3f755c231e1172efec14b01009bf1ef`.
 
-Backend verify completed locally: 878 tests, 0 failures, 0 errors, 0 skipped, and the Spring Boot jar was packaged. Vitest passed 61 tests in 18 files; Playwright passed seven workflows, including direct route refresh, real API search, topology selection/fallback, guided evidence/exit, reduced motion and six responsive viewport sizes. Nine screenshots were captured from the running application; desktop 1440×900 and mobile 390×844, incident, analytics, topology and presentation views were inspected. The build emits a 571.82 kB minified optional topology chunk (144.15 kB gzip), above the 500 kB warning threshold. Docker is unavailable (`docker info` cannot reach `docker_engine`), so image builds and container smoke tests remain unexecuted and unclaimed.
+Backend verify completed locally: 878 tests, 0 failures, 0 errors, 0 skipped, and the Spring Boot jar was packaged. All 61 frontend assertions passed (50 in the 17-file run and 11 in the isolated topology run); the aggregate local invocation had a worker-start timeout. GitHub Actions passed its aggregate frontend job. Playwright passed nine workflows, including direct route refresh, browser errors, contrast, real scrolling, API search, topology selection/fallback, guided evidence/exit, reduced motion and six responsive viewport sizes. Ten screenshots were captured from the running application; desktop 1440×900, selected topology, guided mobile and other key views were visually inspected. The build emits a 571.82 kB minified optional topology chunk (144.15 kB gzip), above the 500 kB warning threshold. Docker is unavailable (`docker info` cannot reach `docker_engine`), so image builds and container smoke tests remain unexecuted and unclaimed.
 
-GitHub Actions run [38042812637](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38042812637), for commit `e09c49fda898c2edb28ff4109bd61403096d29ca`, completed successfully. Its Backend tests and Frontend tests and build jobs both passed.
+GitHub Actions run [38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711), for implementation commit `c6349c77f3f755c231e1172efec14b01009bf1ef`, completed successfully. Backend tests, frontend tests/build/audit, and browser workflows passed.
 
 The Maven build targets Java 21 and uses Spring Boot 3.5.16. The frontend uses React 18, TypeScript, Vite, React Router 7.18.4, Vitest 5 and Playwright; the Vitest suite requires Node 22.12 or newer. There is no separate lint script or axe audit.
 

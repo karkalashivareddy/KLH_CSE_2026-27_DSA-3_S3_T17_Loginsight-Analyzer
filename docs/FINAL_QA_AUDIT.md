@@ -11,6 +11,7 @@
 
 ## Current evidence and limits
 
+- Implementation commit `c6349c77f3f755c231e1172efec14b01009bf1ef` passed [GitHub Actions run 38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711); backend, frontend test/build/audit, and browser jobs all succeeded.
 - Full backend and frontend test counts and final commit/run are recorded in the submission index after release verification.
 - Browser tests exercise the actual local Spring backend with the deterministic demo dataset, not an external service.
 - The aggregate Vitest invocation passed 50 assertions in 17 files, then could not start the topology worker before timeout. The isolated topology file then passed all 11 assertions. Treat the complete local unit-suite invocation as environment-limited; CI remains the aggregate check.
