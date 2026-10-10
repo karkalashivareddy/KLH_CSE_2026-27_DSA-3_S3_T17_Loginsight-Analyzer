@@ -19,6 +19,8 @@ import com.loginsight.model.LogEvent;
 import com.loginsight.parser.LogParseResult;
 import com.loginsight.parser.LogParser;
 import com.loginsight.parser.LogParserFactory;
+import com.loginsight.parser.ParserException;
+import com.loginsight.parser.UnsupportedLogFormatException;
 
 /**
  * Session-scoped in-memory dataset store (docs/02 §6 and docs/API.md §4). Holds the current
@@ -100,15 +102,22 @@ public class DatasetService {
     /**
      * Ingest an arbitrary raw log stream (file upload or pasted content) as a new current dataset.
      *
-     * @param name human-readable dataset name
+     * @param name human-readable dataset name; trimmed, and blank/null falls back to
+     *             {@code "imported-logs"}
      * @param in   the raw stream, auto-detected as JSONL or canonical text
      * @return the freshly loaded dataset
-     * @throws DatasetException if the stream is empty, oversized or could not be parsed
+     * @throws IllegalArgumentException if {@code in} is null
+     * @throws ParserException if the stream is empty (no content to detect a format from)
+     * @throws DatasetException if the stream is oversized or could not be parsed
      */
     public Dataset ingest(String name, InputStream in) {
+        if (in == null) {
+            throw new IllegalArgumentException("Log ingestion stream must not be null");
+        }
+        String datasetName = name == null || name.isBlank() ? "imported-logs" : name.trim();
         byte[] raw = readBounded(in);
-        if (!name.isEmpty() && raw.length == 0) {
-            throw new DatasetException("Log ingestion produced no records");
+        if (raw.length == 0) {
+            throw new UnsupportedLogFormatException("input stream is empty");
         }
         LogParseResult result;
         try (InputStream probe = new java.io.ByteArrayInputStream(raw)) {
@@ -122,7 +131,7 @@ public class DatasetService {
         if (result == null || result.successfulEvents().isEmpty()) {
             throw new DatasetException("Log ingestion produced no records");
         }
-        return install(name == null || name.isBlank() ? "imported-logs" : name, result);
+        return install(datasetName, result);
     }
 
     private static byte[] readBounded(InputStream in) {

@@ -1,10 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import AppErrorBoundary from './components/AppErrorBoundary';
 import './styles/signal-atlas.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root');
+if (!container) throw new Error('LogInsight could not start: #root is missing from index.html.');
+
+ReactDOM.createRoot(container).render(
   <React.StrictMode>
-    <App />
+    <AppErrorBoundary scope="LogInsight">
+      <App />
+    </AppErrorBoundary>
   </React.StrictMode>
 );

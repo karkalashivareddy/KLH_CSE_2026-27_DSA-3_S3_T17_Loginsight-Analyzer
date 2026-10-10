@@ -43,7 +43,7 @@ When free text has no result, the product path computes a bounded Levenshtein su
 
 `IncidentDetector` considers ERROR/FATAL events, places them in fixed five-minute windows, computes the dataset error baseline, marks windows at or above `max(3, ceil(3 × baseline))`, and merges consecutive or one-window-apart elevated windows. Each incident exposes its method, primary pattern, services, window and supporting logs. It is a rule-based heuristic, not a trained anomaly model.
 
-The Command Center reuses this detector over the selected window and labels the result as heuristic. The "Detected incident windows" card counts returned windows, and the health bands shown next to it are fixed error-rate thresholds (healthy <5%, watch 5–<10%, elevated ≥10%, unavailable when the rate is not finite). Neither is a health model or an SLI evaluation.
+The Command Center reuses this detector over the selected window and labels the result as heuristic. The **Incident windows** metric tile counts returned windows, and the **Investigation** card renders the most recent one with its method string. The health bands shown beside them are fixed error-rate thresholds (healthy <5%, watch 5–<10%, elevated ≥10%, unknown when the rate is not finite). Neither is a health model or an SLI evaluation.
 
 ### Live simulation detection
 
@@ -90,6 +90,19 @@ The canonical catalogue is available at `GET /api/algorithms` and `GET /api/modu
 
 Some entries are library-only: Kasai LCP, bounded vertex cover, kernelization, knapsack FPTAS, VC/IS reduction and perfect hashing do not have their own product endpoint. Ford-Fulkerson is trace-reachable; the current flow controller also exposes the implementation at `POST /api/flow`, while the catalogue intentionally records its canonical exposure as trace-only.
 
+## Miller-Rabin: argument validation
+
+`MillerRabin` exposes two entry points, `test` and `testTracked`. Both now call one private `validateArguments`, so they reject exactly the same inputs with exactly the same messages. The shared guard rejects a negative `n`, a null `mode`, and — for `PROBABILISTIC` — a null `rng` or `rounds <= 0`.
+
+This is a correctness contract, not defensive tidying. Before the guard was shared:
+
+- `testTracked(n, null, …)` dereferenced a null `mode` and threw `NullPointerException`.
+- `testTracked(n, PROBABILISTIC, rng, 0)` passed `test`'s guard-less path, built an **empty witness array**, skipped the witness loop entirely and returned `PRIME` for composite `n` — a wrong primality verdict carrying a `probabilistic` mode label in the recorded trace.
+
+The canonical request path was already bounded independently by `QueryValidator.MAX_MILLER_RABIN_ROUNDS = 1_000`, which is why the endpoint could not reach the defect; the library-level guard is what protects every other caller, including the trace path. `MillerRabinValidationRegressionTest` pins the boundary.
+
+`isDefinitePrime` delegates to `test(n, DETERMINISTIC, null, 0)`, which is unaffected: `validateArguments` only constrains `rng`/`rounds` in `PROBABILISTIC` mode.
+
 ## Trace and run sessions
 
 Trace-instrumented algorithms record operation, description, state, highlights and metrics during execution. `POST /api/runs` executes a real traceable algorithm synchronously, stores the record in the bounded `RunStore`, and returns it. `GET /api/runs/{id}/events` replays the recorded steps over SSE as `meta`, `step` and `complete` events. The browser renders those steps; it does not animate an invented computation.
@@ -106,6 +119,6 @@ DSA-3 forbids delegating core algorithm logic in `dsa/**` to `java.util` collect
 
 The frontend uses Three.js/WebGL as an optional rendering layer for the observed service topology. That visualization does not add a DSA engine or alter the backend algorithm catalogue. There is still no WebSocket transport, external research integration, trained ML model, external live collector or production telemetry pipeline.
 
-The topology remains SVG-first. The 3D view is lazy-loaded and maps the same backend nodes and edges into a perspective scene; moving markers are a normalized visual encoding of observed edge weight, not an exact request count or live external traffic stream. See [UI-UX.md](UI-UX.md) and [design-system.md](design-system.md) for its lifecycle and limits.
+The 3D dependency is deferred, not removed: `vendor-three` is a separately named chunk that is fetched only when the 3D topology is opened, so a visitor who never selects 3D never downloads it. See [ARCHITECTURE.md](ARCHITECTURE.md).
 
 See [COMMAND_CENTER.md](COMMAND_CENTER.md) for the field-level window, topology and health semantics.

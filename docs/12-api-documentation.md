@@ -2,9 +2,15 @@
 
 > **Superseded — kept for phase traceability.** This phase-numbered file records the
 > algorithm-laboratory surface as it stood during the rebuild. The authoritative contract, including
-> the deterministic simulation endpoints and the 409 lifecycle mapping, is
-> [API.md](API.md). Where the two differ, API.md is correct. The current DSA exposure and classification
-> lives in [ALGORITHMS.md](ALGORITHMS.md) and [DSA_PRODUCT_MAPPING.md](DSA_PRODUCT_MAPPING.md).
+> the deterministic simulation endpoints, the 409 lifecycle mapping and **the 400 mapping for
+> `ParserException` added after this phase**, is [API.md](API.md). Where the two differ, API.md is
+> correct. The current DSA exposure and classification lives in [ALGORITHMS.md](ALGORITHMS.md) and
+> [DSA_PRODUCT_MAPPING.md](DSA_PRODUCT_MAPPING.md).
+>
+> **Verified against the current controllers on this revision.** Every path in the tables below was
+> checked against the `@RequestMapping` / `@(Get|Post)Mapping` annotations in
+> `backend/src/main/java/com/loginsight/controller/`. The endpoint list is unchanged and accurate;
+> the only drift found was in the error mapping, corrected below.
 
 The product-facing REST and error contract is maintained in [API.md](API.md). This file records the algorithm-laboratory surface retained alongside the rebuilt product shell.
 
@@ -55,6 +61,14 @@ The `POST /api/text-hack/query` compatibility facade routes six query classes to
 
 ## Validation
 
-The current validator and endpoint-specific limits are listed in [API.md](API.md). Important families include text/pattern length, quadratic DP cell budgets, Aho-Corasick pattern/occurrence caps, Miller-Rabin rounds, reservoir stream and `k`, benchmark sweeps, request-factory array/text limits, run history and recorder steps. Invalid input is returned as the standard JSON `400` envelope.
+The current validator and endpoint-specific limits are listed in [API.md](API.md). Important families include text/pattern length, quadratic DP cell budgets, Aho-Corasick pattern/occurrence caps, Miller-Rabin rounds (`QueryValidator.MAX_MILLER_RABIN_ROUNDS = 1_000`), reservoir stream and `k`, benchmark sweeps, request-factory array/text limits, run history and recorder steps. Invalid input is returned as the standard JSON `400` envelope.
 
-The earlier course-map and phase documents in this directory are historical context. The current product routes, counts and limitations are in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md).
+**Corrected for the current revision.** The statement above that validation errors return 400 was not universally true during this phase. `ParserException` had no handler in `GlobalExceptionHandler`, so a parse failure fell through to the generic `Exception` handler and answered HTTP **500**. It is now in the 400 handler, which also covers `UnsupportedLogFormatException`; the observable case is a zero-byte or whitespace-only `POST /api/datasets`, which answers 400 with `message: "input stream is empty"`. `DatasetException` still maps to 404 and `IllegalLifecycleTransitionException` to 409. Full table in [API.md](API.md).
+
+## Library-level guards the endpoints do not cover
+
+Endpoint validators are not the only defence, and this revision added one where the gap was a correctness bug rather than a robustness nicety.
+
+`MillerRabin` validates its arguments in a shared private `validateArguments` called by both `test` and `testTracked`. Before that, `testTracked` performed no validation: `testTracked(n, PROBABILISTIC, rng, 0)` produced an empty witness array, skipped the witness loop entirely, and returned `PRIME` for composite `n`; a null `mode` threw `NullPointerException`. `QueryValidator.MAX_MILLER_RABIN_ROUNDS` bounds the canonical `POST /api/random/prime` request, but the trace path and every direct library caller are protected only by the class-level guard. See [ALGORITHMS.md](ALGORITHMS.md).
+
+The earlier phase documents in this directory are historical context. The current product routes, counts and limitations are in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md).

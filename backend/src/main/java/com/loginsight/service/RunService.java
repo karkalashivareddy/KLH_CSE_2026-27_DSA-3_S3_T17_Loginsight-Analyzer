@@ -8,7 +8,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -34,7 +39,12 @@ import jakarta.annotation.PreDestroy;
 @Service
 public class RunService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RunService.class);
+
     private static final long SSE_TIMEOUT_MS = 60_000L;
+
+    /** Upper bound on how long {@code @PreDestroy} waits for in-flight replays to finish. */
+    private static final long SHUTDOWN_GRACE_SECONDS = 5L;
 
     private final TraceService trace;
     private final RunStore store;
@@ -95,24 +105,86 @@ public class RunService {
     public SseEmitter stream(String runId) {
         RunRecord run = get(runId);
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
-        emitterPool.execute(() -> emit(emitter, run));
+        ReplayTask task = new ReplayTask(emitter, run);
+        emitter.onCompletion(task::cancel);
+        emitter.onTimeout(task::cancel);
+        emitter.onError(error -> task.cancel());
+        try {
+            emitterPool.execute(task);
+        } catch (RejectedExecutionException e) {
+            task.fail(e);
+        }
         return emitter;
     }
 
     // ------------------------------------------------------------------ internals
 
-    private void emit(SseEmitter emitter, RunRecord run) {
-        try {
-            emitter.send(SseEmitter.event().name("meta").data(meta(run)));
-            if ("COMPLETED".equals(run.status())) {
-                for (Map<String, Object> step : run.steps()) {
-                    emitter.send(SseEmitter.event().name("step").data(step));
+    /** A single replay: one emit loop per emitter, cancelled as soon as the client goes away. */
+    private final class ReplayTask implements Runnable {
+
+        private final SseEmitter emitter;
+        private final RunRecord run;
+        private final AtomicBoolean closed = new AtomicBoolean();
+
+        private ReplayTask(SseEmitter emitter, RunRecord run) {
+            this.emitter = emitter;
+            this.run = run;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (closed.get()) {
+                    return;
+                }
+                emitter.send(SseEmitter.event().name("meta").data(meta(run)));
+                if ("COMPLETED".equals(run.status())) {
+                    for (Map<String, Object> step : run.steps()) {
+                        if (closed.get()) {
+                            return;
+                        }
+                        emitter.send(SseEmitter.event().name("step").data(step));
+                    }
+                }
+                if (closed.get()) {
+                    return;
+                }
+                emitter.send(SseEmitter.event().name("complete").data(complete(run)));
+                completeNormally();
+            } catch (Exception e) {
+                if (!closed.get()) {
+                    LOG.debug("Run stream closed: {}", e.getMessage());
+                    fail(e);
                 }
             }
-            emitter.send(SseEmitter.event().name("complete").data(complete(run)));
-            emitter.complete();
-        } catch (Exception e) {
-            emitter.completeWithError(e);
+        }
+
+        private void cancel() {
+            if (closed.compareAndSet(false, true)) {
+                completeEmitter();
+            }
+        }
+
+        private void completeNormally() {
+            if (closed.compareAndSet(false, true)) {
+                completeEmitter();
+            }
+        }
+
+        private void fail(Throwable error) {
+            if (closed.compareAndSet(false, true)) {
+                try {
+                    emitter.completeWithError(error);
+                } catch (RuntimeException ignored) {
+                }
+            }
+        }
+
+        private void completeEmitter() {
+            try {
+                emitter.complete();
+            } catch (RuntimeException ignored) {
+            }
         }
     }
 
@@ -181,5 +253,10 @@ public class RunService {
     @PreDestroy
     void shutdown() {
         emitterPool.shutdown();
+        try {
+            emitterPool.awaitTermination(SHUTDOWN_GRACE_SECONDS, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

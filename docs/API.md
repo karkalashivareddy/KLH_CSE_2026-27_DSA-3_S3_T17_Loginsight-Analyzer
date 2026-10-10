@@ -22,7 +22,7 @@ Stack traces are not returned. `error` is normally the exception class simple na
 
 | Status | Current meaning |
 |---:|---|
-| 400 | Invalid query/log input, illegal argument, malformed or missing body, invalid parameter/date, bounds failure, or upload over 64 MB |
+| 400 | Invalid query/log input, illegal argument, malformed or missing body, invalid parameter/date, bounds failure, upload over 64 MB, **or a parse failure (`ParserException` and its `UnsupportedLogFormatException` subclass)** |
 | 404 | Missing dataset, unknown event/service/incident/run/sample, or unknown endpoint/resource |
 | 405 | HTTP method not supported |
 | 406 | Request cannot accept the available representation |
@@ -31,6 +31,20 @@ Stack traces are not returned. `error` is normally the exception class simple na
 | 500 | Algorithm execution failure or unexpected server failure, with a sanitized message |
 
 A client-side request timeout is normalized by the frontend as status `408`; it is not a backend response.
+
+**Parse failures are 400, not 500.** `ParserException` is mapped explicitly in `GlobalExceptionHandler`. Previously it had no handler, so an empty or unparsable upload fell through to the generic `Exception` handler and answered HTTP 500 — reporting an ordinary client mistake as a server fault. The concrete observable case is a zero-byte or whitespace-only `POST /api/datasets`, which now answers:
+
+```json
+{
+  "status": 400,
+  "error": "UnsupportedLogFormatException",
+  "message": "input stream is empty",
+  "timestamp": "2026-09-25T00:00:00Z",
+  "path": "/api/datasets"
+}
+```
+
+`UnsupportedLogFormatException` extends `ParserException`, so the whole parse-failure family inherits the mapping.
 
 Two presence endpoints intentionally use a small 404 body instead of the normal error envelope:
 
@@ -66,6 +80,20 @@ Two presence endpoints intentionally use a small 404 body instead of the normal 
 | POST | `/api/ingestion/demo` | Alias for demo loading |
 
 `POST /api/datasets/demo`, upload and ingestion-demo return `DatasetResultDto`; its `loaded` field is the string `"true"` in this record. The health/current presence endpoints return a boolean `loaded` field. Counts are real parse results: `size`, `totalLines` and `failedLines`.
+
+#### Ingestion failure contract
+
+`POST /api/datasets` routes every rejection through the standard error envelope:
+
+| Condition | Status | `error` | Message |
+|---|---:|---|---|
+| Zero-byte or whitespace-only body | 400 | `UnsupportedLogFormatException` | `input stream is empty` |
+| Non-empty but unparsable | 400 | `UnsupportedLogFormatException` / `ParserException` | parser message, no stack trace |
+| Body over 64 MB | 400 | `MaxUploadSizeExceededException` | upload-size message |
+| Parse ran but yielded no events | 404 | `DatasetException` | `Log ingestion produced no records` |
+| Missing `file` part | 400 | `MissingServletRequestParameterException` | names the required part |
+
+The `name` parameter is normalized before use: trimmed, and blank or null falls back to `imported-logs`. The empty-body check does **not** depend on whether a name was supplied — an unnamed empty upload and a named empty upload both answer 400.
 
 ### Overview and logs
 
@@ -224,6 +252,8 @@ Events are snapshotted at subscribe time and emitted **oldest-first**, ordered b
 | GET | `/api/runs/{id}/events` | SSE `meta`, repeated `step`, then `complete` |
 
 `POST /api/runs` is the run-creation entry point used by the Algorithm Lab group: it executes the algorithm server-side, records its steps in the bounded `RunStore` and returns the record. `/api/runs` and `/api/runs/{id}/events` are what the Run Sessions page reads and streams.
+
+**SSE emitter lifecycle.** All three streaming endpoints — `/api/simulation/stream`, `/api/live` and `/api/runs/{id}/events` — register `onCompletion`, `onTimeout` and `onError` on their emitter, so an abandoned stream releases its worker immediately rather than holding it until the emitter timeout. `RunService` additionally performs a bounded 5 s `awaitTermination` on shutdown, so in-flight replays finish or are cancelled cleanly rather than being dropped mid-flight. Each stream body is guarded so that completion, cancellation and failure are mutually exclusive and idempotent.
 
 ## Algorithm laboratory endpoints
 

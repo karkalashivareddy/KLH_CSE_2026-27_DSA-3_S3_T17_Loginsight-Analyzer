@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.loginsight.parser.ParserException;
 import com.loginsight.simulation.IncidentLifecycleStore.IllegalLifecycleTransitionException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,7 +46,8 @@ public class GlobalExceptionHandler {
 
     /** Validation failures: HTTP 400. */
     @ExceptionHandler({InvalidQueryException.class, InvalidLogException.class,
-            IllegalArgumentException.class, MaxUploadSizeExceededException.class})
+            IllegalArgumentException.class, MaxUploadSizeExceededException.class,
+            ParserException.class})
     public ResponseEntity<Map<String, Object>> badRequest(Exception e, HttpServletRequest request) {
         String type = e.getClass().getSimpleName();
         String message = e instanceof MaxUploadSizeExceededException

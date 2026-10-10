@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   BarChart3,
   BookOpen,
@@ -31,6 +32,8 @@ import type { LiveStatus, SystemStatus } from '../api/types';
 import { formatNumber } from './format';
 import { PROJECT } from '../types/project';
 import { useApi } from '../hooks/useApi';
+import Atmosphere from '../motion/Atmosphere';
+import { MOTION, EASE } from '../motion/motion';
 
 type Tone = 'good' | 'muted' | 'warn' | 'danger' | 'info';
 
@@ -52,7 +55,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Workspace',
     entries: [
-      { to: '/', label: 'Overview', icon: LayoutDashboard, end: true, aliases: ['/command-center'], keywords: 'command center dashboard home' },
+      { to: '/', label: 'Overview', icon: LayoutDashboard, end: true, aliases: ['/command-center', '/overview'], keywords: 'command center dashboard home' },
       { to: '/scenario-lab', label: 'Scenario Lab', icon: FlaskConical, aliases: ['/simulation'], keywords: 'deterministic simulation scenario incident seed generator' },
       { to: '/live', label: 'Live Monitor', icon: Radio, keywords: 'live monitor stream simulation generated traffic' },
       { to: '/replay', label: 'Dataset Replay', icon: History, keywords: 'dataset replay sse bounded demo' },
@@ -416,6 +419,9 @@ function CommandPalette({ open, onClose, onToggleSidebar, sidebarCollapsed }: {
           <input
             ref={inputRef}
             className="command-input"
+            type="search"
+            autoComplete="off"
+            spellCheck={false}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => {
@@ -459,30 +465,50 @@ function CommandPalette({ open, onClose, onToggleSidebar, sidebarCollapsed }: {
 
 export default function Layout() {
   const location = useLocation();
+  const prefersReducedMotion = useReducedMotion();
+
+  /**
+   * Scroll-linked section reveal.
+   *
+   * Both classes are applied from JavaScript, so the hidden state can never be
+   * applied by CSS alone: if `IntersectionObserver` is unavailable, or the
+   * effect throws, nothing is hidden. Revealed targets are unobserved and the
+   * observers are disconnected on route change and on unmount.
+   */
   useEffect(() => {
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
     const main = document.querySelector('.app-main');
-    if (!main) return;
+    if (!main || prefersReducedMotion || typeof IntersectionObserver === 'undefined') return;
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        entry.target.classList.add('atlas-scroll-revealed');
+        entry.target.classList.add('is-revealed');
         observer.unobserve(entry.target);
       });
-    }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
-    const observed = new WeakSet<Element>();
+    }, { threshold: 0.06, rootMargin: '0px 0px -6% 0px' });
+
+    const tracked = new WeakSet<Element>();
     const observeTargets = () => {
-      main.querySelectorAll<HTMLElement>('.page > section, .page > .card, .page > .overview-metrics, .page > .overview-main-grid, .page > .overview-lower-grid').forEach((target) => {
-        if (observed.has(target)) return;
-        observed.add(target);
+      // Sections are children of the page element, which the route wrapper
+      // (`Layout`) renders around every page's content.
+      main.querySelectorAll<HTMLElement>(
+        '.page > section, .page > .card, .page > .overview-metrics, .page > .overview-main-grid, .page > .overview-lower-grid, .page > .source-empty-state'
+      ).forEach((target) => {
+        if (tracked.has(target)) return;
+        tracked.add(target);
+        target.classList.add('reveal-section');
         observer.observe(target);
       });
     };
+
     const mutations = new MutationObserver(observeTargets);
     observeTargets();
     mutations.observe(main, { childList: true, subtree: true });
-    return () => { mutations.disconnect(); observer.disconnect(); };
-  }, [location.pathname]);
+    return () => {
+      mutations.disconnect();
+      observer.disconnect();
+    };
+  }, [location.pathname, prefersReducedMotion]);
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false;
     try {
@@ -594,14 +620,15 @@ export default function Layout() {
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to main content</a>
+      <Atmosphere />
       <div className={`app-shell${collapsed ? ' app-shell--collapsed' : ''}${mobileOpen ? ' app-shell--mobile-open' : ''}`}>
         <aside ref={sidebarRef} id="primary-navigation" className="sidebar" aria-label="Primary navigation" aria-hidden={mobileViewport && !mobileOpen}>
           <div className="sidebar-brand">
             <Link className="brand-link" to="/" aria-label="LogInsight Analyzer home">
-              <span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="M9 27h8l4-11 7 18 4-10h7" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" /><circle cx="38" cy="24" r="3.1" fill="#00A8C7" stroke="#fff" strokeWidth="1.8" /></svg></span>
+              <span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="M9 27h8l4-11 7 18 4-10h7" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" /><circle cx="38" cy="24" r="3.1" fill="var(--accent-bright)" stroke="#fff" strokeWidth="1.8" /></svg></span>
               <span className="brand-copy">
                 <span className="brand-text">LogInsight</span>
-                <span className="brand-tagline">Real-time log intelligence</span>
+                <span className="brand-tagline">Signal intelligence</span>
               </span>
             </Link>
             <button className="icon-btn mobile-close-btn" type="button" onClick={closeMobile} aria-label="Close navigation" title="Close navigation">
@@ -672,7 +699,21 @@ export default function Layout() {
           </header>
 
           <main className="app-main" id="main-content" tabIndex={-1}>
-            <Outlet />
+            {/*
+              Keying on the pathname remounts the motion div so a route change
+              replays the entrance. `Layout` itself never unmounts, so shell
+              state (collapsed sidebar, palette) survives navigation, and the
+              old timeline is disposed with the subtree.
+            */}
+            <motion.div
+              key={location.pathname}
+              className="route-view"
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : MOTION.slow, ease: EASE.out }}
+            >
+              <Outlet />
+            </motion.div>
           </main>
         </div>
       </div>

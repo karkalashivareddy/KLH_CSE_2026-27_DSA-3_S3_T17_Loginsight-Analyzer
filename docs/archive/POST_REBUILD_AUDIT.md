@@ -6,7 +6,10 @@
 >
 > **Note on `docs/screenshots/`.** That directory is referenced throughout this historical audit as the
 > location of eight stale PNGs which the pass removed. It does not exist today. Current screenshots
-> live in [`images/`](../images/) and are listed in `capture-report.json`.
+> live in [`../images/signal-atlas/`](../images/signal-atlas/) and are captured by
+> `frontend/scripts/capture-visuals.mjs`. The eleven pre-redesign PNGs and the generated
+> `capture-report.json` that used to sit directly under [`../images/`](../images/) were unreferenced
+> and have been removed; see [IMPLEMENTATION_AUDIT.md](../IMPLEMENTATION_AUDIT.md).
 
 > Scope: verify the complete TextHack rebuild (phases 1-13, commits `f014e5a` → `cf76458` → `b711d94`)
 > on branch `main`, then fix anything that fails the bar, and re-verify. No feature creep - this pass

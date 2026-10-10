@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type APIRequestContext } from '@playwright/test';
 
 const apiBase = process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://127.0.0.1:8080';
 
@@ -17,7 +17,7 @@ test('command center presents a backend source and responds at desktop and mobil
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Command center' })).toBeVisible();
   await expect(page.getByText('Demo Dataset', { exact: true }).first()).toBeVisible();
-  await expect(page.getByRole('figure', { name: 'FROM EVENT TO EVIDENCE' })).toBeVisible();
+  await expect(page.getByRole('figure', { name: 'From event to evidence' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1441);
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -60,7 +60,7 @@ test('direct route refresh reaches the primary product surfaces', async ({ page 
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/loginsight-mark.svg');
 });
 
-test('Signal Atlas semantic text colors meet WCAG AA against their intended surfaces', async ({ page }) => {
+test('Atmospheric Signal semantic text colors meet WCAG AA against their intended surfaces', async ({ page }) => {
   await page.goto('/');
   const ratios = await page.evaluate(() => {
     const style = getComputedStyle(document.documentElement);
@@ -71,12 +71,17 @@ test('Signal Atlas semantic text colors meet WCAG AA against their intended surf
       ['--text', '--surface-0'], ['--text-soft', '--surface-0'], ['--text-muted', '--surface-0'],
       ['--text-faint', '--surface-0'], ['--accent-strong', '--surface-0'], ['--accent', '--surface-0'],
       ['--ok', '--ok-dim'], ['--warn', '--warn-dim'], ['--danger', '--danger-dim'],
-      ['--info', '--info-dim'], ['--purple', '--surface-0']
+      ['--info', '--info-dim'], ['--purple', '--surface-0'],
+      // Severity and algorithm-family colors must also be legible on a card.
+      ['--severity-error', '--surface-0'], ['--severity-warn', '--surface-0'],
+      ['--severity-info', '--surface-0'], ['--severity-trace', '--surface-0'],
+      ['--mod-strings', '--surface-0'], ['--mod-dp', '--surface-0'], ['--mod-flow', '--surface-0'],
+      ['--mod-approx', '--surface-0'], ['--mod-random', '--surface-0'], ['--mod-parallel', '--surface-0']
     ];
     return pairs.map(([foreground, background]) => {
       const a = luminance(color(foreground));
       const b = luminance(color(background));
-      return { pair: `${foreground} on ${background}`, ratio: (Math.max(a, b) + .05) / (Math.min(a, b) + .05) };
+      return { pair: `${foreground} on ${background}`, ratio: Number(((Math.max(a, b) + .05) / (Math.min(a, b) + .05)).toFixed(2)) };
     });
   });
   expect(ratios.filter(({ ratio }) => ratio < 4.5), JSON.stringify(ratios)).toEqual([]);
@@ -87,16 +92,18 @@ test('scroll reveals trigger from real scrolling and remain visible with reduced
   await page.goto('/');
   const lowerSection = page.locator('.overview-lower-grid');
   await expect(lowerSection).toBeVisible();
-  await expect.poll(() => lowerSection.evaluate((element) => element.classList.contains('atlas-scroll-revealed'))).toBeFalsy();
+  await expect.poll(() => lowerSection.evaluate((element) => element.classList.contains('is-revealed'))).toBeFalsy();
   await lowerSection.scrollIntoViewIfNeeded();
-  await expect.poll(() => lowerSection.evaluate((element) => element.classList.contains('atlas-scroll-revealed'))).toBeTruthy();
+  await expect.poll(() => lowerSection.evaluate((element) => element.classList.contains('is-revealed'))).toBeTruthy();
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const reducedMotionSection = page.locator('.overview-lower-grid');
   await reducedMotionSection.scrollIntoViewIfNeeded();
   await expect(reducedMotionSection).toBeVisible();
-  await expect.poll(() => reducedMotionSection.evaluate((element) => element.classList.contains('atlas-scroll-revealed'))).toBeFalsy();
+  // Reduced motion never applies the hidden state, so the section must remain fully opaque.
+  await expect.poll(() => reducedMotionSection.evaluate((element) => getComputedStyle(element).opacity)).toBe('1');
+  expect(await reducedMotionSection.evaluate((element) => getComputedStyle(element).transform)).toBe('none');
 });
 
 test('search executes against the dataset and opens real event details', async ({ page }) => {
@@ -182,3 +189,111 @@ test('command center and service topology fit all requested viewport targets', a
     expect(await page.evaluate(() => document.documentElement.scrollWidth), `service map overflow at ${viewport.width}x${viewport.height}`).toBeLessThanOrEqual(viewport.width + 1);
   }
 });
+
+test('the signal field reports real backend values and never invents them', async ({ page, request }) => {
+  await page.goto('/');
+  const figure = page.getByRole('figure', { name: 'From event to evidence' });
+  await expect(figure).toBeVisible();
+
+  const stages = figure.getByRole('listitem');
+  await expect(stages).toHaveCount(4);
+  const summary = await api.health(request);
+  const dataset = await api.currentDataset(request);
+  const expectedEvents = formatNumber(dataset?.size ?? 0);
+  await expect(figure).toContainText(expectedEvents);
+  // Every stage must show a value or an explicit em dash, never a zero placeholder.
+  for (const value of await stages.locator('strong').allInnerTexts()) {
+    expect(value === '—' || /\d/.test(value), `unexpected stage value: ${value}`).toBeTruthy();
+  }
+  expect(summary.status).toBe('UP');
+});
+
+test('an empty dataset shows onboarding instead of fabricated metrics', async ({ page, request }) => {
+  await request.delete(`${apiBase}/api/datasets`);
+  try {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: 'No investigation data yet' })).toBeVisible();
+    await expect(page.getByText('Awaiting a data source')).toBeVisible();
+    // The stage values must be unavailable markers, not zeroed counters.
+    await expect(page.locator('.signal-stage strong').first()).toHaveText('—');
+    await expect(page.getByRole('link', { name: 'Choose a source' }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Upload logs' })).toBeVisible();
+    // Header must not claim a healthy source while none is loaded.
+    await expect(page.getByRole('link', { name: /Source: No dataset/ })).toBeVisible();
+  } finally {
+    await request.post(`${apiBase}/api/datasets/demo`);
+  }
+});
+
+test('a failing backend surfaces a retryable error instead of a blank workspace', async ({ page }) => {
+  await page.route((url) => url.pathname.startsWith('/api/'), (route) => route.fulfill({
+    status: 500,
+    contentType: 'application/json',
+    body: JSON.stringify({ status: 500, error: 'InternalServerError', message: 'An unexpected internal error occurred', path: '/api/health/status' })
+  }));
+  await page.goto('/system');
+  const alert = page.getByRole('alert').first();
+  await expect(alert).toBeVisible();
+  await expect(alert).toContainText('An unexpected internal error occurred');
+  await expect(alert.getByRole('button', { name: 'Retry' })).toBeVisible();
+  // The shell must survive a failing API: navigation and content are still reachable.
+  await expect(page.getByRole('navigation', { name: 'Workspace sections' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'API: Unavailable' })).toBeVisible();
+});
+
+test('the command palette navigates and restores focus', async ({ page }) => {
+  await page.goto('/');
+  const trigger = page.getByRole('button', { name: 'Open command palette' });
+  await trigger.focus();
+  await page.keyboard.press('Control+k');
+  const dialog = page.getByRole('dialog', { name: 'Move through LogInsight' });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('searchbox').fill('analytics');
+  await dialog.getByRole('option', { name: /Analytics/ }).click();
+  await expect(page.getByRole('heading', { name: 'Analytics', exact: true })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Move through LogInsight' })).toHaveCount(0);
+});
+
+test('documented route aliases resolve to the same workspace', async ({ page }) => {
+  const aliases: Array<[string, string]> = [
+    ['/command-center', 'Command center'],
+    ['/overview', 'Command center'],
+    ['/analyze', 'Analytics'],
+    ['/data', 'Datasets'],
+    ['/system/status', 'System'],
+    ['/lab', 'Algorithm Lab'],
+    ['/algorithm-lab', 'Algorithm Lab'],
+    ['/simulation', 'Scenario Lab']
+  ];
+  for (const [route, heading] of aliases) {
+    await page.goto(route);
+    await expect(page.getByRole('heading', { name: heading, exact: true }), `${route} should render ${heading}`).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Skip to main content' })).toHaveAttribute('href', '#main-content');
+  }
+});
+
+test('a document route does not resolve', async ({ page }) => {
+  await page.goto('/this-route-does-not-exist');
+  await expect(page.getByText('Page not found')).toBeVisible();
+  await expect(page.locator('main h1')).toBeVisible();
+});
+
+/** Minimal API helpers shared by the state-specific tests above. */
+const api = {
+  async health(request: APIRequestContext) {
+    const response = await request.get(`${apiBase}/api/health`);
+    expect(response.ok()).toBeTruthy();
+    return (await response.json()) as { status: string; service: string };
+  },
+  async currentDataset(request: APIRequestContext) {
+    const response = await request.get(`${apiBase}/api/datasets/current`);
+    if (!response.ok()) return null;
+    return (await response.json()) as { size: number } | null;
+  }
+};
+
+function formatNumber(value: number): string {
+  if (value >= 1_000_000) return `${Math.round(value / 100_000) / 10}M`;
+  if (value >= 1_000) return `${Math.round(value / 100) / 10}k`;
+  return String(value);
+}

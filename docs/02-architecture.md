@@ -6,6 +6,14 @@
 > `docs/17-limitations.md`, which was never created. The current limitations are stated in
 > [README.md](../README.md) and [final-submission/FINAL_SUBMISSION_INDEX.md](../final-submission/FINAL_SUBMISSION_INDEX.md).
 > The original reference is left as written so this document still reads as the phase artifact it is.
+>
+> **Sections corrected for the current revision.** §10 (Error Handling), §11 (Frontend Architecture)
+> and §12 (Design Decisions) were written during the phase and have drifted from the shipped
+> application. They are annotated in place rather than rewritten, so the phase document still reads
+> as a phase artifact while not asserting anything false about the code. The authoritative frontend
+> architecture — motion layer, error boundary, route splitting, vendor chunking and stylesheet
+> layering — is in [ARCHITECTURE.md](ARCHITECTURE.md); the authoritative design system is in
+> [design-system.md](design-system.md).
 
 ## LogInsight Analyzer — Technical Architecture
 
@@ -241,6 +249,15 @@ Each structure carries a javadoc note explaining why it exists (`docs/03` lists 
 
 - Stack traces never reach the client; validation errors return HTTP 400 (`docs/12` catalog).
 
+> **Corrected for the current revision.** `GlobalExceptionHandler` has since added a mapping that
+> this section did not describe: **`ParserException` now returns HTTP 400**, and with it its subclass
+> `UnsupportedLogFormatException`. Before that, an empty or unparsable upload fell through to the
+> generic `Exception` handler and answered HTTP **500** — an ordinary client mistake reported as a
+> server fault. The current 400 set is: invalid query/log input, illegal arguments, malformed or
+> missing bodies, missing parameters, invalid dates, bounds failures, upload-size rejection and
+> parse failures. `DatasetException` still maps to 404, and `IllegalLifecycleTransitionException` to
+> 409. The full table is in [API.md](API.md); the rationale is in [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md).
+
 ---
 
 ## 11. Frontend Architecture
@@ -252,6 +269,21 @@ Each structure carries a javadoc note explaining why it exists (`docs/03` lists 
 - State: small typed stores per page; datasets held by the backend session; API layer in `api/`.
 - Visual hierarchy (mandatory order): Project title → Current dataset → Query/algorithm →
   Visualization → Result → Complexity → Performance.
+
+> **Corrected for the current revision.** The `pages/` list above is the *phase* composition and no
+> longer matches the shipped route tree: `StringAlgorithms`, `SimilarityLab`, `SuffixLab`,
+> `NetworkFlow`, `Approximation`, `RandomizedLab`, `ParallelLab`, `BenchmarkLab` and `DSAPlayground`
+> have all been replaced by the product surfaces (Command Center, Logs Explorer, Incident Workbench,
+> Services, Patterns, Detector Windows, Algorithm Lab). `recharts` is also no longer a dependency —
+> charts are hand-rolled SVG. What the shipped application actually does:
+>
+> - **`motion` (`motion/react`) is a runtime dependency** and owns JS-driven animation. `src/motion/motion.ts` exports `MOTION`, `EASE`, `spring` and a variant set that mirror the CSS `--motion-*` tokens, so timing is defined once per medium; `src/motion/Atmosphere.tsx` renders a scroll-linked decorative backdrop via `useScroll`/`useTransform` that writes only to compositor motion values and returns `null` under `prefers-reduced-motion`.
+> - **An application error boundary** (`src/components/AppErrorBoundary.tsx`) wraps `<App />` in `main.tsx`, replacing a render-time throw with a recoverable `role="alert"` panel instead of a blank page.
+> - **Route-level code splitting.** Only the Command Center, Logs Explorer and Incident Workbench stay in the entry chunk; the other 17 routes are `lazy()`-loaded behind `Suspense` with a title-preserving skeleton fallback. `manualChunks` pins `three`, `motion`, `react-dom`/`react-router` and `lucide-react` into `vendor-three`, `vendor-motion`, `vendor-react` and `vendor-icons`. First-load JavaScript fell from ~1061 kB raw / ~281 kB gzip to ~493 kB / ~154 kB; `vendor-three` (562.23 kB) is fetched only when the 3D topology is opened.
+> - **The stylesheet is layered.** `signal-atlas.css` imports `global.css` and `product.css` into the named cascade layer `loginsight-structure` and is itself unlayered, so the Atmospheric Signal system overrides the inherited sheets without editing them.
+>
+> Full detail, including the exact breakpoint set and reduced-motion contract, is in
+> [ARCHITECTURE.md](ARCHITECTURE.md) and [design-system.md](design-system.md).
 
 ---
 
@@ -270,6 +302,20 @@ Each structure carries a javadoc note explaining why it exists (`docs/03` lists 
 | Suffix array | doubling + counting sort | SA-IS (impl.), java sort | transparency + O(n log² n); SA-IS conceptual doc |
 | Matching | Dinic-based bipartite matching | Hungarian-only | reuses flow engine, matches syllabus context |
 | Parallel | ExecutorService/ForkJoin | Spring async/WebFlux | explicit schedules, measurable speedup, work/span |
+
+> **Corrected for the current revision.** The `Charts: recharts` row is obsolete — the frontend has
+> no charting dependency and renders SVG directly. The `UI kit: hand-rolled CSS` decision stands, and
+> this revision strengthened it: the system is now a single authoritative stylesheet
+> (`signal-atlas.css`) layered over the inherited structure rather than several competing skin
+> files. Two decisions were added later and are not in the phase table:
+>
+> | Decision | Chosen | Rejected | Rationale |
+> |---|---|---|---|
+> | Animation | `motion` (Framer Motion successor) | bespoke rAF loop | one timing vocabulary shared with CSS; `useScroll` writes to compositor values without re-rendering |
+> | Bundle shape | route-level `lazy()` + named vendor chunks | single entry bundle | 3D topology is reachable from one page only; deferring Three.js cut first-load JS by ~54% raw |
+>
+> A previous visual revision (`signal-in-motion.css`, cobalt accent `#315cf5`) was retired and the
+> file is now **dead** — imported by nothing.
 
 ---
 

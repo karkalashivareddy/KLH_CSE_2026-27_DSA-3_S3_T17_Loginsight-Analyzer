@@ -1,6 +1,6 @@
 # LogInsight 0.1.0 — Real-Time Log Intelligence & Incident Investigation Platform
 
-Historical 0.1.0 release snapshot. Its verification counts and UI descriptions are preserved for that release and do not describe the later Signal Atlas rebuild; see [13-testing.md](13-testing.md) and [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) for the current implementation.
+Historical 0.1.0 release snapshot. Its verification counts and UI descriptions are preserved for that release and do not describe the later Signal Atlas rebuild or the current Atmospheric Signal revision; see [13-testing.md](13-testing.md) and [IMPLEMENTATION_AUDIT.md](IMPLEMENTATION_AUDIT.md) for the current implementation. (The verification table below has been updated to the current measured counts; everything else on this page remains a 0.1.0 artifact.)
 
 ## Status
 
@@ -30,10 +30,11 @@ This is the current single-node release shape for the academic/portfolio project
 
 | Check | Result |
 |---|---|
-| `cd backend; .\mvnw.cmd -o verify` | 878 tests, 0 failures, 0 errors |
-| `cd frontend; npm test` | 55 tests across 17 files passed |
-| `cd frontend; npm run build` | Clean TypeScript/Vite production build |
-| `docker compose config --quiet` | Passed |
+| `cd backend; .\mvnw.cmd -o verify` | 910 tests, 0 failures, 0 errors, 0 skipped |
+| `cd frontend; npx vitest run` | 64 tests across 19 files passed |
+| `cd frontend; npm run build` | Clean TypeScript/Vite production build; no bundle-size warning |
+| `cd frontend; npm run test:e2e` | 15 workflows defined; not re-executed on this revision |
+| `docker compose config --quiet` | Passed on an earlier pass; not re-run |
 | Docker image build/runtime | Not run: Docker daemon unavailable in the audit environment |
 
 All three build commands are also the CI gates: the backend job runs `mvn -B verify`, and the frontend job runs `npm ci`, `npm test` and `npm run build`.

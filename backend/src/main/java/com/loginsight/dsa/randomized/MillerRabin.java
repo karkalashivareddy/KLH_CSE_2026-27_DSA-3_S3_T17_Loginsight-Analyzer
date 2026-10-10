@@ -54,21 +54,11 @@ public final class MillerRabin {
      * @param rounds number of random rounds (required only for {@code PROBABILISTIC} mode;
      *               ignored for {@code DETERMINISTIC})
      * @return an immutable result recording the verdict and the bases used
-     * @throws IllegalArgumentException if {@code PROBABILISTIC} but {@code rng} is null or
-     *         {@code rounds <= 0}
+     * @throws IllegalArgumentException if {@code n < 0}, if {@code mode} is null, or if
+     *         {@code PROBABILISTIC} but {@code rng} is null or {@code rounds <= 0}
      */
     public MillerRabinResult test(long n, Mode mode, RandomSource rng, int rounds) {
-        if (n < 0) {
-            throw new IllegalArgumentException("n must be >= 0, got " + n);
-        }
-        if (mode == Mode.PROBABILISTIC) {
-            if (rng == null) {
-                throw new IllegalArgumentException("rng must not be null for PROBABILISTIC mode");
-            }
-            if (rounds <= 0) {
-                throw new IllegalArgumentException("rounds must be > 0 for PROBABILISTIC mode, got " + rounds);
-            }
-        }
+        validateArguments(n, mode, rng, rounds);
         if (n < 2) {
             return new MillerRabinResult(n, false, modeName(mode),
                     deterministicRounds(mode, 0), new long[0],
@@ -121,6 +111,32 @@ public final class MillerRabin {
                 deterministicModeNote(mode));
     }
 
+    /**
+     * Single source of truth for argument validation, shared by {@link #test} and
+     * {@link #testTracked} so both entry points reject the same inputs with the same messages.
+     *
+     * <p>Rejects a negative {@code n}, a null {@code mode} (which would otherwise silently degrade to
+     * a mislabelled {@code PROBABILISTIC} verdict, or NPE inside the witness loop) and — for
+     * {@code PROBABILISTIC} — a null {@code rng} or a non-positive {@code rounds} (an empty witness
+     * set would report every candidate as prime).</p>
+     */
+    private static void validateArguments(long n, Mode mode, RandomSource rng, int rounds) {
+        if (n < 0) {
+            throw new IllegalArgumentException("n must be >= 0, got " + n);
+        }
+        if (mode == null) {
+            throw new IllegalArgumentException("mode must not be null");
+        }
+        if (mode == Mode.PROBABILISTIC) {
+            if (rng == null) {
+                throw new IllegalArgumentException("rng must not be null for PROBABILISTIC mode");
+            }
+            if (rounds <= 0) {
+                throw new IllegalArgumentException("rounds must be > 0 for PROBABILISTIC mode, got " + rounds);
+            }
+        }
+    }
+
     /** Convenience: deterministic test for all positive {@code long} values. */
     public boolean isDefinitePrime(long n) {
         return test(n, Mode.DETERMINISTIC, null, 0).isPrime();
@@ -164,13 +180,15 @@ public final class MillerRabin {
      * Trace-capable path: identical decomposition + witness loop recording the {@code n-1 = d·2^s}
      * decomposition, every witness base, the modular exponentiation result, every squaring test and
      * the verdict.
+     *
+     * <p>Applies exactly the same argument validation as {@link #test}, so a null {@code mode},
+     * a {@code PROBABILISTIC} run without an {@code rng} or with {@code rounds <= 0} is rejected
+     * instead of producing an empty witness loop that would report composites as prime.</p>
      */
     public TracedResult testTracked(long n, Mode mode, RandomSource rng, int rounds) {
+        validateArguments(n, mode, rng, rounds);
         StepRecorder recorder = new StepRecorder();
         long start = System.nanoTime();
-        if (n < 0) {
-            throw new IllegalArgumentException("n must be >= 0, got " + n);
-        }
         if (n < 2) {
             return new TracedResult("MillerRabin",
                     Map.of("prime", false, "n", n, "mode", mode.name(), "bases", List.of(),

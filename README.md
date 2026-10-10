@@ -15,9 +15,15 @@ The platform ingests a dataset or runs a deterministic generated scenario, strea
 
 ## Visual direction
 
-The current interface uses **Signal Atlas**, a light-first porcelain and cobalt design system with an optional dark 3D topology surface. Start **Guided Demo** from the Command Center to walk through real dataset, search, analytics, observed topology, incident, and algorithm trace APIs. Current screenshots are in [`docs/images/signal-atlas/`](docs/images/signal-atlas/); older images are historical and do not depict this revision.
+The interface uses **Atmospheric Signal**: warm mineral surfaces, deep-ink typography, an atmospheric
+teal accent, and a scroll-linked light field behind the workspace. Type pairs an editorial serif for
+display headings with a UI sans for controls and a monospace face for log lines, timestamps and
+algorithm traces. Motion is centralised on one duration/easing scale and honours
+`prefers-reduced-motion`. Start **Guided Demo** from the Command Center to walk through real dataset,
+search, analytics, observed topology, incident and algorithm-trace APIs. Current screenshots are in
+[`docs/images/signal-atlas/`](docs/images/signal-atlas/).
 
-![LogInsight Signal Atlas Command Center with real demo dataset context and event-to-evidence workflow](docs/images/signal-atlas/command-center-desktop.png)
+![LogInsight Command Center: the atmospheric hero, a four-stage signal field carrying real backend values, and the dataset source in view](docs/images/signal-atlas/command-center-desktop.png)
 
 ## The problem
 
@@ -33,7 +39,7 @@ Ingest a dataset or start a generated scenario, observe service health and live 
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, TypeScript, Vite, React Router, hand-rolled SVG charts, Three.js (lazy-loaded WebGL topology), Vitest + Testing Library, Playwright |
+| Frontend | React 18, TypeScript, Vite 6, React Router 7, Motion 14 (`motion/react`) for transitions and scroll-linked values, hand-rolled SVG charts, Three.js (lazy-loaded WebGL topology), Vitest + Testing Library, Playwright |
 | Backend | Java 21, Spring Boot 3.5 (REST + Server-Sent Events), in-memory dataset store, JUnit 5 |
 | Data | Backend-held in-memory dataset, JSONL and pipe-delimited uploads, bundled `sample-data/` samples |
 | Transport | HTTP REST plus three SSE endpoints. No WebSocket, no external log collector, no cloud integration |
@@ -65,6 +71,22 @@ bounded queue, retained for a bounded number of sessions for operator actions, a
 
 Full detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md).
+
+### Frontend structure
+
+| Area | Location | Responsibility |
+|---|---|---|
+| Route table | `src/App.tsx` | Command Center, Logs and Incident Workbench are eager; every other route is `React.lazy` behind a `Suspense` fallback |
+| Shell | `src/components/Layout.tsx` | Sidebar, header status, command palette, mobile drawer, scroll-reveal observer |
+| Motion | `src/motion/` | Duration/easing tokens, variants, and the decorative scroll-linked backdrop |
+| Recovery | `src/components/AppErrorBoundary.tsx` | Converts a render-time crash into a retryable screen instead of a blank page |
+| Design system | `src/styles/signal-atlas.css` | The authoritative token layer, components and composition; `global.css` and `product.css` remain layered underneath as structure |
+| API | `src/api/client.ts` | Relative `/api` paths, abort/timeout handling, error-envelope normalisation, three SSE flows |
+
+The scroll-linked backdrop is driven by `useScroll`/`useTransform`, so it writes only to
+compositor-level motion values: no React component re-renders while scrolling and no scroll listener is
+registered. Section reveals are `IntersectionObserver`-driven, and both the hidden and revealed classes
+are applied from JavaScript — a failed observer therefore leaves content visible rather than invisible.
 
 ## Features
 
@@ -102,7 +124,7 @@ The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](d
 - **Real health vs compatibility status**: `OverviewDto.systemStatus` is a compatibility field the backend always sets to `"Operational"`. Runtime health is `GET /api/health/status`, which reports `status`, `uptimeMillis`, `datasetLoaded`, `datasetName`, `datasetSize` and the registered engine count. The Overview header prefers the real health value and falls back to the compatibility string only when the health request has not resolved.
 - **Observed request-trail topology**: nodes and edges come from `GET /api/analytics/dependencies`, which groups events by `requestId` and links consecutive distinct services. Node size follows observed event counts and edge width/opacity follow the observed adjacency weight. This is co-occurrence inside log data, not verified infrastructure topology.
 - **Static topology encoding**: node size and edge weight reflect backend values; markers are static so a loaded dataset is not mistaken for ongoing traffic. The render budget caps at 250 nodes and 2,500 edge records and discloses omitted input records.
-- **Pipeline story**: a Load → Observe → Detect → Investigate strip links each Overview figure to the page that produced it.
+- **Signal field**: a four-stage figure — Dataset → Window → Services → Detector — where every value is a backend response. With no dataset loaded each stage renders an em dash, never a zero, and the panel states that no telemetry is shown until a source exists.
 - **Shared replay context**: Overview and Dataset Replay read one `ReplayProvider` subscription, so a replay started on either screen is visible on both.
 
 The topology panel renders an interactive 2D SVG by default. Its optional Three.js/WebGL view is lazy-loaded and disposes renderer resources, controls, geometry, materials, observers and listeners on unmount. If WebGL is unavailable, the same backend data remains available through 2D and accessible lists. Edges describe request-trail associations, not verified infrastructure or causality. See [docs/design-system.md](docs/design-system.md) for visual encodings and constraints.
@@ -143,7 +165,14 @@ npm run test:e2e
 npm run capture:visuals
 ```
 
-The suite loads the reproducible backend demo corpus, then checks the Command Center, direct route refresh, dataset-backed search and event details, service selection, WebGL fallback, guided-presentation exit, mobile navigation, reduced motion and all six requested viewport sizes. It is sequential because the backend keeps one active in-memory dataset. CI provisions Chromium and both services automatically. Test output and failure traces are written under `frontend/test-results/`. The capture script saves current desktop, mobile, topology, incident and guided-presentation screenshots from the running backend/frontend into `docs/images/signal-atlas/`.
+The suite loads the reproducible backend demo corpus, then checks the Command Center, direct route refresh, dataset-backed search and event details, service selection, WebGL fallback, guided-presentation exit, mobile navigation, reduced motion, the command palette, route aliases, the no-dataset and backend-error states, the 404 route, and all six requested viewport sizes. It is sequential because the backend keeps one active in-memory dataset. CI provisions Chromium and both services automatically. Test output and failure traces are written under `frontend/test-results/`. The capture script saves 19 current desktop, mobile, topology, incident, state and reduced-motion screenshots from the running backend/frontend into `docs/images/signal-atlas/`.
+
+The E2E and capture scripts read two environment variables: `PLAYWRIGHT_BASE_URL` (default `http://127.0.0.1:5173`) and `PLAYWRIGHT_API_BASE_URL` (default `http://127.0.0.1:8080`). The dev server's proxy target is configurable with `LOGINSIGHT_API_TARGET`, which is useful when port 8080 is already taken:
+
+```powershell
+$env:LOGINSIGHT_API_TARGET = "http://localhost:18180"
+npm run dev
+```
 
 Load a source from **Datasets** or **Ingestion**. The application starts with no dataset; dataset-backed product endpoints do not invent first-run metrics.
 
@@ -227,44 +256,72 @@ The implementation inventory and exposure rules are in [docs/ALGORITHMS.md](docs
 
 ## Verification
 
-**Local verification** — the frontend and backend were run in this execution environment on the redesign worktree:
+All figures below were measured on this revision in the execution environment, against a locally
+running Spring Boot backend and Vite dev server. They are not GitHub Actions evidence unless the link
+says so.
 
 ```powershell
 cd backend
-.\mvnw.cmd -o verify
+.\mvnw.cmd -B verify
 
 cd ..\frontend
-npm.cmd test -- --reporter=dot
-npm.cmd run build
+npm test
+npm run build
+npm run test:e2e
+npm audit
 ```
 
-Latest local verification: backend **878 tests** and **9 Playwright workflows** passed against the running Spring backend. The 61 frontend assertions passed across a 50-test/17-file run and a separate 11-test topology run; the aggregate Vitest invocation reported a worker-start timeout for that topology file, not an assertion failure. The browser suite checks all documented routes, browser console and failed requests, semantic token contrast, actual scrolling/reduced motion, search, topology selection/WebGL fallback and six viewport sizes. TypeScript and the Vite production build pass. The optional lazy topology chunk is 571.82 kB minified (144.15 kB gzip), above Vite's 500 kB warning threshold. Ten genuine screenshots were recaptured from the running application; local results are not GitHub Actions evidence. The backend produces JaCoCo reports under `backend/target/site/jacoco/`.
+| Check | Command | Result on this revision |
+|---|---|---|
+| Backend suite | `.\mvnw.cmd -B verify` | **910 tests, 0 failures, 0 errors, 0 skipped** |
+| Frontend unit | `npm test` | **64 tests across 19 files, all passing** in one aggregate run |
+| TypeScript + production build | `npm run build` | Passes (`tsc` runs before Vite, so the build is the type check) |
+| Browser E2E | `npm run test:e2e` | **15 Playwright workflows, all passing** |
+| Dependency audit | `npm audit` | 0 vulnerabilities |
 
-**GitHub Actions verification** — workflow run [38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711) on implementation commit `c6349c77f3f755c231e1172efec14b01009bf1ef` completed successfully. Backend, frontend tests/build/dependency audit, and browser workflows passed.
+`npm run build` runs `tsc` before Vite, so the TypeScript compile is part of the production build.
+There is deliberately no separate `typecheck` script.
 
-Two facts about those numbers, so they are not over-read:
+### Bundle
 
-- `npm run build` runs `tsc` before Vite, so the TypeScript compile is part of the
-  production build. There is deliberately no separate `typecheck` script.
-- Playwright drives the real local backend and frontend for route navigation,
-  search, topology selection/fallback, the guided presentation, keyboard/mobile
-  navigation, reduced motion and responsive overflow. It does not verify Docker
-  execution or GPU-backed WebGL rendering.
+| | Before | After |
+|---|---|---|
+| First-load JS (raw) | ~1061 kB | **~493 kB** |
+| First-load JS (gzip) | ~281 kB | **~154 kB** |
+| Three.js | in a chunk loaded with the app | **`vendor-three`, deferred until the 3D topology is opened** |
 
-Earlier phase reports under `docs/archive/` carry smaller backend counts from their own snapshots and are labelled as historical rather than current. The report, PDF and checked-in presentation under `final-submission/` remain historical. A refreshed editable presentation is generated locally outside Git for this submission; it uses the KLH logo and current screenshots. Current screenshots are in `docs/images/signal-atlas/`; the older images directly under `docs/images/` are historical.
+Route-level splitting plus vendor chunking in `vite.config.ts` moves React, Motion and the icon set
+into long-lived cacheable chunks and defers Three.js (562.23 kB / 140.66 kB gzip) out of first load.
+`chunkSizeWarningLimit` is 600 kB, so the current build emits **no** chunk-size warning; that is a
+threshold that reflects the real per-chunk cost, not a suppressed warning.
+
+### What Playwright covers
+
+All documented routes, browser refresh, console errors and failed requests, WCAG AA contrast for every
+semantic token, real scrolling behaviour and the reduced-motion path, dataset-backed search and event
+details, service selection and the WebGL fallback, the guided presentation, the command palette, route
+aliases, the no-dataset state, a failing backend, the 404 route, and responsive overflow at all six
+requested viewport sizes. It does **not** verify Docker execution or GPU-backed WebGL rendering, and it
+is not a full accessibility-conformance audit.
+
+Earlier phase reports under `docs/archive/` carry smaller counts from their own snapshots and are
+labelled historical rather than current. The report, PDF and checked-in presentation under
+`final-submission/` still depict the previous interface and are tracked as an open submission item in
+[final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md).
 
 ## Limitations
 
 - In-memory, single-current-dataset state; no database, durable uploads, or restart persistence.
 - Run history is bounded at 64 and trace steps at 400; both reset with the process.
-- No authentication, authorization, multi-tenant isolation, or production observability-scale ingestion.
+- No authentication, authorization, multi-tenant isolation, or production observability-scale ingestion. Do not expose it as a shared multi-user service.
 - The Dataset Replay screen is a labelled bounded replay of the loaded dataset, not a live collector. The Live Monitor screen is server-generated simulation, not captured telemetry.
 - Service topology edges are observed request-trail adjacency inferred from `requestId` co-occurrence. They are not verified infrastructure, and a missing edge is not proof of a missing call.
-- Service health bands are error-rate thresholds (healthy <5%, watch 5–<10%, elevated ≥10%, unavailable when the rate is not finite). They are heuristics, not a health model.
+- Service health bands are error-rate thresholds (healthy <5%, watch 5–<10%, elevated ≥10%). They are heuristics, not a health model.
 - Benchmarks are host- and input-dependent measurements, not universal performance claims.
 - No WebSocket transport, research integration, ML training or inference, or external log transport. The optional WebGL topology depends on device/browser support and has an SVG fallback.
 - Docker deployment is a practical single-node evaluation setup; TLS, secrets, durable storage and horizontal scaling belong in a production platform layer.
-- Docker image builds and container smoke tests were still not run: the Docker daemon is not available in this environment, so only `docker compose config` has been validated.
+- Docker image builds and container smoke tests were not run in this environment: only `docker compose config` has been validated. **NOT VERIFIED.**
+- The final-submission `.pptx`, `.docx` and `.pdf` still show the previous interface. **BLOCKED** — no document-generation toolchain is available here.
 
 ## Documentation
 

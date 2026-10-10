@@ -1,8 +1,134 @@
 # Command Center
 
-Routes: `/` and `/command-center` (`frontend/src/pages/OverviewPage.tsx`).
+Routes: `/`, `/command-center` and `/overview` (`frontend/src/pages/OverviewPage.tsx`).
 
-The Command Center is a selected-window operations view. Every number on it is a value returned by the backend for the currently loaded dataset. The page does not synthesize metrics, and the no-dataset state is an explicit prompt rather than zeros.
+The Command Center is a selected-window operations view. Every number on it is a value returned by the backend for the currently loaded dataset. The page does not synthesize metrics, the no-dataset state is an explicit prompt rather than zeros, and the signal field renders em dashes rather than `0` for any value the backend has not returned.
+
+## Page composition
+
+Top to bottom, in render order:
+
+1. **Page header** — eyebrow `LogInsight · Observe`, title `Command center`, a scope sentence, and Refresh / Dataset replay / Live monitor actions.
+2. **Hero (`.cc-hero`)** — two columns: the copy block (kicker, display headline, lede, actions, source strip) and the signal field.
+3. **Simulation band** (`SimulationBand`) — the generated-simulation frame, when a scenario is running.
+4. **Window scope bar** — sticky, states the observed window, offers the five range buttons, and prints the last update time.
+5. **Metric strip** — four selected-window metrics.
+6. **Main grid** — observed service relationships (topology) beside the current investigation.
+7. **Lower grid** — recent critical events beside the activity timeline and recurring patterns.
+
+Between 4 and 5 the page branches on request state: a skeleton while loading, an `ErrorBox` with retry on failure, and an explicit `NoDatasetState` panel when the backend holds no dataset. The metric strip, topology, investigation and lower grid render **only** when `data` is non-null.
+
+## The hero
+
+```tsx
+<section className="cc-hero" aria-label="LogInsight overview">
+  <div className="cc-hero__copy">
+    <div className="cc-kicker">… LogInsight</div>
+    <h2>Follow the signal.<br /><em>Read the system.</em></h2>
+    <p className="cc-hero__lede">Every stage of an investigation — parsed events, the
+      selected window, observed service relationships and heuristic detector windows —
+      resolved from the backend and shown in context.</p>
+    <div className="cc-hero__actions">
+      <button className="btn btn-primary guided-demo-launch">Start guided demo</button>
+      <Link className="btn" to="/services">Explore topology</Link>
+    </div>
+    <SourceStrip … />
+  </div>
+  <SignalField … />
+</section>
+```
+
+- The headline is set in the editorial serif (`--font-display`), `clamp(34px, 3.9vw, 56px)`, letter-spacing `-0.03em`, line-height 1. The emphasised second line uses `--accent`.
+- The lede is capped at `46ch`.
+- The hero is a two-column grid, `min-height: 340px`, `--radius-hero`, `--shadow-raised`, with a 2px spectrum hairline along its base (`:after`) that reads as a pressure gradient rather than a rainbow.
+- Below `1100px` the hero becomes `240px / 1fr` at `min-height: 330px`; below `960px` it collapses to one column; below `680px` the headline becomes `clamp(32px, 9.6vw, 42px)` and the action buttons become full-width.
+
+## The signal field
+
+An isobar chart carrying the four real pipeline values. Every number on it is a backend response.
+
+```text
+  ┌──────────────────────────────────────────────────────────┐
+  │  FROM EVENT TO EVIDENCE          source · demo-stream    │  head
+  │                                                           │
+  │   ╭────╮   ╭────╮   ╭────╮   ╭────╮                     │
+  │   │ 01 │   │ 02 │   │ 03 │   │ 04 │                     │  stages
+  │   │14.0k│  │ 615│   │  8  │   │  6  │                    │
+  │   ╰────╯   ╰────╯   ╰────╯   ╰────╯                     │
+  │  ● Backend-derived source and selected-window values  →   │  foot
+  └──────────────────────────────────────────────────────────┘
+```
+
+### The four stages
+
+| # | Label | Value source | Detail line | Links to |
+|---|---|---|---|---|
+| 01 | **Dataset** | `data.datasetEvents` | `parsed events` | `/datasets` |
+| 02 | **Window** | `data.events` | `{range} selected` | `/analytics` |
+| 03 | **Services** | `dependencies.data.nodeCount` | `{edgeCount} observed edges` | `/services` |
+| 04 | **Detector** | `data.activeIncidents` | `heuristic windows` | `/incidents` |
+
+Two things are load-bearing:
+
+1. **The values are real.** Stage 01 and 02 come from `GET /api/overview`, stage 03 from `GET /api/analytics/dependencies`, stage 04 from `GET /api/overview`. Stage 03 is additionally labelled with the edge count from the same response. Nothing is computed in the browser.
+2. **The scope is stated, not assumed.** Stage 03 reads `dependencies` over the **full current dataset**, while stages 02 and 04 are **selected-window** values. The head row prints the source dataset name so a reader can see which snapshot is in view, and the footer legend distinguishes the two states:
+
+   | State | Footer text | Legend dot |
+   |---|---|---|
+   | No dataset | `No telemetry is shown until a source is loaded` | hollow ring |
+   | Dataset resolved | `Backend-derived source and selected-window values` | filled `--ok` |
+
+### Em dashes, not zeros
+
+**With no dataset loaded, every stage renders `—` (U+2014 em dash), never `0`.** Each stage's `detail` line also changes so the value is never read as a measurement:
+
+| Stage | With data | Without data |
+|---|---|---|
+| 01 Dataset | `14,000` / `parsed events` | `—` / `awaiting source` |
+| 02 Window | `615` / `1h selected` | `—` / `load data first` |
+| 03 Services | `8` / `56 observed edges` | `—` / `graph unavailable` |
+| 04 Detector | `6` / `heuristic windows` | `—` / `load data first` |
+
+The head subtitle switches from `waiting for a backend dataset` to `source · {dataset}`. This is deliberate: a `0` is a measurement, and showing `0` for "the backend has no data" would assert something untrue about the system. The same rule applies to the metric strip's error-share tile, which renders `—` when `events === 0`.
+
+This contract is asserted in the browser suite by `the signal field reports real backend values and never invents them`, which cross-checks the rendered stages against the API responses and against the cleared-dataset state.
+
+### Decorative canvas
+
+The isobars, node halo and the travelling `.pulse` path behind the stages are `aria-hidden` and carry no value. The comment in the source is explicit: *"Decorative only: conveys 'signal travelling', never encodes a value."* The `.pulse` stroke animates its dash offset over 6.5 s on a linear drift; it is suppressed under `prefers-reduced-motion`.
+
+Each stage is a `<Link>` carrying `role="listitem"` inside a `role="list"`, with an `aria-label` of the form `{number} {label}: {value}, {detail}` — so a screen reader hears the same information a sighted reader reads.
+
+### Responsive
+
+At `960px` the field drops to `min-height: 272px`; at `680px` the four stages become a 2×2 grid at `min-height: 96px`; at `400px` they become a single column.
+
+## The source strip
+
+States what the workspace is actually reading. It never shows a healthy signal while the request is in flight or has failed.
+
+| State | Head | Body | Links |
+|---|---|---|---|
+| Request in flight (`loading && !data`) | `Requesting source state`, amber `source-pulse--pending` | `Checking the backend…` | Choose a source, Ingest logs |
+| No dataset | `Workspace ready`, green pulse | `Awaiting a data source` — *"The backend holds no dataset, so the signal field stays empty rather than showing invented values."* | Choose a source, Ingest logs |
+| Dataset resolved | `Source in view`, green pulse | `{dataset}` + `{scope} · {datasetEvents} dataset events` | Change source; `Bounded dataset replay` provenance chip and replay status when a replay is active |
+
+The prose in the empty state is the honest one: it states the consequence of the rule rather than apologising for a missing number.
+
+## The metric strip
+
+Four tiles, all selected-window, all backend-returned:
+
+| Tile | Value | Note | Tone |
+|---|---|---|---|
+| **Events observed** | `formatNumber(data.events)` | `{scope} · {datasetEvents} in source` | cyan |
+| **Observed rate** | `{eventsPerMinute.toFixed(1)} / min` | `Backend selected-window aggregate` | blue |
+| **Error share** | `—` or `{errors/events*100}%` to 2dp | `{errors} ERROR/FATAL of {events} events` | amber at ≥ 5%, else green |
+| **Incident windows** | `formatNumber(data.activeIncidents)` | `Heuristic windows returned for scope` | violet |
+
+Two honesty details: the error-share tile renders `—` rather than `0.00%` when the window contains no events (an undefined share is not zero), and the incident tile is labelled *windows* rather than *incidents*, because `activeIncidents` counts detected heuristic windows, not open or ongoing incidents.
+
+At `960px` the strip becomes 2×2; at `680px` each tile becomes an icon-plus-text cell at `min-height: 100px`.
 
 ## Selected-window overview semantics
 
@@ -25,7 +151,7 @@ The Command Center is a selected-window operations view. Every number on it is a
 
 ### eventsPerMinute
 
-The denominator is the nominal width of the selected range (5, 15, 60, 360 or 1440 minutes), not the observed span between the first and last event inside the window. A window that contains events clustered in two minutes still divides by the full range width, so the displayed rate reads low. It is a normalized window rate, not a measured inter-arrival or arrival-process rate. The UI labels it "Selected-window observed rate" and pairs it with the raw window event count.
+The denominator is the nominal width of the selected range (5, 15, 60, 360 or 1440 minutes), not the observed span between the first and last event inside the window. A window that contains events clustered in two minutes still divides by the full range width, so the displayed rate reads low. It is a normalized window rate, not a measured inter-arrival or arrival-process rate. The UI labels the tile **Observed rate**, notes it as the *Backend selected-window aggregate*, and pairs it with the raw window event count.
 
 ### Real health versus the compatibility status field
 
@@ -90,16 +216,9 @@ The same thresholds color the topology node health dot and CSS class.
 
 ## Pipeline story
 
-The pipeline strip links each Command Center number to the surface that produced it:
+**Removed.** Earlier revisions documented a Load → Observe → Detect → Investigate strip linking the displayed numbers to `/ingestion`, `/analytics`, `/incidents` and `/logs`. That strip no longer exists in `OverviewPage.tsx`. It has been replaced by the **signal field** described above, which carries the same navigation intent but is anchored to real backend values rather than to narrative labels: four stages, each a link, each displaying the number it navigates away from. Playwright asserts the field directly (`the signal field reports real backend values and never invents them`).
 
-| Step | Link | Value shown |
-|---|---|---|
-| Load | `/ingestion` | The loaded dataset name. |
-| Observe | `/analytics` | Selected-window event count. |
-| Detect | `/incidents` | Heuristic window count. |
-| Investigate | `/logs` | Critical events returned. |
-
-It is a navigation aid over data already on screen, not a process model of the application.
+The distinction matters. The old strip told a story with no data attached; the new field shows a number and a link. Both are navigation over already-returned data, neither is a process model of the application.
 
 ## Shared replay context
 
@@ -116,10 +235,14 @@ The backend side of this stream is a bounded replay of the loaded dataset, sorte
 
 ## Route note
 
+`/` , `/command-center` and `/overview` all render `OverviewPage`. The `/overview` alias was added so a path-shaped URL is not mistaken for a different surface; the sidebar entry registers both aliases against `/`, and the command palette resolves all three.
+
 `/incidents`, `/incidents/:id` and the alias `/investigate/:id` all render `IncidentsPage`. The `investigate` alias is registered in the command palette alongside `/incidents`; selecting an incident from the Command Center navigates to `/incidents/{id}`.
 
 ## What this page does not do
 
+- It does not fabricate a number. Every tile, stage and readout is a backend field; anything unresolved renders an em dash.
 - It does not attribute cause. The investigation card states that the window and pattern are returned detector output.
-- It does not present a healthy band as an operational verdict.
+- It does not present a healthy band as an operational verdict, and an empty investigation card states explicitly that "this is an empty result, not evidence that the system is healthy".
+- It does not reconcile scopes silently. Stage 03 of the signal field is full-dataset while stages 02 and 04 are selected-window; the head row prints the dataset name and the footer legend states which values are backend-derived.
 - The optional Three.js scene is a view of dataset-derived dependencies; it does not connect to an external live feed or prove the direction of causality.

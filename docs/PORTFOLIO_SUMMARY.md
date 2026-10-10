@@ -8,7 +8,8 @@ Current branch: `main`. These summaries use only the current implementation and 
 
 ## Resume version
 
-> **LogInsight Analyzer — Signal Atlas Log Intelligence Workspace** · Java 21 / Spring Boot 3.5 with React 18, TypeScript and Vite. KMP powers product search, Levenshtein powers zero-hit suggestions, and heuristic pattern extraction and evidence-backed incident grouping remain explicitly non-ML; a six-module catalogue exposes real algorithm engines and recorded runs, and a frozen `java.util` manifest keeps the `dsa` engines inside the course scope rule. The Command Center is a selected-window operations view over an observed request-trail topology derived from `requestId` co-occurrence (not verified infrastructure), with an accessible 2D SVG default and optional Three.js/WebGL view, error-rate health bands, and a pipeline story linking metrics to product pages. The runtime is single-process and in-memory; Dataset Replay is a bounded, labelled dataset replay shared by one `ReplayProvider` subscription, not production telemetry.
+> **LogInsight Analyzer — Atmospheric Signal Log Intelligence Workspace** · Java 21 / Spring Boot 3.5 with React 18.3, TypeScript 5.6 and Vite 6. KMP powers product search, Levenshtein powers zero-hit suggestions, and heuristic pattern extraction and evidence-backed incident grouping remain explicitly non-ML; a six-module catalogue exposes real algorithm engines and recorded runs, and a frozen `java.util` manifest keeps the `dsa` engines inside the course scope rule. The Command Center is a selected-window operations view over an observed request-trail topology derived from `requestId` co-occurrence (not verified infrastructure), with an accessible 2D SVG default and an optional Three.js/WebGL view in a chunk deferred off the first load, error-rate health bands, and a signal field carrying four real backend values that render em dashes rather than zeros when no dataset is loaded. The runtime is single-process and in-memory; Dataset Replay is a bounded, labelled dataset replay shared by one `ReplayProvider` subscription, not production telemetry.
+
 
 ## Technical version
 
@@ -32,5 +33,6 @@ Current branch: `main`. These summaries use only the current implementation and 
 | Demo versus replay | `DemoDatasetGenerator`, `LiveStreamService`, `demo-replay` labels |
 | Academic `java.util` scope guard | `EngineScopeGuardTest` frozen manifest over `dsa/**` |
 | Deployment | `backend/Dockerfile`, `frontend/Dockerfile`, `frontend/nginx.conf`, `docker-compose.yml` |
-| Verification | `.\mvnw.cmd -o verify` (878 backend tests), `npm test` (61 tests across 18 files), `npm run build`, `npm audit` (0 vulnerabilities), `docker compose config`, and Playwright (7 browser workflows). CI also provisions Chromium for browser workflows |
+| Verification | `.\mvnw.cmd -o verify` (910 backend tests), `npx vitest run` (64 tests across 19 files), `npm run build` (first-load JS ~493 kB raw / ~154 kB gzip), `npm audit` (0 vulnerabilities, not re-run this pass), `docker compose config`, and Playwright (15 defined browser workflows, not re-run this pass). CI also provisions Chromium for browser workflows |
 | Docker limitation | daemon still unreachable in the audit environment; image/runtime smoke not claimed |
+| Submission artefacts | the `.pptx`, `.docx` and `.pdf` under `final-submission/` were **not regenerated** — no document-generation toolchain is available — so they still depict the previous interface |
