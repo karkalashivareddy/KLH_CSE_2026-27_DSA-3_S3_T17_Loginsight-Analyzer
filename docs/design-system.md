@@ -1,16 +1,17 @@
 # LogInsight Frontend Design System
 
-The frontend uses a dark graphite system with restrained cyan interaction states, semantic health colors, and violet for algorithmic context. Data remains the visual priority: color, blur, and motion only describe values returned by the application APIs.
+The frontend uses the **Signal in Motion** light-first system: porcelain and white surfaces, cobalt actions, cyan data accents, restrained indigo analysis, and semantic severity colors. The optional 3D topology retains a dark scene surface for node and edge contrast. Data remains the visual priority: color, depth, and motion describe values returned by the application APIs.
 
 ## Source of truth
 
-- `frontend/src/styles/product.css` owns the visual tokens, product background, component skin, page compositions, and responsive refinements.
+- `frontend/src/styles/product.css` owns shared component compositions and responsive refinements.
+- `frontend/src/styles/signal-in-motion.css` overrides shared visual tokens for the light-first identity and supplies the guided-demo surface and reduced-motion refinements.
 - `frontend/src/styles/global.css` supplies semantic/base layout rules and accessible structural behavior. It consumes the tokens declared by `product.css` and does not define a second palette.
 - `frontend/src/main.tsx` loads the structural rules followed by the product skin.
 
 ## Tokens and semantics
 
-The `:root` block in `product.css` defines the graphite backgrounds, glass levels, text scale, semantic colors, spacing, radii, shadows, typography, blur, and motion timing. Status is not communicated by color alone: badges and graph nodes include labels or accessible descriptions.
+The `:root` block in `signal-in-motion.css` defines porcelain surfaces, text, semantic colors, shadows and motion timing over the shared component styles. Status is not communicated by color alone: badges and graph nodes include labels or accessible descriptions.
 
 | Meaning | Token family | Use |
 | --- | --- | --- |
@@ -21,7 +22,7 @@ The `:root` block in `product.css` defines the graphite backgrounds, glass level
 | Informational | `--info*` | Dataset or runtime context |
 | Algorithmic | `--purple`, `--mod-*`, `--glow-*` | DSA modules and analysis workspaces |
 
-The background uses fixed, low-contrast radial light and a faint grid. Glass is reserved for the shell, primary hero panels, selected cards, floating controls, and drawers. Dense event content remains more opaque for readability.
+The background uses restrained blue and cyan light with opaque white data panels. Translucency is reserved for navigation and the floating demo panel; dense event content remains opaque for readability.
 
 ## Navigation and page hierarchy
 
@@ -48,6 +49,8 @@ The graph represents relationships observed in log records, not verified infrast
 ## Motion and lifecycle
 
 Motion uses the shared fast, normal, and slow timing tokens. Reduced-motion preferences suppress decorative movement. The WebGL renderer pauses while its panel is outside the viewport or the browser tab is hidden, caps pixel ratio and particle count, observes container resize, and disposes renderer resources, geometries, materials, controls, observers, and listeners on unmount.
+
+The guided tour keeps each underlying route interactive, executes its evidence request through the shared API client, aborts superseded requests, exposes failed requests with a retry action, and supports Escape plus arrow-key navigation. The new light-theme CSS and responsive overrides have not yet received browser visual verification in this execution environment.
 
 ## Product data modes and limits
 
@@ -82,24 +85,24 @@ Design rules for these surfaces:
 
 ## Readability and accessibility floor
 
-These are enforced rules, not aspirations. Each was re-measured in the browser after the final styling pass.
+These are existing interaction rules from the previous visual audit. That browser measurement predates Signal in Motion and does not verify this theme revision; re-run browser contrast, viewport, and focus checks before claiming conformance for the new styling.
 
 | Rule | Value | Enforcement |
 | --- | --- | --- |
 | Minimum text size | 10 px | The smallest values are `10px` and `0.72rem`. The root is `14px`, so `0.72rem` resolves to `10.08px`. No stylesheet declares a smaller rendered font size. |
 | Minimum target size | 24 x 24 px | Dense data rows and inline links are sized to their line-height, so `.log-row-message`, `.log-row-service a`, `.log-row-context a`, `.signal-event-message`, `.signal-event-meta a`, `.text-action`, `.source-card-actions a` and `.breadcrumb-piece a` carry `min-height: 24px`. Below 680 px they grow to 32 px. |
 | Focus visibility | 2 px solid `--accent-strong` | Focus rings are never removed without a replacement. Form controls use `:focus-visible`; the command palette input and topology nodes had no indicator and now do. Keyboard traversal of the shell was verified to produce a visible ring on every stop. |
-| Contrast | 4.5:1 body, 3:1 large text | Measured against the resolved effective background by walking ancestors for the first opaque layer. Zero failures across Overview, Scenario Lab, Live Monitor, Incident Workbench, Logs, Services, Algorithm Lab, Patterns, Incidents and System. |
+| Contrast | 4.5:1 body, 3:1 large text | Target. The new palette has not yet been measured in a browser; verify every route and state before claiming conformance. |
 | Colour independence | required | Health, severity and provenance are always carried by a label or accessible description, never by hue alone. |
-| Horizontal overflow | 0 px | Verified at 1440x900, 1280x800, 1024x768, 768x1024 and 390x844 on the six densest routes. |
+| Horizontal overflow | 0 px | Existing responsive breakpoints remain; the six target viewports have not been rechecked for this revision. |
 
 ### Reduced motion
 
 `prefers-reduced-motion: reduce` collapses `page-in` and every transition to `0.01ms`, and in the WebGL scene it disables camera damping, skips the animation loop in favour of a single render, and still leaves orbit, zoom and selection fully usable.
 
-### Verified runtime stability
+### Historical runtime stability checks
 
-Measured in Chromium against the running application:
+The following browser observations are from an earlier visual revision and have not been rerun after the light-theme update. They are not current acceptance evidence:
 
 - Five 2D-to-3D-to-2D cycles held exactly one `<canvas>` in 3D and zero in 2D, with identical DOM node counts and a flat JS heap, so no renderer or WebGL context is duplicated.
 - Three start/stop cycles kept the event buffer bounded at 40 rows with no DOM or heap growth.

@@ -1,5 +1,15 @@
 # LogInsight — Final Submission Index
 
+## Current frontend revision update
+
+The repository now includes the Signal in Motion light-first frontend and a route-based guided
+demonstration. Local verification for this revision reports **878 backend tests passed** and **56
+frontend tests across 18 files passed**; TypeScript and the production build pass, with a Vite warning
+for the 576.56 kB minified lazy topology chunk. No browser visual checks, fresh screenshots, or GitHub
+Actions result were available for this revision. The report, PDF, presentation, and images below are
+historical artifacts and do not depict the redesigned interface. The verification table that follows
+is preserved as historical evidence for its named commit.
+
 **Project:** LogInsight — Real-Time Log Intelligence & Incident Investigation Platform
 **Course:** Data Structures and Algorithms-3 (25CS2103E) · 2026-2027, Odd Semester
 **Repository:** https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer
@@ -40,19 +50,11 @@ Course instructor: Dr. J Sirisha Devi, Professor, Department of Computer Science
 | `LogInsight_Final_Project_Report.docx` | Full project report built on the institutional PBL template: case study, algorithm and pseudocode, code excerpts and results with captured screenshots. |
 | `LogInsight_Final_Project_Report.pdf` | PDF rendering of the same report. |
 
-Screenshots referenced by the report live in `docs/images/`; the ones also used in the README are
-reproduced in the README visual section.
+Screenshots referenced by the submitted report live in `docs/images/`. They depict the earlier dark visual revision. They were removed from the README and are not evidence of the current light-first UI.
 
-The `.pptx`, `.docx` and `.pdf` in this directory were synchronized before the documentation pass: their
-figures read **877** backend tests and **55** frontend tests, the 11 embedded screenshots are the
-current ones, and they carry none of the stale claims the pass corrected. That synchronization required
-no regeneration by this pass, so the three files are preserved exactly as verified.
+The `.pptx`, `.docx` and `.pdf` in this directory predate the light-first redesign. Their test counts and embedded screenshots are historical; the binary documents were not regenerated or visually updated in this pass.
 
-**The submitted documents therefore show 877, while the repository now runs 878.** The difference is one
-test added afterwards, `AlgorithmCatalogTest.publishedCatalogueFiguresMatchTheImplementation`, which
-pins the 42 / 36 / 35 / 13 catalogue figures this README publishes so they cannot drift from the code
-again. No product code changed. Regenerate the three documents only if the institute requires the
-report to state the live test count.
+The historical documents show older test counts and UI captures. Regenerate the report and presentation from the final UI and current test results before submitting if those artifacts must match this revision.
 
 ## Verification figures
 
@@ -74,10 +76,11 @@ The workflow is `.github/workflows/ci.yml`: the backend job runs `mvn -B verify`
 run for the pre-documentation commit; the documentation pass changed no code, so the test and build
 results are unchanged, and the run for the final HEAD is reported in the push output.
 
-## Browser verification
+## Historical browser verification
 
-Verified in Chromium against the running application on this commit, separately from the unit tests.
-The demo used the deterministic `checkout-5xx-cascade` scenario, driven through real navigation.
+The following Chromium observations were recorded for the earlier dark UI at the historical content
+verification commit. They were not repeated after the Signal in Motion redesign and are not evidence
+about the current frontend.
 
 - **0** uncaught exceptions and **0** application console errors across all 20 routes.
 - **0** React duplicate-key warnings. Generated simulation events now carry a deterministic unique id,

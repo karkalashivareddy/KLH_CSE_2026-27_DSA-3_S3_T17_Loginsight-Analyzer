@@ -13,50 +13,9 @@ The platform ingests a dataset or runs a deterministic generated scenario, strea
 
 > Academic/portfolio software. The Docker artifacts are a single-node deployment shape, not a claim of production scale or public deployment.
 
-## Screenshots
+## Visual direction
 
-Captured from the running application at 1440x900 unless noted. The Overview and Scenario Lab shots
-are taken during a live deterministic run, so the figures on screen are measured, not staged.
-
-### 1. Overview — command center
-
-![Overview during a live run: stream state, KPI strip, detected signals and algorithm evidence](docs/images/overview.png)
-
-### 2. Scenario Lab — controlled failure lab
-
-![Scenario catalogue, selected scenario, run controls and emerging telemetry](docs/images/scenario-lab.png)
-
-### 3. Live Monitor — system state to measurement to detection
-
-![Hero telemetry state, KPI row, chart, topology and event stream](docs/images/live-monitor.png)
-
-### 4. Incident Workbench — investigation desk
-
-![Three-zone workbench: incident navigator, measured detail with lifecycle and evidence, and blast radius with topology](docs/images/incident-workbench.png)
-
-### 5. Service topology — 2D and 3D
-
-The same backend nodes and edges, rendered two ways. 2D is the accessible SVG map; 3D is a lazy-loaded WebGL scene. Both encode node size from measured event volume and node state from measured health.
-
-| 2D — accessible SVG map | 3D — lazy-loaded WebGL scene |
-|---|---|
-| ![2D service topology](docs/images/topology-2d.png) | ![3D service topology](docs/images/topology-3d.png) |
-
-### 6. Algorithm evidence
-
-![Algorithm catalogue with complexity, exposure and runnable evidence](docs/images/algorithm-evidence.png)
-
-### 7. Dataset analysis
-
-![Analytics over the loaded dataset](docs/images/dataset-analysis.png)
-
-### Responsive layouts
-
-The dashboard is restructured rather than scaled down. Topology, tables and KPI strips collapse to a single column, and hit areas grow on touch viewports.
-
-| Tablet — 1024x768 | Mobile — 390x844 |
-|---|---|
-| ![Overview at 1024x768](docs/images/tablet-overview.png) | ![Overview at 390x844](docs/images/mobile-overview.png) |
+The current interface uses **Signal in Motion**, a light-first porcelain and cobalt design system with a dark, optional 3D topology surface. Start **Guided Demo** from the Command Center to walk through the real dataset, search, analytics, observed topology, incident evidence, and algorithm catalogue APIs. Existing screenshots under `docs/images/` were captured before this visual revision and are retained only for historical submission artifacts; they do not depict the current UI. No new screenshot is published until it can be captured from the final running frontend in a browser.
 
 ## The problem
 
@@ -109,9 +68,10 @@ Full detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 
 ## Features
 
-The shell is a dark observability workspace. Sidebar labels below are the real navigation names.
+The shell is a light-first observability workspace. Sidebar labels below are the real navigation names.
 
 - **Overview** — selected-window operations view over the loaded dataset, with a live simulation band.
+- **Guided Demo** — a repeatable route-by-route walkthrough; it uses backend dataset, search, analytics, dependency, incident and trace-catalogue operations and shows each response as evidence.
 - **Scenario Lab** — scenario catalogue and run controls for the deterministic generated simulation.
 - **Live Monitor** — the generated simulation stream: stream state, scenario, seed, speed, tick, phase, error rate, throughput, p95, signals, evidence, incident, event stream and topology.
 - **Dataset Replay** — a bounded, labelled replay of the loaded dataset. Not a live collector.
@@ -254,20 +214,20 @@ The implementation inventory and exposure rules are in [docs/ALGORITHMS.md](docs
 
 ## Verification
 
-**Local verification** — the current checkout was verified with:
+**Local verification** — the frontend and backend were run in this execution environment on the redesign worktree:
 
 ```powershell
 cd backend
 .\mvnw.cmd -o verify
 
 cd ..\frontend
-npm test
-npm run build
+npm.cmd test -- --reporter=dot
+npm.cmd run build
 ```
 
-Results: backend **878 tests**, 0 failures, 0 errors, 0 skipped, jar packaged; frontend Vitest **55 tests** across **17 files** passed; TypeScript and the Vite production build clean. The backend produces JaCoCo reports under `backend/target/site/jacoco/`. The 17 frontend test files are `api/client.test.ts`, `components/format.test.ts`, `components/Layout.test.tsx`, `components/TopologyPanel.test.tsx`, `pages/AlgorithmsPage.test.tsx`, `pages/AnalyticsPage.test.tsx`, `pages/IncidentWorkbench.test.tsx`, `pages/LivePage.test.tsx`, `pages/LogsPage.test.tsx`, `pages/MonitorPage.test.tsx`, `pages/OverviewPage.test.tsx`, `pages/PatternsPage.test.tsx`, `pages/ScenarioLabPage.test.tsx`, `pages/ServicesPage.test.tsx`, `replay/ReplayContext.test.tsx`, `telemetry/adapters.test.ts` and `telemetry/SimulationBand.test.tsx`; `docs/13-testing.md` tables every one of them.
+Results on the final source revision: backend **878 tests**, 0 failures, 0 errors, 0 skipped; frontend Vitest **56 tests across 18 files** passed; TypeScript and Vite production build passed. The build reports the lazy topology chunk at 576.56 kB minified (145.44 kB gzip), above Vite's 500 kB chunk warning threshold. These are local results, not GitHub Actions evidence. The backend produces JaCoCo reports under `backend/target/site/jacoco/`.
 
-**GitHub Actions verification** — `.github/workflows/ci.yml` runs on every push to `main`: the backend job runs `mvn -B verify`, and the frontend job runs `npm ci`, `npm test` and `npm run build`. The authoritative merge gate is the workflow run, not the local run above; the two are recorded separately.
+**GitHub Actions verification** — `.github/workflows/ci.yml` runs on every push to `main`: backend `mvn -B verify`; frontend `npm ci`, `npm test`, and `npm run build`. GitHub Actions status for this revision was not available from the execution environment and is not claimed here.
 
 Two facts about those numbers, so they are not over-read:
 
@@ -278,7 +238,7 @@ Two facts about those numbers, so they are not over-read:
   as configuration only. Nothing in this repository asserts that the assembled
   application was driven in a real browser, so no such result is claimed.
 
-Earlier phase reports under `docs/archive/` carry smaller backend counts from their own snapshots and are labelled as historical rather than current.
+Earlier phase reports under `docs/archive/` carry smaller backend counts from their own snapshots and are labelled as historical rather than current. The report, PDF, presentation, and PNGs under `final-submission/` and `docs/images/` have not been regenerated for this light-first redesign; their screenshots show the earlier interface.
 
 ## Limitations
 

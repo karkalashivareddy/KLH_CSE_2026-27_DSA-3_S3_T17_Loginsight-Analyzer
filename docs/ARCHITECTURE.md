@@ -24,11 +24,13 @@ React 18 + TypeScript + Vite SPA
 
 ## Frontend
 
-`frontend/src/App.tsx` defines the current route tree and wraps it in `ReplayProvider`. `Layout.tsx` supplies grouped navigation, breadcrumbs, status indicators, a command palette, a mobile drawer and the skip link. Pages fetch through `api/client.ts`, which uses the `/api` base path, request timeouts, cancellation, error-envelope normalization and manual SSE parsing. `useApi.ts` handles loading, refresh, cancellation and dataset-change invalidation.
+`frontend/src/App.tsx` defines the current route tree and wraps it in `ReplayProvider`, `TelemetryProvider`, and the route-persistent `GuidedDemoProvider`. `Layout.tsx` supplies grouped navigation, breadcrumbs, status indicators, a command palette, a mobile drawer and the skip link. Pages fetch through `api/client.ts`, which uses the `/api` base path, request timeouts, cancellation, error-envelope normalization and manual SSE parsing. `useApi.ts` handles loading, refresh, cancellation and dataset-change invalidation. The guided demonstration traverses existing routes and runs requests through the same API client; it can load the deterministic demo corpus only if no dataset is currently active.
 
 `replay/ReplayContext.tsx` owns the one Dataset Replay SSE subscription for the whole app. Because the provider sits above the router, the Command Center and the Dataset Replay page render the same stream state, progress and event buffer rather than each opening a connection. A generation counter invalidates callbacks from a superseded subscription, and `subscribeDatasetInvalidation` resets the stream when the dataset changes. The backend snapshot is sorted by `(timestamp, id)` and emitted oldest-first, so the "live" route name is a label on a finite ordered replay.
 
 Charts remain local SVG components in `components/ui.tsx`. The Command Center service topology defaults to the accessible SVG renderer in `components/TopologyPanel.tsx`; its optional `Topology3D` chunk uses Three.js/WebGL and OrbitControls over the same observed dependency API response. The 3D scene is lazy-loaded, visibility-aware, bounded to instanced markers and disposable on unmount. SVG service and edge lists remain available independently of WebGL. There is no WebSocket client or browser-side telemetry generator.
+
+The light-first **Signal in Motion** skin is layered after the shared structural and component styles in `styles/signal-in-motion.css`. The 3D topology keeps a dark scene for visual contrast. The updated palette and responsive refinements have not been browser-verified in this revision.
 
 ## Backend
 

@@ -2,27 +2,31 @@
 
 ## Current gates
 
-The current checkout was verified locally with:
+The Signal in Motion and guided-demo revision was verified locally with:
 
 ```powershell
 cd backend
 .\mvnw.cmd -o verify
 
 cd ..\frontend
-npm test
-npm run build
+npm.cmd test -- --reporter=dot
+npm.cmd run build
 ```
 
 Results:
 
 - Backend: **878 tests, 0 failures, 0 errors**; Spring Boot jar packaged successfully.
-- Frontend: **55 tests across 17 files passed** with Vitest.
-- Frontend build: TypeScript compilation and Vite production build passed.
+- Frontend: **56 tests across 18 files passed** with Vitest, including a guided-demo API workflow test.
+- Frontend build: TypeScript compilation and Vite production build passed. Vite warns that the lazy WebGL chunk is 576.56 kB minified (145.44 kB gzip), above the 500 kB warning threshold.
 - JaCoCo: report generated under `backend/target/site/jacoco/`; no numeric coverage threshold is configured in the POM.
 - Compose syntax: `docker compose config --quiet` passed.
 - Container image build/runtime: not executed because the Docker daemon was unavailable. That limitation still holds; `docker info` cannot reach the Docker engine in this environment, so no image build or container smoke test has been run on this branch.
 
-The checked-in CI workflow runs `mvn -B verify` in the backend job, then `npm ci`, `npm test` and `npm run build` in the frontend job, so the Vitest suite is a merge gate rather than a local-only check. The frontend job pins Node 22 because Vitest 5 declares `engines: ^22.12.0 || ^24.0.0 || >=26.0.0`; the frontend still has no configured browser-test or lint command.
+The checked-in CI workflow runs `mvn -B verify` in the backend job, then `npm ci`, `npm test` and `npm run build` in the frontend job. GitHub Actions status for this revision was unavailable and is not claimed. The frontend job pins Node 22 because Vitest 5 declares `engines: ^22.12.0 || ^24.0.0 || >=26.0.0`; the frontend still has no configured browser-test or lint command.
+
+### Guided-demo backend integration smoke
+
+The packaged backend jar was started locally on port `18080` because port `8080` was already occupied. Against this isolated process, the guided-demo sequence successfully loaded the deterministic demo dataset and called the real APIs: 14,000 parsed events; 6,127 `level:ERROR` search matches (the response's algorithm is `null` because this structured filter uses indexes); 12 analytics buckets; 8 services and 56 observed request-trail edges; 6 detector windows; 13 trace-catalogue operations; and 615 events in the returned `1h` overview. These are observations from one local smoke run, not expected constants or performance claims.
 
 **Local verification and GitHub Actions verification are separate records.** The local commands above run the same goals the workflow runs, but the authoritative gate for a merge is the workflow run on `main`, which reports its own per-job counts. A local green run is not a substitute for a green workflow run, and this document records only what was actually executed.
 
@@ -41,13 +45,14 @@ The checked-in CI workflow runs `mvn -B verify` in the backend job, then `npm ci
 | `src/pages/LogsPage.test.tsx` | 1 | The explorer applies backend severity syntax and opens the selected event drawer. |
 | `src/pages/MonitorPage.test.tsx` | 4 | The stream is labelled generated rather than captured telemetry; measured frame metrics and server evidence are rendered; a deterministic run starts on demand; operators are pointed at Scenario Lab instead of being offered a traffic control that does not exist. |
 | `src/pages/OverviewPage.test.tsx` | 3 | Command Center selected-window metrics, dataset coverage, detected-investigation state, the bounded-dataset-replay disclosure with working pattern log links, and the explicit source-selection state. |
+| `src/presentation/GuidedDemo.test.tsx` | 1 | Guided demo reads the active dataset, issues the structured-search request, shows backend evidence and exits with Escape. |
 | `src/pages/PatternsPage.test.tsx` | 1 | Pattern evidence links search the returned example message, not the wildcard template. |
 | `src/pages/ScenarioLabPage.test.tsx` | 4 | Scenario catalogue with the persisted selection; a real server frame previewed before any stream starts; a deterministic run opened through the client and its session reported; the two data sources kept separate in the copy. |
 | `src/pages/ServicesPage.test.tsx` | 2 | Generated fleet health renders with no dataset loaded, and stays separate from the dataset service map. |
 | `src/replay/ReplayContext.test.tsx` | 2 | One shared SSE subscription, replay state transitions, progress counters, and restart/stop behaviour. |
 | `src/telemetry/SimulationBand.test.tsx` | 2 | Measured simulation metrics come from the shared stream, and the open incident is separated from the dataset sections with a workbench link. |
 | `src/telemetry/adapters.test.ts` | 4 | The measured band reads the current tick rather than the lagging rolling window; reports elevated while the current tick is failing; counts `FATAL` as failing to match the server detector rule; and is explicit about having no measurement. |
-| **Total** | **55** | 17 test files. |
+| **Total** | **56** | 18 test files. |
 
 These are focused component tests over client helpers, the shell, the topology renderer, the Command Center, Algorithm Lab, analytics tabs, patterns, the Demo Replay screen and the replay provider. They are not browser QA and do not exercise real network, real SSE timing or real backend responses.
 

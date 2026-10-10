@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../api/client';
 import type { IncidentDto, LogEvent, ObjectApiResponse, OverviewDto, ServiceStatsDto, SystemStatus } from '../api/types';
 import { ReplayProvider } from '../replay/ReplayContext';
+import { GuidedDemoProvider } from '../presentation/GuidedDemo';
 import OverviewPage from './OverviewPage';
 
 const event: LogEvent = { id: 11, timestamp: '2026-09-25T10:05:00Z', severityNumber: 9, level: 'ERROR', service: 'api', host: 'host-1', ipAddress: '127.0.0.1', httpMethod: 'GET', endpoint: '/events', statusCode: 500, responseTime: 4, requestId: 'request-11', userId: 'user-11', message: 'request failed', traceId: null, spanId: null, url: null, source: 'test', rawMessage: null, attributes: {} };
@@ -13,7 +14,7 @@ const overview: OverviewDto = { dataset: 'sample', datasetEvents: 400, windowSta
 const dependencies: ObjectApiResponse = { nodes: [{ id: 'api', events: 100, outDegree: 1, inDegree: 0 }], edges: [{ source: 'api', target: 'auth', weight: 8 }], nodeCount: 1, edgeCount: 1 };
 const health: SystemStatus = { status: 'UP', service: 'loginsight', timestamp: '2026-09-25T10:05:00Z', uptimeMillis: 1000, datasetLoaded: true, datasetName: 'sample', datasetSize: 400, engines: 4 };
 
-function renderPage() { return render(<MemoryRouter><ReplayProvider><OverviewPage /></ReplayProvider></MemoryRouter>); }
+function renderPage() { return render(<MemoryRouter><GuidedDemoProvider><ReplayProvider><OverviewPage /></ReplayProvider></GuidedDemoProvider></MemoryRouter>); }
 
 describe('System overview', () => {
   afterEach(() => { cleanup(); vi.restoreAllMocks(); });

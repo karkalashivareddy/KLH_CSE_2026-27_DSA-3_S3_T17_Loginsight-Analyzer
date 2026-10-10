@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { Activity, ArrowUpRight, Database, ExternalLink, Radio, RefreshCw, Search, ShieldAlert, Timer } from 'lucide-react';
+import { Activity, ArrowUpRight, Database, ExternalLink, Play, Radio, RefreshCw, Search, ShieldAlert, Timer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import type { IncidentDto, LogEvent, ObjectApiResponse, OverviewDto, SystemStatus } from '../api/types';
@@ -9,6 +9,7 @@ import { useReplay } from '../replay/ReplayContext';
 import { SimulationBand } from '../telemetry/SimulationBand';
 import { Badge, Card, EmptyState, ErrorBox, EventDrawer, LevelBadge, NoDatasetState, PageHeader, Spinner, StatusPill, TimeChart } from '../components/ui';
 import { formatMillis, formatNumber, formatTs } from '../components/format';
+import { useGuidedDemo } from '../presentation/GuidedDemo';
 
 const RANGES = ['5m', '15m', '1h', '6h', '24h'] as const;
 const HEALTHY_ERROR_RATE_MAX = 5;
@@ -50,6 +51,7 @@ function investigationFor(incidents: IncidentDto[], data: OverviewDto): Incident
 }
 
 export default function OverviewPage() {
+  const guidedDemo = useGuidedDemo();
   const [range, setRange] = useState<string>('1h');
   const [selectedEvent, setSelectedEvent] = useState<LogEvent | null>(null);
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export default function OverviewPage() {
         eyebrow="LOGINSIGHT / OBSERVE"
         title="System overview"
         description={data ? <><strong>{data.dataset}</strong> · {scopeText(data)} · {windowText(data)}</> : 'A workspace for reading operational signals, following service relationships and inspecting evidence.'}
-        actions={<><button className="btn btn-sm" type="button" onClick={refreshAll} disabled={overview.refreshing || dependencies.refreshing || incidents.refreshing || health.refreshing}><RefreshCw size={14} aria-hidden="true" /> Refresh</button><Link className="btn btn-sm" to="/replay"><Radio size={14} aria-hidden="true" /> Dataset replay</Link><Link className="btn btn-primary" to="/live"><Radio size={14} aria-hidden="true" /> Live monitor</Link></>}
+        actions={<><button className="btn btn-sm guided-demo-launch" type="button" onClick={guidedDemo.start}><Play size={14} aria-hidden="true" /> Start guided demo</button><button className="btn btn-sm" type="button" onClick={refreshAll} disabled={overview.refreshing || dependencies.refreshing || incidents.refreshing || health.refreshing}><RefreshCw size={14} aria-hidden="true" /> Refresh</button><Link className="btn btn-sm" to="/replay"><Radio size={14} aria-hidden="true" /> Dataset replay</Link><Link className="btn btn-primary" to="/live"><Radio size={14} aria-hidden="true" /> Live monitor</Link></>}
       />
 
       <div className="page">

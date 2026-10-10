@@ -28,6 +28,19 @@ npm run dev
 Open `http://localhost:5173`. Vite proxies `/api` to port 8080, so the browser uses same-origin API
 paths. Wait for `Started LogInsightApplication` in the backend terminal before opening the UI.
 
+### Guided product demo
+
+From the Command Center, choose **Start guided demo**. It visits the existing overview, search,
+analytics, services, incidents and algorithms routes. Each step calls its corresponding backend API
+and displays returned evidence. If no dataset is active, the first step loads the deterministic
+backend demo corpus; if a dataset is already active, it keeps that source. Search, time buckets,
+observed request-trail topology, heuristic incident windows and trace catalogue data are fetched from
+the server. Failures remain visible with a retry action. Use Previous/Next or the arrow keys; Escape
+exits. The tour describes inferred topology and heuristic incidents with those limitations intact.
+
+This feature has a focused Vitest interaction test. It has not been exercised in a real browser in
+this revision.
+
 Docker evaluation:
 
 ```powershell

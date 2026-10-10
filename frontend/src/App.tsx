@@ -22,12 +22,14 @@ import NotFoundPage from './pages/NotFoundPage';
 import ScenarioLabPage from './pages/ScenarioLabPage';
 import { ReplayProvider } from './replay/ReplayContext';
 import { TelemetryProvider } from './telemetry/TelemetryContext';
+import { GuidedDemoProvider } from './presentation/GuidedDemo';
 
 export default function App() {
   return (
     <ReplayProvider>
       <TelemetryProvider>
         <BrowserRouter>
+          <GuidedDemoProvider>
           <Routes>
         <Route element={<Layout />}>
       <Route path="/" element={<OverviewPage />} />
@@ -67,6 +69,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
+          </GuidedDemoProvider>
         </BrowserRouter>
       </TelemetryProvider>
     </ReplayProvider>

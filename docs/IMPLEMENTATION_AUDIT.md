@@ -1,6 +1,6 @@
 # LogInsight — Current Implementation Audit
 
-Audit snapshot: refreshed against `main`.
+Audit snapshot: frontend redesign and guided-demo revision. The exact commit carrying this snapshot is the repository HEAD that contains this file.
 
 This is the canonical description of the checked-out implementation. It is based on the current source, tests, frontend routes, build files and API controllers. Historical rebuild reports remain in [`docs/archive/`](archive/); they are not the current contract.
 
@@ -11,14 +11,14 @@ This is the canonical description of the checked-out implementation. It is based
 | Gate | Command | Result |
 |---|---|---|
 | Backend | `cd backend; .\mvnw.cmd -o verify` | 878 tests, 0 failures, 0 errors; Spring Boot jar packaged |
-| Frontend tests | `cd frontend; npm test` | 55 tests across 17 files passed |
+| Frontend tests | `cd frontend; npm.cmd test -- --reporter=dot` | 56 tests across 18 files passed |
 | Frontend build | `cd frontend; npm run build` | TypeScript and Vite production build passed |
 | Compose syntax | `docker compose config --quiet` | Passed |
-| Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable in the audit environment |
+| Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable in this environment |
 
 CI mirrors these gates: the backend job runs `mvn -B verify` and the frontend job runs `npm ci`, `npm test` and `npm run build`.
 
-The Docker daemon limitation still holds at this audit: `docker info` cannot reach `dockerDesktopLinuxEngine`, so image builds and container smoke tests remain unexecuted and unclaimed.
+Backend verify completed locally: 878 tests, 0 failures, 0 errors, 0 skipped, and the Spring Boot jar was packaged. The frontend test result includes the guided-demo regression. The TypeScript and production build passed; the production build emits a 576.56 kB minified lazy topology chunk (145.44 kB gzip) and warns about chunks over 500 kB. Docker is unavailable (`docker info` cannot reach `docker_engine`), so image builds and container smoke tests remain unexecuted and unclaimed. Browser visual verification and viewport screenshots were not run; no current screenshots are represented as evidence.
 
 The Maven build targets Java 21 and uses Spring Boot 3.5.16. The frontend uses React 18, TypeScript, Vite, React Router and Vitest 5; the Vitest suite requires Node 22.12 or newer. The frontend has no configured browser-test or lint command.
 
