@@ -217,7 +217,7 @@ consolidation. No import of `experience.css` remains anywhere; `main.tsx` import
 | Encoding | UTF-8 integrity across all docs | Clean; apparent mojibake was a PowerShell console rendering artifact, verified absent from file bytes |
 
 The README's navigation list was validated against the rendered sidebar, which returns exactly:
-`Overview, Scenario Lab, Live Monitor, Dataset Replay, Logs, Detector Windows, Incident Workbench,
+`Overview, Scenario Lab, Live Monitor, Dataset Replay, Logs, Incidents, Incident Workbench,
 Services, Patterns, Analytics`.
 
 ## 14. Route surface verification

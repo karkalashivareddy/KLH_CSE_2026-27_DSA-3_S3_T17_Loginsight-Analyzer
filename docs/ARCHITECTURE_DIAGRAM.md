@@ -7,7 +7,7 @@ flowchart TB
     Browser[Browser]
     subgraph UI[React SPA]
         Shell[Layout · routes · command palette]
-        Pages[Overview · Logs · Algorithmic Search · Analytics · Patterns · Detector Windows · Services]
+        Pages[Overview · Logs · Algorithmic Search · Analytics · Patterns · Incidents · Services]
         Sim[Scenario Lab · Live Monitor · Incident Workbench]
         Lab[Datasets · Ingestion · Algorithms · Benchmarks · Runs · Dataset Replay]
         API[Typed /api client · REST + SSE]

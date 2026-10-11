@@ -274,12 +274,12 @@ Each structure carries a javadoc note explaining why it exists (`docs/03` lists 
 > longer matches the shipped route tree: `StringAlgorithms`, `SimilarityLab`, `SuffixLab`,
 > `NetworkFlow`, `Approximation`, `RandomizedLab`, `ParallelLab`, `BenchmarkLab` and `DSAPlayground`
 > have all been replaced by the product surfaces (Command Center, Logs Explorer, Incident Workbench,
-> Services, Patterns, Detector Windows, Algorithm Lab). `recharts` is also no longer a dependency —
+> Services, Patterns, Incidents, Algorithm Lab). `recharts` is also no longer a dependency —
 > charts are hand-rolled SVG. What the shipped application actually does:
 >
 > - **`motion` (`motion/react`) is a runtime dependency** and owns JS-driven animation. `src/motion/motion.ts` exports `MOTION`, `EASE`, `spring` and a variant set that mirror the CSS `--motion-*` tokens, so timing is defined once per medium; `src/motion/Atmosphere.tsx` renders a scroll-linked decorative backdrop via `useScroll`/`useTransform` that writes only to compositor motion values and returns `null` under `prefers-reduced-motion`.
 > - **An application error boundary** (`src/components/AppErrorBoundary.tsx`) wraps `<App />` in `main.tsx`, replacing a render-time throw with a recoverable `role="alert"` panel instead of a blank page.
-> - **Route-level code splitting.** Only the Command Center, Logs Explorer and Incident Workbench stay in the entry chunk; the other 17 routes are `lazy()`-loaded behind `Suspense` with a title-preserving skeleton fallback. `manualChunks` pins `three`, `motion`, `react-dom`/`react-router` and `lucide-react` into `vendor-three`, `vendor-motion`, `vendor-react` and `vendor-icons`. First-load JavaScript fell from ~1061 kB raw / ~281 kB gzip to ~493 kB / ~154 kB; `vendor-three` (562.23 kB) is fetched only when the 3D topology is opened.
+> - **Route-level code splitting.** Only the Command Center, Logs Explorer and Incident Workbench stay in the entry chunk; the other 17 routes are `lazy()`-loaded behind `Suspense` with a title-preserving skeleton fallback. `manualChunks` pins `three`, `motion`, `react-dom`/`react-router` and `lucide-react` into `vendor-three`, `vendor-motion`, `vendor-react` and `vendor-icons`. First-load JavaScript fell from (measured before route splitting) raw / ~281 kB gzip to ~483 kB / ~154 kB; `vendor-three` (562.23 kB) is fetched only when the 3D topology is opened.
 > - **The stylesheet is layered.** `signal-atlas.css` imports `global.css` and `product.css` into the named cascade layer `loginsight-structure` and is itself unlayered, so the Atmospheric Signal system overrides the inherited sheets without editing them.
 >
 > Full detail, including the exact breakpoint set and reduced-motion contract, is in

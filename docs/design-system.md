@@ -1,4 +1,4 @@
-﻿# LogInsight Frontend Design System â€” Atmospheric Signal
+# LogInsight Frontend Design System â€” Atmospheric Signal
 
 The frontend implements **Atmospheric Signal**: warm mineral surfaces, deep-ink typography, a single atmospheric teal accent, an editorial serif display face, and a layered light field that reads as weather rather than as decoration. Data remains the visual priority â€” color, depth and motion describe values returned by the application APIs, and nothing else.
 
@@ -154,31 +154,12 @@ CSS keyframes: `atlas-stage-in`, `atlas-page-in`, `atlas-section-in`, `atlas-val
 
 Scroll reveals use a two-class contract: `Layout` adds `.reveal-section` (opacity 0, `translateY(22px)`) from an `IntersectionObserver`, then `.is-revealed` on entry. Because the hidden state only ever arrives via JavaScript, a failed or unavailable observer leaves content **visible**.
 
-## The atmosphere
+## The backdrop
 
-Five painted layers, from back to front. The stack is the visual signature of the system.
+A decorative, scroll-linked light field was built and then removed during review: it competed with dense log
+data for attention and added motion that carried no information. The remaining backdrop is deliberately
+inert - a faint lattice plus film grain painted on html/ody, neither of which animates.
 
-| z | Layer | Selector | What it is |
-|---:|---|---|---|
-| â€” | Canvas wash | `html` background | Three radial gradients (teal `#17a2ae` at 84%/âˆ’10%, amber `#c6a260` at 2%/6%, steel `#1f5e7e` at 46%/112%) over a `linear-gradient(178deg, #f4f2eb, #ebe8e0 52%, #e6e2d8)`, with `scroll-behavior: smooth` and `scroll-padding-top: 84px` |
-| âˆ’2 | **Atmosphere** | `.atmosphere` | The scroll-linked veil and isobars (see below) |
-| âˆ’1 | Isobar lattice | `body::before` | A `56px Ã— 56px` plotted grid at `rgba(34,62,55,.035)`, masked by a radial gradient so it fades before reaching content |
-| âˆ’1 | Grain | `body::after` | A 140Ã—140 inline-SVG `feTurbulence` at `opacity: .28`, `saturate(0)`, so the field does not look plastic |
-
-**The wash must live on `html`, not `body`.** A negative-z-index child of the root stacking context paints *after* the root background but *before* an in-flow descendant's background â€” so putting the wash on `body` would paint it straight over the atmospheric layers below it.
-
-### The scroll-linked backdrop
-
-`src/motion/Atmosphere.tsx` renders two layers inside `.atmosphere` (`position: fixed; inset: -10% -10% 0; pointer-events: none`):
-
-| Element | Content | Motion |
-|---|---|---|
-| `.atmosphere__veil` | Three radial gradients (teal, amber, steel) | `y: 0% â†’ âˆ’14%`; `left: 18% â†’ 62% â†’ 34%`; `opacity: .95 â†’ .72 â†’ .5` |
-| `.atmosphere__contours` | Six SVG isobar paths over a `1600Ã—900` viewBox, `stroke: rgba(15,110,122,.16)`, `vector-effect: non-scaling-stroke` | `y: 0% â†’ âˆ’30%` |
-
-The two layers run at different rates â€” the veil leads, the contours lag â€” so the interface reads as sitting inside a medium rather than on a flat plane. Both are driven by `useScroll`/`useTransform` writing to **compositor-only motion values**: no React component re-renders while scrolling, and the component registers no scroll listener.
-
-The backdrop is `aria-hidden`, is never positioned above page content (`Layout` renders it *before* `.app-shell`), and the component **returns `null`** under `prefers-reduced-motion: reduce` â€” it is never mounted, not merely hidden.
 
 ## Composition
 
@@ -216,9 +197,8 @@ The layered `global.css` and `product.css` additionally carry structural rules a
 - Every animation and transition collapses to `0.01ms` with a single iteration and zero delay, via `!important`.
 - `opacity: 1` and `transform: none` are forced on `.route-view` and its children, `.overview-metric strong`, `.guided-demo`, `.signal-stage`, `.cc-hero h2`, `.cc-hero__lede`, `.cc-hero__actions`, `.cc-source`, `.signal-field`, `.pulse` and both tour orbits.
 - `.reveal-section` is forced visible â€” **scroll-driven reveals must never hide content for reduced-motion users**.
-- `.atmosphere { display: none }`, and `Atmosphere.tsx` independently returns `null`.
 
-The defence is layered: JavaScript checks `useReducedMotion()` and skips the observer entirely, the component refuses to mount, and CSS is the final backstop. A user with the preference set gets a static, fully visible workspace.
+The defence is layered: JavaScript checks `useReducedMotion()` and skips the observer entirely, and CSS is the final backstop. A user with the preference set gets a static, fully visible workspace.
 
 ## States
 
@@ -273,7 +253,7 @@ These are interaction goals, not a conformance certificate.
 
 `frontend/scripts/capture-visuals.mjs` captures **19 screenshots** into `docs/images/signal-atlas/`, every one taken against the running application with a real dataset loaded through the API â€” including the no-dataset state, a forced WebGL failure and a reduced-motion run.
 
-Browser E2E holds **15 workflows** covering direct routing, semantic token contrast, scroll reveal and reduced motion, dataset search and event details, topology selection and forced WebGL fallback, guided-presentation evidence and exit, mobile navigation, the signal field's no-fabrication contract, the empty-dataset state, a failing backend, command-palette focus restoration, documented route aliases and the not-found route, plus the six viewport targets.
+Browser E2E holds **18 workflows** covering direct routing, semantic token contrast, scroll reveal and reduced motion, dataset search and event details, topology selection and forced WebGL fallback, guided-presentation evidence and exit, mobile navigation, the signal field's no-fabrication contract, the empty-dataset state, a failing backend, command-palette focus restoration, documented route aliases and the not-found route, plus the six viewport targets.
 
 No full axe scan, no screen-reader audit and no pixel-diff visual-regression suite are configured. Successful hardware-accelerated WebGL rendering has not been verified â€” the fallback path has been.
 

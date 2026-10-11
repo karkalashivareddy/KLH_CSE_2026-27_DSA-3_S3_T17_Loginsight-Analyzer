@@ -33,6 +33,6 @@ Current branch: `main`. These summaries use only the current implementation and 
 | Demo versus replay | `DemoDatasetGenerator`, `LiveStreamService`, `demo-replay` labels |
 | Academic `java.util` scope guard | `EngineScopeGuardTest` frozen manifest over `dsa/**` |
 | Deployment | `backend/Dockerfile`, `frontend/Dockerfile`, `frontend/nginx.conf`, `docker-compose.yml` |
-| Verification | `.\mvnw.cmd -o verify` (910 backend tests), `npx vitest run` (64 tests across 19 files), `npm run build` (first-load JS ~493 kB raw / ~154 kB gzip), `npm audit` (0 vulnerabilities, not re-run this pass), `docker compose config`, and Playwright (15 defined browser workflows, not re-run this pass). CI also provisions Chromium for browser workflows |
+| Verification | `.\mvnw.cmd -o verify` (910 backend tests), `npx vitest run` (72 tests across 20 files), `npm run build` (first-load JS ~483 kB raw / ~154 kB gzip), `npm audit` (0 vulnerabilities, not re-run this pass), `docker compose config`, and Playwright (15 defined browser workflows, not re-run this pass). CI also provisions Chromium for browser workflows |
 | Docker limitation | daemon still unreachable in the audit environment; image/runtime smoke not claimed |
 | Submission artefacts | the `.pptx`, `.docx` and `.pdf` under `final-submission/` were **not regenerated** — no document-generation toolchain is available — so they still depict the previous interface |

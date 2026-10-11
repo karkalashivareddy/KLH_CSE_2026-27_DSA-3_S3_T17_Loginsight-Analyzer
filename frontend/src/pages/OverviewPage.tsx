@@ -97,10 +97,10 @@ export default function OverviewPage() {
             <span className="signal-mark" aria-hidden="true"><Activity size={15} /></span>
             LogInsight
           </div>
-          <h2>Follow the signal.<br /><em>Read the system.</em></h2>
+          <h2>Current state and <em>next action</em></h2>
           <p className="cc-hero__lede">
-            Every stage of an investigation — parsed events, the selected window, observed service
-            relationships and heuristic detector windows — resolved from the backend and shown in context.
+            Selected-window metrics, observed service relationships and detector windows for the
+            loaded dataset. Every value below is returned by the backend.
           </p>
           <div className="cc-hero__actions">
             <button className="btn btn-primary guided-demo-launch" type="button" onClick={guidedDemo.start}><Play size={14} aria-hidden="true" /> Start guided demo</button>
@@ -110,10 +110,6 @@ export default function OverviewPage() {
         </div>
         <SignalField data={data} serviceCount={dependencies.data?.nodeCount ?? null} edgeCount={dependencies.data?.edgeCount ?? null} />
       </section>
-
-      <div className="overview-simulation-band">
-        <SimulationBand />
-      </div>
 
       <div className="overview-window-bar">
         <div className="window-label"><span className="window-label-dot" aria-hidden="true" /> Observed window</div>
@@ -169,6 +165,16 @@ export default function OverviewPage() {
                     {data.topPatterns.length === 0 ? <EmptyState>No recurring patterns were returned.</EmptyState> : <div className="overview-pattern-list">{data.topPatterns.slice(0, 4).map((pattern) => <Link key={`${pattern.template}-${pattern.level}`} to={`/logs?q=${encodeURIComponent(pattern.example || pattern.template)}`}><span className="pattern-level">{pattern.level || 'UNKNOWN'}</span><code>{pattern.template}</code><strong>{formatNumber(pattern.count)}</strong><Search size={14} aria-hidden="true" /></Link>)}</div>}
                   </Card>
                 </div>
+              </section>
+
+              {/*
+                The generated simulation is a separate data source from the loaded
+                dataset, and it has its own dedicated pages. It sits below the
+                dataset evidence so the Command Center answers "what is in the
+                data I am investigating" before "what is the simulator doing".
+              */}
+              <section className="overview-simulation-band" aria-label="Generated simulation status">
+                <SimulationBand />
               </section>
             </>}
       <EventDrawer event={selectedEvent} onClose={() => setSelectedEvent(null)} />
@@ -232,18 +238,6 @@ function SignalField({ data, serviceCount, edgeCount }: { data: OverviewDto | nu
 
   return (
     <figure className="signal-field" aria-labelledby="signal-field-title">
-      <div className="signal-field__canvas" aria-hidden="true">
-        <svg viewBox="0 0 600 300" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-          <ellipse className="isobar" cx="300" cy="150" rx="286" ry="140" />
-          <ellipse className="isobar" cx="300" cy="150" rx="232" ry="112" />
-          <ellipse className="isobar isobar--inner" cx="300" cy="150" rx="178" ry="84" />
-          <ellipse className="isobar isobar--inner" cx="300" cy="150" rx="124" ry="56" />
-          <circle className="node-halo" cx="300" cy="150" r="20" />
-          <path className="path" d="M40 150 C 130 96, 200 210, 300 150 S 470 96, 560 150" />
-          {/* Decorative only: conveys "signal travelling", never encodes a value. */}
-          <path className="pulse" d="M40 150 C 130 96, 200 210, 300 150 S 470 96, 560 150" />
-        </svg>
-      </div>
       <figcaption className="signal-field__head">
         <span id="signal-field-title">From event to evidence</span>
         <span>{data ? `source · ${data.dataset}` : 'waiting for a backend dataset'}</span>
@@ -262,13 +256,13 @@ function SignalField({ data, serviceCount, edgeCount }: { data: OverviewDto | nu
             <span className="signal-stage__label">{stage.label}</span>
             <strong>{stage.value}</strong>
             <small>{stage.detail}</small>
-            <span className="signal-stage__exit" aria-hidden="true"><ArrowUpRight size={13} /></span>
+            <span className="signal-stage__exit" aria-hidden="true"><ArrowUpRight size={12} /></span>
           </Link>
         ))}
       </div>
       <div className="signal-field__foot">
-        <span><i className={`signal-key${data ? ' signal-key--ready' : ''}`} aria-hidden="true" /> {data ? 'Backend-derived source and selected-window values' : 'No telemetry is shown until a source is loaded'}</span>
-        <Link to="/docs"><Waves size={13} aria-hidden="true" /> How data moves</Link>
+        <span><i className={`signal-key${data ? ' signal-key--ready' : ''}`} aria-hidden="true" /> {data ? 'Backend-derived values' : 'No telemetry shown until a source is loaded'}</span>
+        <Link to="/docs"><Waves size={12} aria-hidden="true" /> How data moves</Link>
       </div>
     </figure>
   );

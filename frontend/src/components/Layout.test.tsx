@@ -74,7 +74,7 @@ describe('application shell', () => {
     expect(screen.getByText(/Backend checking/)).toBeInTheDocument();
   });
 
-  it('keeps supporting routes under an accessible More control', async () => {
+it('keeps the primary workflow compact and specialist routes under Advanced', async () => {
     vi.spyOn(api, 'systemStatus').mockResolvedValue(systemStatus);
     vi.spyOn(api, 'liveStatus').mockResolvedValue(liveStatus);
 
@@ -89,15 +89,20 @@ describe('application shell', () => {
     );
 
     const navigation = screen.getByRole('navigation', { name: 'Workspace sections' });
-    expect(within(navigation).getByRole('link', { name: 'Overview' })).toBeInTheDocument();
-    expect(within(navigation).getByRole('link', { name: 'Detector Windows' })).toBeInTheDocument();
-  expect(within(navigation).getByRole('link', { name: 'Incident Workbench' })).toBeInTheDocument();
-  expect(within(navigation).getByRole('link', { name: 'Scenario Lab' })).toBeInTheDocument();
-  expect(within(navigation).getByRole('link', { name: 'Live Monitor' })).toBeInTheDocument();
+    // The five daily destinations are visible without opening anything.
+    for (const label of ['Overview', 'Logs', 'Incidents', 'Services', 'Analytics']) {
+      expect(within(navigation).getByRole('link', { name: label })).toBeInTheDocument();
+    }
+    // Specialist tools stay reachable, just collapsed.
     expect(within(navigation).queryByRole('link', { name: 'Benchmarks' })).toBeNull();
-    fireEvent.click(within(navigation).getByRole('button', { name: /^More/ }));
-    expect(within(navigation).getByRole('link', { name: 'Benchmarks' })).toBeInTheDocument();
-    expect(within(navigation).getByRole('link', { name: 'Datasets' })).toBeInTheDocument();
+    expect(within(navigation).queryByRole('link', { name: 'Algorithm Lab' })).toBeNull();
+
+    fireEvent.click(within(navigation).getByRole('button', { name: /^Advanced/ }));
+    for (const label of ['Incident Workbench', 'Live Monitor', 'Dataset Replay', 'Scenario Lab', 'Patterns', 'Algorithm Lab', 'Algorithmic Search', 'Algorithms', 'Benchmarks', 'Run Sessions', 'Datasets', 'Ingestion', 'System', 'Documentation']) {
+      expect(within(navigation).getByRole('link', { name: label }), `${label} should be reachable under Advanced`).toBeInTheDocument();
+    }
+    // Every route is still declared; grouping must not drop one.
+    expect(within(navigation).getAllByRole('link')).toHaveLength(19);
   });
 
   it('opens the command palette with Ctrl+K and restores focus after Escape', async () => {

@@ -171,7 +171,7 @@ content changes.
 5. **Search and patterns.** Open **Logs** and **Algorithmic Search**. Use `level:ERROR`,
    `service:...` and free text. KMP runs the product search; the zero-hit "Did you mean?" suggestion is
    Levenshtein. Patterns are token heuristics, not ML.
-6. **Dataset incidents.** Open **Detector Windows** (`/incidents`, alias `/investigate/:id`). These are
+6. **Dataset incidents.** Open **Incidents** (`/incidents`, alias `/investigate/:id`). These are
    dataset-derived elevated-error windows with inspectable evidence, separate from the simulation
    incident lifecycle.
 7. **Algorithm Lab.** Open **Algorithm Lab** (`/analysis`), **Algorithms** (`/algorithms`) and

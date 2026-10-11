@@ -104,7 +104,16 @@ function shortRateText(node: TopologyNode): string {
   return `${node.errorRate.toFixed(1)}% window`;
 }
 
-export function TopologyPanel({ nodes, edges, graphKind = 'observed', title = graphKind === 'declared' ? 'Declared service topology' : 'Observed service topology', description = graphKind === 'declared' ? 'Node size follows simulated events in the selected window; node health and error rate follow the selected window. Edge weight follows the declared scenario dependency graph.' : 'Node size follows dataset-wide events; node health and error rate follow the selected window. Edge weight follows observed request-trail adjacency.', mode, defaultMode = '2d', onModeChange, selectedId, onSelect, incidentServiceIds = [], incidentLabel }: TopologyPanelProps) {
+/**
+ * Shared empty default.
+ *
+ * A `[]` literal in the parameter list allocates a new array on every render,
+ * which propagates into `Topology3D`'s scene-building effect and forces a full
+ * WebGL teardown/rebuild on each one.
+ */
+const NO_INCIDENT_SERVICES: string[] = [];
+
+export function TopologyPanel({ nodes, edges, graphKind = 'observed', title = graphKind === 'declared' ? 'Declared service topology' : 'Observed service topology', description = graphKind === 'declared' ? 'Node size follows simulated events in the selected window; node health and error rate follow the selected window. Edge weight follows the declared scenario dependency graph.' : 'Node size follows dataset-wide events; node health and error rate follow the selected window. Edge weight follows observed request-trail adjacency.', mode, defaultMode = '2d', onModeChange, selectedId, onSelect, incidentServiceIds = NO_INCIDENT_SERVICES, incidentLabel }: TopologyPanelProps) {
   const titleId = useId();
   const descriptionId = useId();
   const markerId = useId().replace(/:/g, '');

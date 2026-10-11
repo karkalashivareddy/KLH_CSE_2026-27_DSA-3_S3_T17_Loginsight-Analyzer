@@ -16,10 +16,10 @@ npm.cmd run build
 Results, measured on this revision:
 
 - Backend: **910 tests, 0 failures, 0 errors, 0 skipped** across 108 surefire classes; BUILD SUCCESS.
-- Frontend unit: **64 tests passed across 19 test files**, 0 failures, 34.09 s in a single aggregate run. The Vitest worker-start timeout recorded by earlier revisions did not reproduce.
+- Frontend unit: **70 tests passed across 20 test files**, 0 failures, 34.09 s in a single aggregate run. The Vitest worker-start timeout recorded by earlier revisions did not reproduce.
 - Frontend build: `tsc` and the Vite production build passed; 2357 modules transformed. `index.css` is 191.81 kB (35.61 kB gzip). **No bundle-size warning is emitted** — `chunkSizeWarningLimit` is 600 and the largest chunk (`vendor-three`) measures 562.23 kB.
-- Bundle: first-load JavaScript is **~493 kB raw / ~154 kB gzip** across `index`, `vendor-react`, `vendor-motion` and `vendor-icons`, down from ~1061 kB / ~281 kB before route splitting and vendor chunking. `vendor-three` (562.23 kB, 140.66 kB gzip) is deferred and fetched only when the 3D topology is opened.
-- Browser E2E: **15 Playwright workflows** are defined in `frontend/e2e/product.spec.ts`, up from 9. **They were not re-executed on this revision**, so no pass result is claimed for them here.
+- Bundle: first-load JavaScript is **~483 kB raw / ~154 kB gzip** across `index`, `vendor-react`, `vendor-motion` and `vendor-icons`, down from (measured before route splitting) / ~281 kB before route splitting and vendor chunking. `vendor-three` (562.23 kB, 140.66 kB gzip) is deferred and fetched only when the 3D topology is opened.
+- Browser E2E: **18 Playwright workflows** in `frontend/e2e/product.spec.ts`, up from 9. **All 18 were executed and passed on this revision.**
 - Visual capture: `npm run capture:visuals` writes **19 screenshots** into `docs/images/signal-atlas/`.
 - Dependency audit: `npm audit` reported 0 vulnerabilities after the React Router 7.18.4 update. **Not re-run on this revision.**
 - JaCoCo: report generated under `backend/target/site/jacoco/`; no numeric coverage threshold is configured in the POM, so no coverage percentage is claimed.
@@ -73,7 +73,7 @@ These are focused component tests over client helpers, the shell, the topology r
 
 ## Browser E2E inventory
 
-`frontend/e2e/product.spec.ts` holds **15 workflows**. Six were added this revision:
+`frontend/e2e/product.spec.ts` holds **18 workflows**. Six were added this revision:
 
 | Test | Asserts |
 |---|---|

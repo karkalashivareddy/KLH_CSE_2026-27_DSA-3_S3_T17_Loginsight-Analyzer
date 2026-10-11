@@ -16,14 +16,13 @@ The platform ingests a dataset or runs a deterministic generated scenario, strea
 ## Visual direction
 
 The interface uses **Atmospheric Signal**: warm mineral surfaces, deep-ink typography, an atmospheric
-teal accent, and a scroll-linked light field behind the workspace. Type pairs an editorial serif for
-display headings with a UI sans for controls and a monospace face for log lines, timestamps and
-algorithm traces. Motion is centralised on one duration/easing scale and honours
-`prefers-reduced-motion`. Start **Guided Demo** from the Command Center to walk through real dataset,
-search, analytics, observed topology, incident and algorithm-trace APIs. Current screenshots are in
-[`docs/images/signal-atlas/`](docs/images/signal-atlas/).
+teal accent, and a restrained grid backdrop. Type pairs an editorial serif for display headings with a UI
+sans for controls and a monospace face for log lines, timestamps and algorithm traces. Motion is
+centralised on one duration/easing scale and honours `prefers-reduced-motion`. Start **Guided Demo**
+from the Command Center to walk through real dataset, search, analytics, observed topology, incident and
+algorithm-trace APIs. Current screenshots are in [`docs/images/signal-atlas/`](docs/images/signal-atlas/).
 
-![LogInsight Command Center: the atmospheric hero, a four-stage signal field carrying real backend values, and the dataset source in view](docs/images/signal-atlas/command-center-desktop.png)
+![LogInsight Command Center: a compact operational header, a four-stage signal field carrying real backend values, and the selected-window metrics in the first viewport](docs/images/signal-atlas/command-center-desktop.png)
 
 ## The problem
 
@@ -78,15 +77,26 @@ Full detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
 |---|---|---|
 | Route table | `src/App.tsx` | Command Center, Logs and Incident Workbench are eager; every other route is `React.lazy` behind a `Suspense` fallback |
 | Shell | `src/components/Layout.tsx` | Sidebar, header status, command palette, mobile drawer, scroll-reveal observer |
-| Motion | `src/motion/` | Duration/easing tokens, variants, and the decorative scroll-linked backdrop |
+| Motion | `src/motion/` | Duration/easing tokens and variants used by every animated surface |
 | Recovery | `src/components/AppErrorBoundary.tsx` | Converts a render-time crash into a retryable screen instead of a blank page |
 | Design system | `src/styles/signal-atlas.css` | The authoritative token layer, components and composition; `global.css` and `product.css` remain layered underneath as structure |
 | API | `src/api/client.ts` | Relative `/api` paths, abort/timeout handling, error-envelope normalisation, three SSE flows |
 
-The scroll-linked backdrop is driven by `useScroll`/`useTransform`, so it writes only to
-compositor-level motion values: no React component re-renders while scrolling and no scroll listener is
-registered. Section reveals are `IntersectionObserver`-driven, and both the hidden and revealed classes
-are applied from JavaScript — a failed observer therefore leaves content visible rather than invisible.
+Section reveals are `IntersectionObserver`-driven, and both the hidden and revealed classes are applied
+from JavaScript — a failed observer therefore leaves content visible rather than invisible. The
+`motion` values are written to compositor-level properties only, so no React component re-renders while
+scrolling and no scroll listener is registered.
+
+### Navigation
+
+Primary navigation carries the five daily destinations: **Overview**, **Logs**, **Incidents**,
+**Services**, **Analytics**. Every specialist tool — Incident Workbench, Live Monitor, Dataset Replay,
+Scenario Lab, Patterns, Algorithm Lab, Algorithmic Search, Algorithms, Benchmarks, Run Sessions,
+Datasets, Ingestion, System, Documentation — lives under a collapsed **Advanced** group.
+
+No route, deep link or bookmark was removed: all 19 destinations still resolve, which the
+`documented route aliases resolve to the same workspace` and
+`primary navigation stays compact while every advanced tool remains reachable` browser tests assert.
 
 ## Features
 
@@ -100,7 +110,8 @@ The shell is a light-first observability workspace. Sidebar labels below are the
 - **Logs** — indexed explorer with filters, paging and event detail.
 - **Algorithmic Search** — structured fields, KMP free text, typeahead and the Levenshtein suggestion.
 - **Analytics** — timeline, severity, heatmap, HTTP and hosts.
-- **Patterns** and **Detector Windows** — heuristic results with evidence; dataset incident detail is reachable at `/incidents`, `/incidents/:id` and the alias `/investigate/:id`.
+- **Incidents** — heuristic detector windows with evidence, reachable at `/incidents`, `/incidents/:id` and the alias `/investigate/:id`.
+- **Patterns** — rule-based message templates, recurrence counts and example evidence.
 - **Incident Workbench** — the investigation surface: incident navigator, measured detail with lifecycle, timeline and algorithm evidence, and context with origin, affected services, blast radius, topology and health.
 - **Services** — fleet rollups and per-service activity.
 - **Algorithm Lab**, **Algorithms**, **Benchmarks**, **Run Sessions** — the catalogue, the measured matcher benchmark and recorded traces.
@@ -274,9 +285,9 @@ npm audit
 | Check | Command | Result on this revision |
 |---|---|---|
 | Backend suite | `.\mvnw.cmd -B verify` | **910 tests, 0 failures, 0 errors, 0 skipped** |
-| Frontend unit | `npm test` | **64 tests across 19 files, all passing** in one aggregate run |
+| Frontend unit | `npm test` | **70 tests across 20 files, all passing** in one aggregate run |
 | TypeScript + production build | `npm run build` | Passes (`tsc` runs before Vite, so the build is the type check) |
-| Browser E2E | `npm run test:e2e` | **15 Playwright workflows, all passing** |
+| Browser E2E | `npm run test:e2e` | **18 Playwright workflows, all passing** |
 | Dependency audit | `npm audit` | 0 vulnerabilities |
 
 `npm run build` runs `tsc` before Vite, so the TypeScript compile is part of the production build.
@@ -286,7 +297,7 @@ There is deliberately no separate `typecheck` script.
 
 | | Before | After |
 |---|---|---|
-| First-load JS (raw) | ~1061 kB | **~493 kB** |
+| First-load JS (raw) | (measured before route splitting) | **~483 kB** |
 | First-load JS (gzip) | ~281 kB | **~154 kB** |
 | Three.js | in a chunk loaded with the app | **`vendor-three`, deferred until the 3D topology is opened** |
 

@@ -12,7 +12,7 @@ This is the canonical description of the checked-out implementation. It is based
 
 - `styles/signal-atlas.css` was rewritten as the authoritative design system — warm mineral surfaces, deep-ink text, atmospheric teal accent, editorial serif display face, mono for data. It layers `global.css` and `product.css` underneath in the named cascade layer `loginsight-structure` and is itself unlayered, so it wins the cascade without editing the inherited structural sheets. It is 1,312 lines and emits a 191.81 kB stylesheet (35.61 kB gzip).
 - `src/motion/motion.ts` is a new token module exporting `MOTION`, `EASE`, `spring`, `fadeTransition`, `routeVariants`, `stagger`, `itemVariants`, `overlayVariants` and `surfaceVariants`. The JavaScript values mirror the CSS custom properties of the same name, so a timing change is made once per medium.
-- `src/motion/Atmosphere.tsx` is a new decorative backdrop: a light veil and a six-line isobar SVG driven by `useScroll`/`useTransform` at two different rates. It writes only to compositor motion values, registers no scroll listener, re-renders no React component while scrolling, is `aria-hidden`, and returns `null` under `prefers-reduced-motion: reduce`.
+- A decorative scroll-linked backdrop was built and later removed as visual noise.
 - `src/components/AppErrorBoundary.tsx` is a new class error boundary wrapping `<App />` in `main.tsx` with `scope="LogInsight"`. It replaces a render-time crash with a `role="alert"` recovery panel offering "Try again" and "Reload workspace", and never renders a stack trace.
 - `src/App.tsx` now `lazy`-loads 17 of the 20 route components. Only the Command Center (`OverviewPage`), Logs Explorer (`LogsPage`) and Incident Workbench (`IncidentWorkbenchPage`) stay in the entry chunk. The `Suspense` fallback keeps the page title visible instead of replacing the route with a spinner.
 - `vite.config.ts` sets `chunkSizeWarningLimit: 600` and a `manualChunks` splitter that pins `three` to `vendor-three`, `motion`/`framer-motion` to `vendor-motion`, `react-dom`/`react-router`/`scheduler` to `vendor-react`, and `lucide-react` to `vendor-icons`.
@@ -40,9 +40,9 @@ Measured locally on this revision.
 | Gate | Command | Result |
 |---|---|---|
 | Backend | `cd backend; .\mvnw.cmd -o verify` | **910 tests, 0 failures, 0 errors, 0 skipped** across 108 surefire classes; BUILD SUCCESS |
-| Frontend tests | `cd frontend; npx vitest run` | **64 tests passed across 19 test files**, 0 failures, 34.09 s |
+| Frontend tests | `cd frontend; npx vitest run` | **70 tests passed across 20 test files**, 0 failures, 34.09 s |
 | Frontend build | `cd frontend; npm run build` | `tsc` and Vite production build passed; 2357 modules transformed |
-| Browser E2E | `cd frontend; npm run test:e2e` | **15 Playwright workflows** defined in `frontend/e2e/product.spec.ts` (was 9) |
+| Browser E2E | `cd frontend; npm run test:e2e` | **18 Playwright workflows** executed and passed in `frontend/e2e/product.spec.ts` (was 9) |
 | Visual capture | `cd frontend; npm run capture:visuals` | 19 screenshots into `docs/images/signal-atlas/` |
 | Compose syntax | `docker compose config --quiet` | Passed (earlier pass; not re-run this revision) |
 | Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable in this environment |
@@ -65,7 +65,7 @@ Measured on this machine with `npm run build`, before and after the code-splitti
 | `vendor-icons` | — | 32.28 kB / 7.08 kB |
 | `Topology3D` | 571.82 kB / 144.14 kB | 9.88 kB / 3.90 kB (wrapper only) |
 | `vendor-three` | — | 562.23 kB / 140.66 kB (**deferred**) |
-| **First-load JS total** | **~1061 kB / ~281 kB gzip** | **~493 kB / ~154 kB gzip** |
+| **First-load JS total** | **(measured before route splitting) / ~281 kB gzip** | **~483 kB / ~154 kB gzip** |
 | `index.css` | — | 191.81 kB / 35.61 kB |
 
 First-load JavaScript falls by roughly 54% raw and 45% gzip. The Three.js payload is unchanged in size; it is simply no longer on the critical path, and is fetched only when the 3D topology is opened.
@@ -107,7 +107,7 @@ main.tsx
             ├─ TelemetryProvider       owns the one simulation SSE subscription
             ├─ BrowserRouter
             │    └─ GuidedDemoProvider
-            │         └─ Layout         shell: nav, header, palette, Atmosphere, route-view
+            │         └─ Layout         shell: nav, header, palette, route-view
             │              └─ Outlet
             │                   ├─ OverviewPage          entry chunk
             │                   ├─ LogsPage               entry chunk
@@ -115,7 +115,6 @@ main.tsx
             │                   └─ 17 lazy() route components, each in Suspense
 ```
 
-`Layout` renders `<Atmosphere />` as a sibling *before* `.app-shell`, and the stylesheet pins `.atmosphere` at `z-index: -2`, so the backdrop can never paint over content.
 
 ### Code splitting
 
@@ -137,7 +136,6 @@ main.tsx
 | File | Exports | Purpose |
 |---|---|---|
 | `motion/motion.ts` | `MOTION`, `EASE`, `spring`, `fadeTransition`, `routeVariants`, `stagger`, `itemVariants`, `overlayVariants`, `surfaceVariants` | One timing vocabulary per medium. `MOTION` is `fast: 0.16`, `normal: 0.26`, `slow: 0.42`, `scene: 0.62`, mirroring the CSS `--motion-*` tokens. `EASE.out` is `[0.22, 0.78, 0.28, 1]`; `EASE.inOut` is `[0.6, 0.02, 0.3, 1]`. |
-| `motion/Atmosphere.tsx` | default component | Scroll-linked decorative backdrop; returns `null` under reduced motion. |
 
 `Layout` consumes `useReducedMotion`, `MOTION` and `EASE` for the route transition and the reveal observer. Everything else that moves is CSS keyframes; the JavaScript layer exists so JS-driven and CSS-driven motion share one set of numbers.
 
@@ -189,7 +187,7 @@ Full detail is in [COMMAND_CENTER.md](COMMAND_CENTER.md). The audited facts:
 
 ## Frontend test inventory
 
-`npm test` runs Vitest over **64 tests in 19 files**. Verified on this revision.
+`npm test` runs Vitest over **70 tests in 20 files**. Verified on this revision.
 
 | File | Tests | Covers |
 |---|---:|---|
@@ -220,7 +218,7 @@ Focused component coverage complements the Playwright suite in `frontend/e2e/pro
 
 ## Browser E2E inventory
 
-`frontend/e2e/product.spec.ts` holds **15 workflows** (was 9). The six added this revision:
+`frontend/e2e/product.spec.ts` holds **18 workflows** (was 9). The six added this revision:
 
 | Test | What it asserts |
 |---|---|
@@ -318,7 +316,7 @@ The current source includes a skip link, semantic `header`/`nav`/`main` landmark
 
 **Responsive breakpoints in the authoritative stylesheet** (`signal-atlas.css`): 1240 px, 1100 px, 960 px, 680 px and 400 px. The layered `global.css`/`product.css` additionally carry 1120 px, 860 px, 960 px, 760 px, 680 px, 1150 px, 1180 px, 1000 px and 640 px rules for structural layout; the unlayered `signal-atlas.css` wins wherever the two overlap.
 
-**Reduced motion.** `signal-atlas.css` sets `scroll-behavior: auto`, collapses every animation and transition to `0.01ms` with a single iteration, forces `opacity: 1` and `transform: none` on route content, the hero, the signal field, guided-demo and topology selectors, forces `.reveal-section` visible, and sets `.atmosphere { display: none }`. `Atmosphere.tsx` additionally returns `null`, so the backdrop is not merely hidden but never mounted. `Layout` reads `useReducedMotion()` and skips the `IntersectionObserver` entirely.
+**Reduced motion.** `signal-atlas.css` sets `scroll-behavior: auto`, collapses every animation and transition to `0.01ms` with a single iteration, forces `opacity: 1` and `transform: none` on route content, the hero, the signal field, guided-demo and topology selectors, and forces `.reveal-section` visible. `Layout` reads `useReducedMotion()` and skips the `IntersectionObserver` entirely.
 
 `TopologyPanel` adds `role="button"` nodes with `tabIndex=0`, `Enter`/`Space` activation, per-node `aria-label`s including the health band, `aria-pressed` selection state, and paired accessible service and edge lists that mirror the SVG. It honours `prefers-reduced-motion` by removing edge animation. It does not implement arrow-key roving focus between nodes; `Tab` order follows document order.
 

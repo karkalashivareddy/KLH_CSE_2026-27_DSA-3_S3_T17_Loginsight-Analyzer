@@ -43,7 +43,7 @@ Where algorithms reach the product:
 | Live simulation thresholds | Fixed sliding-window aggregation in `RollingWindow`, per-tick and rolling |
 | Incident blast radius | BFS over the **declared** dependency graph |
 | Patterns | Deterministic token normalization (not ML) |
-| Detector Windows (dataset) | Five-minute baseline thresholding, rule-based |
+| Incidents (dataset) | Five-minute baseline thresholding, rule-based |
 | Command Center topology | Group-by-`requestId` ordered adjacency fold over the full dataset, not a catalogue entry |
 | Service health bands | Fixed error-rate thresholds |
 | Search benchmark | Naive / KMP / Z / Rabin-Karp, one measured run each |

@@ -32,7 +32,6 @@ import type { LiveStatus, SystemStatus } from '../api/types';
 import { formatNumber } from './format';
 import { PROJECT } from '../types/project';
 import { useApi } from '../hooks/useApi';
-import Atmosphere from '../motion/Atmosphere';
 import { MOTION, EASE } from '../motion/motion';
 
 type Tone = 'good' | 'muted' | 'warn' | 'danger' | 'info';
@@ -48,28 +47,38 @@ interface NavEntry {
 
 interface NavGroup {
   label: string;
+  /** Collapsed by default so specialist tools do not compete with the main workflow. */
+  collapsible?: boolean;
   entries: NavEntry[];
 }
 
+/**
+ * Navigation is grouped so the daily workflow is visible at a glance.
+ *
+ * `Workspace` holds the five destinations an operator uses constantly.
+ * `Advanced` holds every specialist tool — none were removed, and every entry
+ * keeps its original path, so existing bookmarks and deep links still resolve.
+ */
 const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Workspace',
     entries: [
       { to: '/', label: 'Overview', icon: LayoutDashboard, end: true, aliases: ['/command-center', '/overview'], keywords: 'command center dashboard home' },
-      { to: '/scenario-lab', label: 'Scenario Lab', icon: FlaskConical, aliases: ['/simulation'], keywords: 'deterministic simulation scenario incident seed generator' },
-      { to: '/live', label: 'Live Monitor', icon: Radio, keywords: 'live monitor stream simulation generated traffic' },
-      { to: '/replay', label: 'Dataset Replay', icon: History, keywords: 'dataset replay sse bounded demo' },
       { to: '/logs', label: 'Logs', icon: FileSearch, keywords: 'events explorer query' },
-      { to: '/incidents', label: 'Detector Windows', icon: ShieldAlert, aliases: ['/investigate'], keywords: 'detector windows dataset incidents' },
-      { to: '/incidents/workbench', label: 'Incident Workbench', icon: Waypoints, keywords: 'simulation incident investigation lifecycle blast radius evidence' },
-      { to: '/services', label: 'Services', icon: Network, keywords: 'fleet dependencies hosts' },
-      { to: '/patterns', label: 'Patterns', icon: Workflow, keywords: 'templates recurrence' },
-      { to: '/analytics', label: 'Analytics', icon: BarChart3, aliases: ['/analyze'], keywords: 'charts traffic severity http hosts' },
+      { to: '/incidents', label: 'Incidents', icon: ShieldAlert, aliases: ['/investigate'], keywords: 'detector windows dataset incidents' },
+      { to: '/services', label: 'Services', icon: Network, keywords: 'fleet dependencies hosts topology' },
+      { to: '/analytics', label: 'Analytics', icon: BarChart3, aliases: ['/analyze'], keywords: 'charts traffic severity http hosts' }
     ]
   },
   {
-    label: 'More',
+    label: 'Advanced',
+    collapsible: true,
     entries: [
+      { to: '/incidents/workbench', label: 'Incident Workbench', icon: Waypoints, keywords: 'simulation incident investigation lifecycle blast radius evidence' },
+      { to: '/live', label: 'Live Monitor', icon: Radio, keywords: 'live monitor stream simulation generated traffic' },
+      { to: '/replay', label: 'Dataset Replay', icon: History, keywords: 'dataset replay sse bounded demo' },
+      { to: '/scenario-lab', label: 'Scenario Lab', icon: FlaskConical, aliases: ['/simulation'], keywords: 'deterministic simulation scenario incident seed generator' },
+      { to: '/patterns', label: 'Patterns', icon: Workflow, keywords: 'templates recurrence' },
       { to: '/analysis', label: 'Algorithm Lab', icon: CircleGauge, end: true, aliases: ['/lab', '/algorithm-lab'], keywords: 'engines laboratory' },
       { to: '/search', label: 'Algorithmic Search', icon: Search, keywords: 'query matcher fuzzy' },
       { to: '/algorithms', label: 'Algorithms', icon: Workflow, aliases: ['/analysis/algorithms'], keywords: 'catalogue dsa engines' },
@@ -114,10 +123,11 @@ function NavGroupView({ group, pathname }: { group: NavGroup; pathname: string }
   const activeEntry = currentEntry(pathname);
   const active = group.entries.some((entry) => entryIsActive(entry, pathname));
   const [expanded, setExpanded] = useState(active);
-  const open = group.label !== 'More' || expanded || active;
+  const collapsible = Boolean(group.collapsible);
+  const open = !collapsible || expanded || active;
   return (
-    <div className={`nav-group${group.label === 'More' ? ' nav-group--more' : ''}`}>
-      {group.label === 'More'
+    <div className={`nav-group${collapsible ? ' nav-group--more' : ''}`}>
+      {collapsible
         ? <button className="nav-group-label nav-group-toggle" type="button" aria-expanded={open} onClick={() => setExpanded((value) => !value)}><span>{group.label}</span><span className="nav-group-rule" aria-hidden="true" /><span aria-hidden="true">{open ? '−' : '+'}</span></button>
         : <div className="nav-group-label"><span>{group.label}</span><span className="nav-group-rule" aria-hidden="true" /></div>}
       {open && group.entries.map((entry) => {
@@ -620,7 +630,6 @@ export default function Layout() {
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to main content</a>
-      <Atmosphere />
       <div className={`app-shell${collapsed ? ' app-shell--collapsed' : ''}${mobileOpen ? ' app-shell--mobile-open' : ''}`}>
         <aside ref={sidebarRef} id="primary-navigation" className="sidebar" aria-label="Primary navigation" aria-hidden={mobileViewport && !mobileOpen}>
           <div className="sidebar-brand">

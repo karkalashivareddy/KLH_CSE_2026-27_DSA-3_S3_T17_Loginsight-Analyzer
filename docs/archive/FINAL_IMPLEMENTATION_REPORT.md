@@ -34,7 +34,7 @@ DevTools Protocol against a running backend, described in `FINAL_VISUAL_QA_REPOR
 Baseline before this work: frontend 11 test files / 29 tests passing. The suite grew by 6 files and
 20 tests, and all pre-existing tests still pass. Two changes required updating an existing test
 assertion rather than reverting behaviour: `Layout.test.tsx` now expects the new navigation labels
-(`Detector Windows`, `Incident Workbench`, `Scenario Lab`, `Live Monitor`), which is the intended
+(`Incidents`, `Incident Workbench`, `Scenario Lab`, `Live Monitor`), which is the intended
 information architecture.
 
 ## 3. Architecture Overview

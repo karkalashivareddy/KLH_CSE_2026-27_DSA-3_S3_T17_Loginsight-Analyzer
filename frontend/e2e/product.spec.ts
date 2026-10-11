@@ -278,6 +278,62 @@ test('a document route does not resolve', async ({ page }) => {
   await expect(page.locator('main h1')).toBeVisible();
 });
 
+test('primary navigation stays compact while every advanced tool remains reachable', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const nav = page.getByRole('navigation', { name: 'Workspace sections' });
+
+  // The daily workflow is visible without opening anything.
+  for (const label of ['Overview', 'Logs', 'Incidents', 'Services', 'Analytics']) {
+    await expect(nav.getByRole('link', { name: label, exact: true })).toBeVisible();
+  }
+  expect(await nav.getByRole('link').count()).toBe(5);
+
+  // Specialist tools are collapsed, not deleted.
+  await expect(nav.getByRole('link', { name: 'Algorithm Lab' })).toHaveCount(0);
+  await nav.getByRole('button', { name: /^Advanced/ }).click();
+  for (const label of ['Incident Workbench', 'Live Monitor', 'Dataset Replay', 'Scenario Lab', 'Patterns', 'Algorithm Lab', 'Algorithmic Search', 'Algorithms', 'Benchmarks', 'Run Sessions', 'Datasets', 'Ingestion', 'System', 'Documentation']) {
+    await expect(nav.getByRole('link', { name: label, exact: true }), `${label} must remain reachable`).toBeVisible();
+  }
+  expect(await nav.getByRole('link').count()).toBe(19);
+});
+
+test('the 2D/3D toggle survives repeated switching without duplicating canvases', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/services');
+  await expect(page.getByRole('heading', { name: 'Observed service map' })).toBeVisible();
+  await page.locator('.topology-node').first().waitFor();
+
+  const nodeId = await page.locator('.topology-node').first().getAttribute('data-node-id');
+  await page.locator('.topology-node').first().click();
+  await expect(page.locator('.service-inspector-title')).toContainText(nodeId ?? '');
+
+  const canvases = () => page.locator('canvas').count();
+  for (let round = 0; round < 3; round += 1) {
+    await page.getByRole('button', { name: '3D WebGL' }).click();
+    await expect(page.locator('.topology-stage')).toHaveAttribute('data-mode', '3d');
+    await page.waitForTimeout(350);
+    expect(await canvases(), `round ${round}: at most one canvas should exist`).toBeLessThanOrEqual(1);
+
+    await page.getByRole('button', { name: '2D', exact: true }).click();
+    await expect(page.locator('.topology-stage')).toHaveAttribute('data-mode', '2d');
+    // Selection must survive the round trip.
+    await expect(page.locator('.topology-node--selected')).toHaveCount(1);
+  }
+});
+
+test('the command center keeps operational data above the fold', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await page.locator('.overview-metrics').waitFor();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  // Selected-window metrics must be reachable without scrolling past a hero.
+  const metricsTop = await page.locator('.overview-metrics').evaluate((el) => el.getBoundingClientRect().top);
+  expect(metricsTop).toBeLessThan(900);
+  const heroHeight = await page.locator('.cc-hero').evaluate((el) => el.getBoundingClientRect().height);
+  expect(heroHeight).toBeLessThan(420);
+});
+
 /** Minimal API helpers shared by the state-specific tests above. */
 const api = {
   async health(request: APIRequestContext) {

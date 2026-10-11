@@ -8,7 +8,6 @@ The current frontend is a React 18.3 + TypeScript 5.6 + Vite 6 single-page appli
 
 ```text
 skip link
-<Atmosphere/>                     decorative, scroll-linked, never above content
 .app-shell
   ├── <aside class="sidebar">    brand, workspace block, grouped nav, footer status
   └── .main-area
@@ -39,7 +38,7 @@ The `Suspense` fallback (`.route-fallback`) deliberately keeps the page title vi
 - **Logs** (`/logs`, `/logs/:id`): indexed explorer, paging, filters and event detail.
 - **Algorithmic Search** (`/search`): structured query fields, KMP free text, typeahead and Levenshtein suggestion.
 - **Analytics** (`/analytics`): timeline, severity, heatmap, HTTP and hosts.
-- **Patterns** (`/patterns`) and **Detector Windows** (`/incidents`, `/incidents/:id`, alias `/investigate/:id`): heuristic results with examples and evidence.
+- **Patterns** (`/patterns`) and **Incidents** (`/incidents`, `/incidents/:id`, alias `/investigate/:id`): heuristic results with examples and evidence.
 - **Scenario Lab** (`/scenario-lab`, alias `/simulation`): scenario catalogue, run controls, and the generated telemetry frames and algorithm evidence.
 - **Live Monitor** (`/live`): the generated simulation stream — stream state, scenario, seed, speed, tick, phase, measured error rate, throughput, p95, signals, evidence, incident, event stream and declared topology.
 - **Incident Workbench** (`/incidents/workbench`): the investigation surface — incident navigator, measured detail with lifecycle, timeline and algorithm evidence, and context with origin, affected services, blast radius, topology and health.
@@ -98,7 +97,7 @@ The current source provides:
 - `prefers-reduced-motion` handling across page, topology, guided-demo and atmospheric layers, enforced at three independent levels (JavaScript component logic, `useReducedMotion()` guards in `Layout`, and CSS `!important` rules).
 - Responsive rules at 1240 px, 1100 px, 960 px, 680 px and 400 px, including a mobile navigation drawer and stacked small-screen grids.
 
-This is a source-level review supported by focused component tests (including 3 dedicated `AppErrorBoundary` tests) and 15 Playwright workflows. The repository has no configured automated axe, screen-reader or pixel-diff visual-regression command, so those broader validations are not claimed as completed in this audit. Contrast is verified for 20 semantic token pairs by Playwright; that is a focused check, not whole-application WCAG conformance.
+This is a source-level review supported by focused component tests (including 3 dedicated `AppErrorBoundary` tests) and 18 Playwright workflows. The repository has no configured automated axe, screen-reader or pixel-diff visual-regression command, so those broader validations are not claimed as completed in this audit. Contrast is verified for 20 semantic token pairs by Playwright; that is a focused check, not whole-application WCAG conformance.
 
 ## Data honesty in the UI
 

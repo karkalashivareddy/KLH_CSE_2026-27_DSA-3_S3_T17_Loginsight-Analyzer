@@ -1,0 +1,39 @@
+{
+  "_comment": "Single source of truth for the submission metadata. These values were transcribed from the previously submitted LogInsight_Final_Project_Presentation.pptx and final-submission/FINAL_SUBMISSION_INDEX.md so that regenerating the documents cannot invent or drift them. They are NOT derived from source code and must be confirmed against the institution's records.",
+  "course": "DATA STRUCTURES AND ALGORITHMS-3  ·  25CS2103E  ·  PBL",
+  "students": [
+    { "name": "KARKALA SHIVA REDDY", "roll": "2520030105" },
+    { "name": "PARIPALLI NAVADEEP", "roll": "2520030196" }
+  ],
+  "guide": "Dr. J Sirisha Devi",
+  "department": "Professor, Department of Computer Science and Engineering",
+  "institution": "Koneru Lakshmaiah Education Foundation",
+  "term": "2026-2027, Odd Semester",
+  "project_title": "LogInsight Analyzer",
+  "project_subtitle": "Algorithm-Driven Log Analysis and Incident Investigation",
+  "verification": [
+    { "label": "Backend tests", "value": "910", "note": "mvnw -B verify — 0 failures, 0 errors, 0 skipped" },
+    { "label": "Frontend unit tests", "value": "72", "note": "vitest run — 72 across 20 files, single aggregate run" },
+    { "label": "Browser end-to-end", "value": "18", "note": "Playwright — all routes, 2D/3D round trip, reduced motion" },
+    { "label": "Dependency audit", "value": "0", "note": "npm audit — no vulnerabilities" },
+    { "label": "Production build", "value": "pass", "note": "tsc && vite build" }
+  ],
+  "limitations": [
+    "In-memory, single-current-dataset state. No database, no durable uploads, no restart persistence.",
+    "No authentication or authorization. This is not a shared multi-user service.",
+    "Dataset Replay is a bounded replay of the loaded dataset, not a live collector.",
+    "Live Monitor is server-generated simulation from a scenario and seed, not captured telemetry.",
+    "Topology edges are request-trail adjacency inferred from requestId co-occurrence, not verified infrastructure.",
+    "Benchmarks are host- and input-dependent measurements, not universal performance claims.",
+    "The 3D topology requires WebGL and falls back to 2D where it is unavailable.",
+    "Generated traffic is not production telemetry and is labelled as such throughout the interface."
+  ],
+  "algorithms": [
+    { "name": "KMP", "complexity": "O(n + m)", "role": "Linear exact substring search; no backtracking." },
+    { "name": "Aho-Corasick", "complexity": "O(n)", "role": "Every error signature matched in one left-to-right pass." },
+    { "name": "Levenshtein / Damerau", "complexity": "O(nm)", "role": "Edit-distance DP ranks a 'did you mean' suggestion." },
+    { "name": "BFS over dependency graph", "complexity": "O(V + E)", "role": "Blast radius reachable downstream of the failing service." },
+    { "name": "Fixed-window detection", "complexity": "O(n + W)", "role": "Bucketed, baseline-relative threshold, merged into one window." },
+    { "name": "Suffix array + Kasai LCP", "complexity": "O(n log n)", "role": "Traceable phrase search over the corpus." }
+  ]
+}

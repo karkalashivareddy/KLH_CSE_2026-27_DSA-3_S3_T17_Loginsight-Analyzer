@@ -1,4 +1,4 @@
-﻿# Architecture
+# Architecture
 
 ## Runtime topology
 
@@ -35,7 +35,7 @@ main.tsx
             â”œâ”€ BrowserRouter
             â”‚    â””â”€ GuidedDemoProvider
             â”‚         â””â”€ Layout      nav, header, palette, skip link,
-            â”‚              â”‚          <Atmosphere/>, <motion.div.route-view>
+            â”‚              â”‚, <motion.div.route-view>
             â”‚              â””â”€ Outlet
             â”‚                   â”œâ”€ OverviewPage           entry chunk
             â”‚                   â”œâ”€ LogsPage               entry chunk
@@ -45,7 +45,7 @@ main.tsx
 
 `AppErrorBoundary` is a class component with `getDerivedStateFromError` and `componentDidCatch`. It renders children normally and swaps in a `role="alert"` recovery panel on a render-time throw, offering "Try again" (reset state, re-render the subtree) and "Reload workspace" (`window.location.reload()`). The caught error is written to the developer console only; the DOM never receives a stack trace or a component name. It exists because without it any render-time failure unmounts the entire tree and produces a blank page with no message â€” which a reachable-but-failing backend could cause.
 
-`Atmosphere` is rendered by `Layout` as a sibling *before* `.app-shell`. The stylesheet pins `.atmosphere` at `z-index: -2`, so the decorative backdrop can never paint above page content.
+A decorative scroll-linked backdrop was built and later removed: it competed with dense log data and animated without conveying information. The remaining backdrop is inert - a faint lattice and film grain painted on `html`/`body`.
 
 `Layout.tsx` supplies grouped navigation, breadcrumbs, status indicators, a command palette, a mobile drawer and the skip link. Pages fetch through `api/client.ts`, which uses the `/api` base path, request timeouts, cancellation, error-envelope normalization and manual SSE parsing. `useApi.ts` handles loading, refresh, cancellation and dataset-change invalidation. The guided demonstration traverses existing routes and runs requests through the same API client; it can load the deterministic demo corpus only if no dataset is currently active.
 
@@ -83,7 +83,7 @@ Measured effect on first-load JavaScript:
 
 | | Before | After |
 |---|---|---|
-| Raw | ~1061 kB | ~493 kB |
+| Raw | (measured before route splitting) | ~483 kB |
 | Gzip | ~281 kB | ~154 kB |
 
 `chunkSizeWarningLimit` is set to 600 kB. That is a deliberate threshold change, not a suppression: the measured `vendor-three` chunk is 562.23 kB and the build now emits **no** size warning. The limit was raised to reflect the real per-chunk cost of the one intentionally deferred dependency.
@@ -102,7 +102,6 @@ Measured effect on first-load JavaScript:
 
 plus `fadeTransition`, `routeVariants`, `stagger()`, `itemVariants`, `overlayVariants` and `surfaceVariants`.
 
-**`motion/Atmosphere.tsx`** â€” a decorative scroll-linked light field: a three-gradient veil and a six-path isobar SVG, driven by `useScroll`/`useTransform` at two different rates (`-14%` and `-30%` over the full scroll). Design constraints:
 
 - *Performance.* Both layers write only to compositor motion values via `style`. No React component re-renders while scrolling, and this component registers no scroll listener.
 - *Accessibility.* `aria-hidden`, `pointer-events: none`, and the component returns `null` entirely under `prefers-reduced-motion: reduce` â€” the backdrop is not merely hidden, it is never mounted.

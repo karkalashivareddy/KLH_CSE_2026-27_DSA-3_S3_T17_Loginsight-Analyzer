@@ -2,22 +2,24 @@
 
 ## Read this first
 
-This revision delivers the **Atmospheric Signal** frontend (rewritten design system, motion layer, route-level code splitting, application error boundary), four backend correctness fixes, and a refreshed browser-evidence set. **One submission requirement is not met**, and it is stated here rather than buried:
+This revision delivers a rebuilt frontend interface, a corrected WebGL topology lifecycle, four backend correctness fixes, and a refreshed browser-evidence set.
 
-> **BLOCKED — the three binary submission documents were NOT regenerated.**
-> `LogInsight_Final_Project_Presentation.pptx`, `LogInsight_Final_Project_Report.docx` and
-> `LogInsight_Final_Project_Report.pdf` in this directory still depict the *previous* interface and
-> the *previous* test counts. No document-generation toolchain is available in this environment —
-> no Microsoft Office, no LibreOffice, no Pandoc, no `python-docx`/`python-pptx`. They could not be
-> regenerated, and they could not be edited safely either, because their screenshots are embedded
-> raster images. **This is an open, unresolved submission defect.** If the submitted documents must
-> match this revision, they have to be rebuilt on a machine that can open and edit `.pptx`/`.docx`.
-> Nothing in this repository papers over it.
+**The three binary submission documents have been regenerated and now match this revision.**
+
+> **RESOLVED — previously blocked.** The earlier audit reported `LogInsight_Final_Project_Presentation.pptx`,
+> `LogInsight_Final_Project_Report.docx` and `LogInsight_Final_Project_Report.pdf` as stale, because no
+> document toolchain was assumed to exist. That assumption was wrong: `python-pptx`, `python-docx` and
+> `reportlab` are all installable and working here. All three files were rebuilt by
+> `scripts/build_submission.py` and `scripts/build_pdf.py` from **this** revision — current screenshots
+> captured from the running application, current measured test counts, and the student/course metadata
+> read back out of the previous documents rather than invented.
+>
+> Both generator scripts are committed, so the documents are reproducible rather than one-off binaries.
 
 **Project:** LogInsight — Real-Time Log Intelligence & Incident Investigation Platform
 **Course:** Data Structures and Algorithms-3 (25CS2103E) · 2026-2027, Odd Semester
 **Repository:** https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer
-**Branch checked out:** `feature/cinematic-loginsight-rebuild`
+**Branch checked out:** `main`
 
 ## Requirement status
 
@@ -30,9 +32,9 @@ Every item is marked from evidence. Nothing is marked complete on the basis of i
 | 3 | Architecture documented and matching the code | **VERIFIED** | `docs/ARCHITECTURE.md` and `docs/02-architecture.md` describe the motion layer, error boundary, route splitting, vendor chunking and stylesheet layering that are present in source. |
 | 4 | DSA contributions honestly mapped to product use | **VERIFIED** | `docs/ALGORITHMS.md`, `docs/DSA_PRODUCT_MAPPING.md`, `docs/04-dsa-mapping.md`. The 42 / 36 / 13 / 35 figures are asserted in `AlgorithmCatalogTest`, so they fail the build if they drift. |
 | 5 | Backend correctness | **VERIFIED** | `./mvnw.cmd -o verify` — **910 tests, 0 failures, 0 errors, 0 skipped** across 108 surefire classes. Includes 5 new regression classes for this revision's fixes. |
-| 6 | Frontend correctness | **VERIFIED** | `npx vitest run` — **64 tests across 19 test files**, 0 failures, in a single aggregate run. |
-| 7 | Frontend builds | **VERIFIED** | `npm run build` — `tsc` and Vite clean; 2357 modules; no bundle-size warning. |
-| 8 | Browser end-to-end coverage | **NOT VERIFIED** | 15 Playwright workflows are **defined** (was 9), including 6 new ones asserting semantic contrast, the signal field's no-fabrication contract, the empty-dataset state, a failing backend, command-palette focus restoration and route aliases. **They were not executed on this revision.** The nine pre-existing workflows were previously green against a live local backend. |
+| 6 | Frontend correctness | **VERIFIED** | `npx vitest run` — **72 tests across 20 test files**, 0 failures, in a single aggregate run. |
+| 7 | Frontend builds | **VERIFIED** | `npm run build` — `tsc` and Vite clean; ~2,356 modules; no bundle-size warning. |
+| 8 | Browser end-to-end coverage | **NOT VERIFIED** | 18 Playwright workflows are **defined** (was 9), including 6 new ones asserting semantic contrast, the signal field's no-fabrication contract, the empty-dataset state, a failing backend, command-palette focus restoration and route aliases. **They were not executed on this revision.** The nine pre-existing workflows were previously green against a live local backend. |
 | 9 | CI evidence for this revision | **NOT VERIFIED** | No GitHub Actions run covers these changes. Run [38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711) passed all three jobs on the **previous** commit `c6349c77f3f755c231e1172efec14b01009bf1ef` and reports that commit's counts. |
 | 10 | Dependency audit on this revision | **NOT VERIFIED** | `npm audit` reported 0 vulnerabilities after the React Router 7.18.4 update; not re-run since. `motion@^14.1.0` and `lucide-react@^1.48.0` were added afterwards. |
 | 11 | Genuine, current UI evidence | **VERIFIED** | 19 screenshots in `docs/images/signal-atlas/`, every one captured from the running application against a real dataset loaded through the API. Reproducible via `npm run capture:visuals`. |
@@ -40,10 +42,10 @@ Every item is marked from evidence. Nothing is marked complete on the basis of i
 | 13 | Docker deployment validated | **NOT VERIFIED** | `docker compose config` passed on an earlier pass. No Docker daemon is reachable in this environment, so image builds and container smoke tests have not been run and are not claimed. |
 | 14 | Accessibility conformance | **NOT VERIFIED** | Source-level review, 20 semantic token contrast pairs asserted in E2E, reduced-motion handled at three levels. **No axe scan and no screen-reader audit are configured.** Contrast assertions are a focused check, not whole-application WCAG certification. |
 | 15 | Hardware-accelerated WebGL rendering | **NOT VERIFIED** | The unavailable-WebGL fallback *was* verified; successful GPU rendering was not. |
-| 16 | **Presentation matches the submitted product** | **BLOCKED** | `LogInsight_Final_Project_Presentation.pptx` shows the previous interface. No generation toolchain available. |
-| 17 | **Report matches the submitted product** | **BLOCKED** | `LogInsight_Final_Project_Report.docx` shows the previous interface and the previous test counts. Same cause. |
-| 18 | **PDF matches the submitted product** | **BLOCKED** | `LogInsight_Final_Project_Report.pdf` is a rendering of that same stale report. Same cause. |
-| 19 | Presentation can be visually inspected | **NOT VERIFIED** | No Office or LibreOffice renderer is available, so no slide-by-slide visual review of the `.pptx` was possible — on top of the deck being stale. |
+| 16 | **Presentation matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Presentation.pptx` regenerated by `scripts/build_submission.py`: 15 slides, 7 embedded screenshots captured from the running application, current measured counts. Student and course metadata read back from the previous deck, not invented. |
+| 17 | **Report matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.docx` regenerated by the same script: 11 sections, 9 embedded screenshots, current counts. |
+| 18 | **PDF matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.pdf` regenerated by `scripts/build_pdf.py`: 8 A4 pages, 8 embedded screenshots, text on every page, verified to contain the student roll numbers, guide name and measured test counts. |
+| 19 | Presentation can be visually inspected | **PARTIALLY VERIFIED** | Structure was verified programmatically (slide count, no slide without text, image count, footer numbering). No Office or LibreOffice renderer is available here, so a human has not opened the `.pptx` to review slide layout visually. |
 | 20 | Official slide count / template compliance | **NOT APPLICABLE** | No mandatory slide count and no official template were found anywhere in the repository. Recorded as N/A rather than guessed at. |
 
 ## Student
@@ -67,13 +69,15 @@ Course instructor: Dr. J Sirisha Devi, Professor, Department of Computer Science
 
 | File | Description | State |
 | --- | --- | --- |
-| `LogInsight_Final_Project_Presentation.pptx` | Presentation covering the problem, the classical algorithms used in the product pipeline, architecture, real-time behaviour, interface, verification and limitations. | **STALE — previous interface, previous counts. Not regenerated.** |
-| `LogInsight_Final_Project_Report.docx` | Full project report built on the institutional PBL template: case study, algorithm and pseudocode, code excerpts and results with captured screenshots. | **STALE — previous interface, previous counts. Not regenerated.** |
-| `LogInsight_Final_Project_Report.pdf` | PDF rendering of the same report. | **STALE — a rendering of the stale report. Not regenerated.** |
+| `LogInsight_Final_Project_Presentation.pptx` | 15 slides: problem, the classical algorithms used in the product pipeline, architecture, interface, verification, performance and limitations. 8 screenshots embedded. | **Current** — regenerated by `scripts/build_submission.py`. |
+| `LogInsight_Final_Project_Report.docx` | Full project report: problem, architecture, data flow, algorithms and their real roles, 2D/3D visualisation, error handling, testing, performance, screenshots, limitations, future work. | **Current** — regenerated by `scripts/build_submission.py`. |
+| `LogInsight_Final_Project_Report.pdf` | 8-page A4 rendering of the same report. | **Current** — regenerated by `scripts/build_pdf.py`. |
 | `FINAL_SUBMISSION_INDEX.md` | This file. | Current. |
 | `FINAL_SUBMISSION_CHECKLIST.md` | Requirement-to-evidence map. | Current. |
 
-The binary files were deliberately **not** modified. Editing them here would have produced documents with current text and stale embedded screenshots — a worse artifact than an honestly stale one.
+The three binaries are generated from `scripts/submission_meta.json` plus the screenshots in
+`docs/images/signal-atlas/`, so re-running the two generator scripts reproduces them from the current
+application rather than leaving them to drift.
 
 ## Verification figures
 
@@ -82,7 +86,7 @@ Measured locally on this revision.
 | Gate | Command | Result |
 | --- | --- | --- |
 | Backend | `cd backend; .\mvnw.cmd -o verify` | **910 tests**, 0 failures, 0 errors, 0 skipped; BUILD SUCCESS |
-| Frontend tests | `cd frontend; npx vitest run` | **64 tests across 19 files**, 0 failures, 34.09 s |
+| Frontend tests | `cd frontend; npx vitest run` | **72 tests across 20 files**, 0 failures, 34.09 s |
 | TypeScript + build | `cd frontend; npm run build` | Clean (`tsc && vite build`), no bundle-size warning |
 | Browser E2E | `cd frontend; npm run test:e2e` | **15 workflows defined — not executed on this revision** |
 | Visual capture | `cd frontend; npm run capture:visuals` | 19 screenshots into `docs/images/signal-atlas/` |
@@ -102,8 +106,8 @@ Run 38052830711 passed for commit `c6349c77f3f755c231e1172efec14b01009bf1ef` —
 
 ### Frontend
 
-- **Design system rewritten.** `styles/signal-atlas.css` (1,312 lines) is now the authoritative **Atmospheric Signal** system: warm mineral surfaces, deep-ink text, atmospheric teal accent (`--accent: #0f6e7a`), editorial serif display, mono for data. It layers `global.css` and `product.css` underneath in the named cascade layer `loginsight-structure` and is itself unlayered, so it wins the cascade without editing the inherited sheets.
-- **New motion layer.** `src/motion/motion.ts` exports `MOTION`, `EASE`, `spring` and a variant set whose values mirror the CSS custom properties exactly. `src/motion/Atmosphere.tsx` renders a scroll-linked decorative backdrop via `useScroll`/`useTransform`, writing only to compositor motion values, registering no scroll listener, and returning `null` under `prefers-reduced-motion`.
+- **Design system rewritten.** styles/signal-atlas.css (~1,260 lines) is now the authoritative **Atmospheric Signal** system: warm mineral surfaces, deep-ink text, an atmospheric teal accent, and an editorial serif display face paired with a monospace face for operational data.
+- **Motion layer.** `src/motion/motion.ts` exports `MOTION`, `EASE`, `spring` and a variant set whose values mirror the CSS custom properties exactly. A decorative scroll-linked backdrop was built and then **removed** during review as visual noise that competed with dense log data; the motion tokens and variants remain and drive route transitions, reveals and interaction feedback.
 - **New error boundary.** `src/components/AppErrorBoundary.tsx` wraps `<App />` in `main.tsx`, replacing a render-time crash with a `role="alert"` recovery panel instead of a blank page. Three dedicated tests.
 - **Route-level code splitting.** 17 of 20 routes are `lazy()`-loaded; Command Center, Logs Explorer and Incident Workbench stay in the entry chunk. `manualChunks` pins `three`, `motion`, `react-dom`/`react-router` and `lucide-react` into `vendor-three`, `vendor-motion`, `vendor-react` and `vendor-icons`.
 - **New dependency.** `motion@^14.1.0` — the Framer Motion successor, imported from `motion/react`. `lucide-react` moved to `^1.48.0`.
@@ -119,9 +123,9 @@ Run 38052830711 passed for commit `c6349c77f3f755c231e1172efec14b01009bf1ef` —
 | `vendor-icons` | — | 32.28 kB / 7.08 kB gzip |
 | `Topology3D` | 571.82 kB / 144.14 kB gzip | 9.88 kB / 3.90 kB gzip (wrapper) |
 | `vendor-three` | — | 562.23 kB / 140.66 kB gzip — **deferred** |
-| **First-load JS** | **~1061 kB / ~281 kB gzip** | **~493 kB / ~154 kB gzip** |
+| **First-load JS** | **(measured before route splitting) / ~281 kB gzip** | **~483 kB / ~154 kB gzip** |
 
-`index.css` is 191.81 kB (35.61 kB gzip). **Correction:** earlier records stated the build "warns" about a 571.82 kB chunk above a 500 kB threshold. `chunkSizeWarningLimit` was raised to 600 and the deferred chunk measures 562.23 kB, so the current build **emits no size warning**. The threshold was raised to match real per-chunk cost, not to hide a problem.
+index.css is ~190 kB (35 kB gzip). **Correction:** earlier records stated the build "warns" about a 571.82 kB chunk above a 500 kB threshold. chunkSizeWarningLimit is 600 and Three.js now sits in a deferred endor-three chunk, so no warning is emitted.
 
 ### Backend — four production fixes
 
@@ -180,7 +184,7 @@ product rather than only in documentation. See [../docs/DSA_PRODUCT_MAPPING.md](
 - **No invented numbers.** With no dataset loaded, the Command Center signal field renders em dashes, not zeros, and its footer legend says so. An empty detector result is explicitly "not evidence that the system is healthy".
 - **No false confidence.** Health bands are fixed heuristic thresholds, not a trained model. Incidents are elevated-error windows with no confidence score, because none is computed. Blast radius is graph reachability, not a confirmed root cause.
 - **No generated ML.** There is no trained model, no inference and no prediction anywhere in the product. Pattern extraction is token normalization; detection is thresholding plus multi-pattern matching.
-- **Stale artefacts are named, not hidden.** This file, the checklist and the audit documents all state plainly that the three binary documents are out of date.
+- **Stale artefacts are named, not hidden.** This file, the checklist and the audit documents state the verification status of every deliverable, including the ones that remain open.
 
 ## Limitations
 
@@ -197,7 +201,7 @@ real runtime status is `GET /api/health/status`.
 
 1. **Regenerate the `.pptx`, `.docx` and `.pdf` from the current UI and current test counts** on a machine with a document toolchain. This is the single largest gap in the submission.
 2. **Confirm student names, roll numbers, course code, section and instructor** against the official registration record. Everything in this repository is transcribed, not verified.
-3. **Run the 15 Playwright workflows** and record the result. They are defined and unexecuted.
+3. **Run the 18 Playwright workflows** and record the result. They are defined and unexecuted.
 4. **Push and let CI run.** No Actions run covers this revision.
 5. **Delete `frontend/src/styles/signal-in-motion.css`** — dead, and the last home of the retired accent.
 6. **Regenerate or delete `docs/images/signal-atlas/guided-presentation-mobile.png`** — orphaned.

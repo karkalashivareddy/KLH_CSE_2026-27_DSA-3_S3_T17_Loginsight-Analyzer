@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { TopologyEdge, TopologyNode } from './TopologyPanel';
@@ -23,6 +23,9 @@ type SceneNode = {
   incidentRing?: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>;
   position: THREE.Vector3;
   health: NonNullable<TopologyNode['health']>;
+  /** Resting emphasis for this node's health band, before any focus boost. */
+  baseEmissive: number;
+  baseHaloOpacity: number;
 };
 
 const HEALTH_COLORS: Record<NonNullable<TopologyNode['health']>, number> = {
@@ -56,9 +59,41 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
   useEffect(() => { latestSelectionRef.current = selectedId; }, [selectedId]);
   useEffect(() => { onSelectRef.current = onSelect; }, [onSelect]);
 
+  /**
+   * The scene-building effect must depend on the *content* of its inputs, never
+   * on their array identity. Callers routinely pass freshly-filtered arrays
+   * (`graph.health ?? []`, `.filter(...)` at a call site), and an identity dep
+   * would tear down and reallocate the whole WebGL context on every render —
+   * exhausting the browser's live-context budget within seconds.
+   *
+   * `JSON.stringify` is used rather than a delimiter join because it cannot
+   * collide when a service name contains the separator itself. The current
+   * values are read through refs, so the effect re-runs only when a set actually
+   * changes.
+   */
+  const incidentIdsRef = useRef(incidentServiceIds);
+  const graphRef = useRef({ nodes, edges });
+  const incidentKey = JSON.stringify(incidentServiceIds);
+  /**
+   * Keyed only on the fields the scene actually reads. `errorRate` drives the
+   * 2D map and the accessible list, not the 3D geometry, so including it would
+   * rebuild the whole WebGL context whenever a value it ignores moved.
+   */
+  const graphKey = useMemo(
+    () => JSON.stringify([
+      nodes.map((node) => [node.id, node.events, node.health ?? null]),
+      edges.map((edge) => [edge.source, edge.target, edge.weight])
+    ]),
+    [nodes, edges]
+  );
+  useEffect(() => { incidentIdsRef.current = incidentServiceIds; }, [incidentKey]);
+  useEffect(() => { graphRef.current = { nodes, edges }; }, [graphKey]);
+
   useEffect(() => {
     const stage = stageRef.current;
-    if (!stage || nodes.length === 0) return;
+    // Read through the ref so the effect body never closes over a stale array.
+    const { nodes: currentNodes, edges: currentEdges } = graphRef.current;
+    if (!stage || currentNodes.length === 0) return;
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -106,13 +141,13 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
     });
     scene.add(grid);
 
-    const positions = graphPositions(nodes);
-    const incidentServices = new Set(incidentServiceIds);
-    const maxEvents = Math.max(1, ...nodes.map((node) => Math.max(0, node.events)));
-    const maxWeight = Math.max(1, ...edges.map((edge) => Math.max(0, edge.weight)));
+    const positions = graphPositions(currentNodes);
+    const incidentServices = new Set(incidentIdsRef.current);
+    const maxEvents = Math.max(1, ...currentNodes.map((node) => Math.max(0, node.events)));
+    const maxWeight = Math.max(1, ...currentEdges.map((edge) => Math.max(0, edge.weight)));
     const nodeObjects = new Map<string, SceneNode>();
-    const nodeMeshes: THREE.Mesh[] = [];
-    nodes.forEach((node) => {
+    const hitAreaMeshes: THREE.Mesh[] = [];
+    currentNodes.forEach((node) => {
       const position = positions.get(node.id);
       if (!position) return;
       const scale = 0.3 + Math.sqrt(Math.max(0, node.events) / maxEvents) * 0.48;
@@ -157,13 +192,33 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
         new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
       );
       hitArea.userData.serviceId = node.id;
+      // Hidden from the render pass but still raycastable: three's `intersect()`
+      // tests `layers`, not `visible`, so this removes one draw call per node
+      // without affecting picking.
+      hitArea.visible = false;
       group.add(hitArea);
-      nodeMeshes.push(core, shell, hitArea);
+      // Picking runs against these alone. They are one mesh per node and sit
+      // outside the visible shells, so every click that could land on a node
+      // lands on its hit area — at a third of the ray-test work of testing
+      // core, shell and hit area together.
+      hitAreaMeshes.push(hitArea);
       scene.add(group);
-      nodeObjects.set(node.id, { group, core, halo, incidentRing, position: position.clone(), health });
+      nodeObjects.set(node.id, {
+      group,
+      core,
+      halo,
+      incidentRing,
+      position: position.clone(),
+      health,
+      // Elevated nodes stay visibly brighter at rest. Without carrying the
+      // resting value on the entry, the highlight pass overwrote it with the
+      // same constant for every node and the band was invisible in 3D.
+      baseEmissive: health === 'elevated' ? 0.58 : 0.34,
+      baseHaloOpacity: health === 'elevated' ? 0.62 : 0.4
+    });
     });
 
-    edges.forEach((edge) => {
+    currentEdges.forEach((edge) => {
       const from = positions.get(edge.source);
       const to = positions.get(edge.target);
       if (!from || !to) return;
@@ -193,8 +248,8 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
       const selection = latestSelectionRef.current;
       nodeObjects.forEach((entry, id) => {
         const focused = selection === id || hoveredIdRef.current === id;
-        entry.core.material.emissiveIntensity = focused ? 0.72 : 0.34;
-        entry.halo.material.opacity = focused ? 0.95 : 0.55;
+entry.core.material.emissiveIntensity = focused ? entry.baseEmissive + 0.38 : entry.baseEmissive;
+      entry.halo.material.opacity = focused ? 0.95 : entry.baseHaloOpacity;
         entry.halo.scale.setScalar(focused ? 1.13 : 1);
       });
     };
@@ -289,7 +344,7 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       pointerPosition = { x: event.clientX - rect.left, y: event.clientY - rect.top };
       raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObjects(nodeMeshes, false).find((item) => typeof item.object.userData.serviceId === 'string');
+      const hit = raycaster.intersectObjects(hitAreaMeshes, false).find((item) => typeof item.object.userData.serviceId === 'string');
       const nextId = hit?.object.userData.serviceId as string | undefined;
       stage.classList.toggle('topology-stage--node-hover', Boolean(nextId));
       if (nextId) {
@@ -306,7 +361,7 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObjects(nodeMeshes, false).find((item) => typeof item.object.userData.serviceId === 'string');
+      const hit = raycaster.intersectObjects(hitAreaMeshes, false).find((item) => typeof item.object.userData.serviceId === 'string');
       const id = hit?.object.userData.serviceId as string | undefined;
       if (id) onSelectRef.current(id);
     };
@@ -315,12 +370,23 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
       renderer.setAnimationLoop(null);
       setRendererError(true);
     };
+    /**
+     * A lost context is recoverable: the browser restores it because
+     * `onContextLost` calls `preventDefault()`. Bumping `retryToken` rebuilds the
+     * scene from scratch, which is the only correct way to reinitialise GL state
+     * after a restore. Without this the user is stranded on the fallback.
+     */
+    const onContextRestored = () => {
+      setRendererError(false);
+      setRetryToken((value) => value + 1);
+    };
     const onControlChange = () => renderOnce();
 
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointerleave', onPointerLeave);
     renderer.domElement.addEventListener('click', onClick);
     renderer.domElement.addEventListener('webglcontextlost', onContextLost);
+    renderer.domElement.addEventListener('webglcontextrestored', onContextRestored);
     stage.addEventListener('topology-focus-selected', onFocusRequest);
     stage.addEventListener('topology-fit-view', onFitRequest);
     stage.addEventListener('topology-reset-view', onResetRequest);
@@ -339,11 +405,17 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
 
     return () => {
       renderer.setAnimationLoop(null);
+      // A stale hover card pointing at a node that no longer exists would
+      // otherwise stay pinned over the freshly built scene.
+      hoveredIdRef.current = null;
+      setHovered(null);
+      stage.classList.remove('topology-stage--node-hover');
       document.removeEventListener('visibilitychange', onVisibility);
       renderer.domElement.removeEventListener('pointermove', onPointerMove);
       renderer.domElement.removeEventListener('pointerleave', onPointerLeave);
       renderer.domElement.removeEventListener('click', onClick);
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
+      renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       stage.removeEventListener('topology-focus-selected', onFocusRequest);
       stage.removeEventListener('topology-fit-view', onFitRequest);
       stage.removeEventListener('topology-reset-view', onResetRequest);
@@ -360,9 +432,17 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
         }
       });
       renderer.dispose();
+      // `dispose()` releases three's own resources but deliberately keeps the
+      // underlying WebGL context alive. Browsers cap the number of live
+      // contexts and silently drop the oldest, so release it explicitly.
+      try {
+        renderer.forceContextLoss();
+      } catch {
+        // `WEBGL_lose_context` is an optional extension; nothing to release.
+      }
       renderer.domElement.remove();
     };
-  }, [nodes, edges, incidentServiceIds, reducedMotion, retryToken]);
+  }, [graphKey, incidentKey, reducedMotion, retryToken]);
 
   useEffect(() => {
     if (focusToken <= 0 || nodes.length === 0) return;
@@ -385,7 +465,14 @@ export default function Topology3D({ nodes, edges, selectedId, incidentServiceId
 
   return (
     <div className="topology-three-wrap">
-      <div ref={stageRef} className={`topology-three-stage${rendererError ? ' topology-three-stage--fallback' : ''}`} aria-label="Three-dimensional observed service topology">
+      {/*
+  Deliberately no `role="img"` on this element. An image role makes the whole
+  subtree presentational, which would hide the WebGL fallback message and its
+  "Retry WebGL" control from assistive technology. The stage is a plain
+  container; the canvas inside it is already `aria-hidden`, and the real
+  representation of this data is the accessible service list in TopologyPanel.
+*/}
+<div ref={stageRef} className={`topology-three-stage${rendererError ? ' topology-three-stage--fallback' : ''}`}>
         {rendererError ? (
           <div className="topology-webgl-fallback" role="status">
             <span className="topology-fallback-mark" aria-hidden="true">3D</span>

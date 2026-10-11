@@ -8,7 +8,7 @@ This is the current single-node release shape for the academic/portfolio project
 
 ## Current capabilities
 
-- Rebuilt React/TypeScript observability shell with Command Center, Logs, Algorithmic Search, analytics, patterns, Detector Windows, Incident Workbench, services, datasets, ingestion, Algorithm Lab, run replay, system and docs routes. Dataset incident evidence is also reachable at `/investigate/:id`.
+- Rebuilt React/TypeScript observability shell with Command Center, Logs, Algorithmic Search, analytics, patterns, Incidents, Incident Workbench, services, datasets, ingestion, Algorithm Lab, run replay, system and docs routes. Dataset incident evidence is also reachable at `/investigate/:id`.
 - Deterministic generated simulation with a scenario catalogue, run controls and a Server-Sent Events frame stream: Scenario Lab (`/scenario-lab`), Live Monitor (`/live`), and the Incident Workbench (`/incidents/workbench`) with an operator lifecycle, timeline, blast radius and algorithm evidence.
 - Scenario Lab and Live Monitor share one `TelemetryProvider` stream. The backend owns the session; the browser renders measured frames and never substitutes its own telemetry.
 - Command Center selected-window view: `range` selects the window, `windowStart`/`windowEnd` anchor it on the newest event timestamp, `scope` is `selected-window`, and window-scoped counts are reported alongside the unfiltered `datasetEvents` total. `eventsPerMinute` divides by the nominal range width, so it is a normalized window rate rather than a measured inter-arrival rate.
@@ -31,7 +31,7 @@ This is the current single-node release shape for the academic/portfolio project
 | Check | Result |
 |---|---|
 | `cd backend; .\mvnw.cmd -o verify` | 910 tests, 0 failures, 0 errors, 0 skipped |
-| `cd frontend; npx vitest run` | 64 tests across 19 files passed |
+| `cd frontend; npx vitest run` | 72 tests across 20 files passed |
 | `cd frontend; npm run build` | Clean TypeScript/Vite production build; no bundle-size warning |
 | `cd frontend; npm run test:e2e` | 15 workflows defined; not re-executed on this revision |
 | `docker compose config --quiet` | Passed on an earlier pass; not re-run |
