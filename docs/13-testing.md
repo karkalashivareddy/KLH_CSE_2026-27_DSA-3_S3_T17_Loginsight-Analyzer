@@ -16,17 +16,17 @@ npm.cmd run build
 Results, measured on this revision:
 
 - Backend: **910 tests, 0 failures, 0 errors, 0 skipped** across 108 surefire classes; BUILD SUCCESS.
-- Frontend unit: **70 tests passed across 20 test files**, 0 failures, 34.09 s in a single aggregate run. The Vitest worker-start timeout recorded by earlier revisions did not reproduce.
-- Frontend build: `tsc` and the Vite production build passed; 2357 modules transformed. `index.css` is 191.81 kB (35.61 kB gzip). **No bundle-size warning is emitted** — `chunkSizeWarningLimit` is 600 and the largest chunk (`vendor-three`) measures 562.23 kB.
-- Bundle: first-load JavaScript is **~483 kB raw / ~154 kB gzip** across `index`, `vendor-react`, `vendor-motion` and `vendor-icons`, down from (measured before route splitting) / ~281 kB before route splitting and vendor chunking. `vendor-three` (562.23 kB, 140.66 kB gzip) is deferred and fetched only when the 3D topology is opened.
+- Frontend unit: **72 tests passed across 20 test files**, 0 failures, 26.85 s in a single aggregate run. ⚠️ **Intermittent worker-start timeout.** Earlier revisions recorded a 50-test/17-file run plus an isolated 11-test topology run, and this revision reproduced the symptom once: `Failed to start threads worker for test files .../TopologyPanelWebGL.test.tsx`, yielding 19 files / 64 tests. It followed immediately after `npm run capture:report`, which renders WebGL through SwiftShader and leaves the machine memory-pressured; it did **not** reproduce across five subsequent runs on an idle machine. Treat the figure as **72 tests / 20 files on a clean run**, and re-run rather than trusting a single short run.
+- Frontend build: `tsc` and the Vite production build passed; 2,356 modules transformed in 5.62 s. `index.css` is 189.83 kB (35.07 kB gzip). **No bundle-size warning is emitted** — `chunkSizeWarningLimit` is 600 and the largest chunk (`vendor-three`) measures 562.23 kB.
+- Bundle: first-load JavaScript is **483.22 kB raw / 150.10 kB gzip** across `index`, `vendor-react`, `vendor-motion` and `vendor-icons`, down from (measured before route splitting) / ~281 kB before route splitting and vendor chunking. `vendor-three` (562.23 kB, 140.66 kB gzip) is deferred and fetched only when the 3D topology is opened.
 - Browser E2E: **18 Playwright workflows** in `frontend/e2e/product.spec.ts`, up from 9. **All 18 were executed and passed on this revision.**
-- Visual capture: `npm run capture:visuals` writes **19 screenshots** into `docs/images/signal-atlas/`.
-- Dependency audit: `npm audit` reported 0 vulnerabilities after the React Router 7.18.4 update. **Not re-run on this revision.**
+- Visual capture: `npm run capture:visuals` writes **19 screenshots** into `docs/images/signal-atlas/`; `npm run capture:report` writes **11 report figures** into `docs/images/report/`.
+- Dependency audit: `npm audit` — **0 vulnerabilities**, re-run on this revision.
 - JaCoCo: report generated under `backend/target/site/jacoco/`; no numeric coverage threshold is configured in the POM, so no coverage percentage is claimed.
-- Compose syntax: `docker compose config --quiet` passed on an earlier pass. **Not re-run on this revision.**
+- Compose syntax: `docker compose config --quiet` — **passed**, re-run on this revision.
 - Container image build/runtime: not executed, because no Docker daemon was reachable in the development environment. Image builds and container smoke tests remain unexecuted and unclaimed.
 
-The checked-in CI workflow runs `mvn -B verify`, frontend tests/build, a full npm audit and a browser E2E job that provisions Chromium and starts both services. GitHub Actions [run 38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711) passed all three jobs for the **previous** commit `c6349c77f3f755c231e1172efec14b01009bf1ef` and reports that commit's counts. **No CI run exists for the current revision.** The frontend job pins Node 22 because Vitest 5 declares `engines: ^22.12.0 || ^24.0.0 || >=26.0.0`.
+The checked-in CI workflow runs `mvn -B verify`, frontend tests/build, a full npm audit and a browser E2E job that provisions Chromium and starts both services. GitHub Actions [run 38109292191](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38109292191) passed all three jobs for commit `4f74d247e1002f717f5ce0a2e11a343e9e40c37a`. [Run 38066030545](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38066030545) passed for the preceding revision. The frontend job pins Node 22 because Vitest 5 declares `engines: ^22.12.0 || ^24.0.0 || >=26.0.0`.
 
 ### Backend regression tests added this revision
 
@@ -87,7 +87,7 @@ These are focused component tests over client helpers, the shell, the topology r
 
 The viewport matrix is unchanged: 1440×900, 1280×800, 1024×768, 768×1024, 390×844 and 360×800, asserting `document.documentElement.scrollWidth` fits on both the Command Center and the Service Map.
 
-**These 15 workflows have not been executed on this revision.** The nine pre-existing workflows were previously green against a live local backend; the six new ones are present in source and are named above, but no run result is claimed for them.
+**All 18 workflows were executed against the live application on this revision: 18 passed, 34.8 s.**
 
 ## Backend coverage map
 
@@ -113,7 +113,7 @@ DSA-3 forbids delegating core algorithm logic in `dsa/**` to `java.util` collect
 
 The production build validates TypeScript and Vite bundling. Playwright runs the product through Vite against the actual local Spring Boot backend; deterministic demo data is loaded through its real API. Fifteen workflows check the documented routes, browser console and unexpected failed requests, 20 semantic token contrast pairs, real scroll reveal and reduced motion, dataset search and event details, topology selection and forced WebGL fallback, guided-presentation evidence/exit, mobile navigation, the signal field's no-fabrication contract, the empty-dataset state, a failing backend, command-palette focus restoration, route aliases and the not-found route, plus overflow at six viewport targets. The visual capture script records 19 current screenshots. These checks do not prove GPU-backed WebGL rendering, complete screen-reader usability or production network behavior under load.
 
-**Executed on this revision:** backend `mvn verify`, frontend `vitest run`, frontend `npm run build`. **Not executed on this revision:** Playwright, `npm audit`, `docker compose config`.
+**Executed on this revision:** backend `mvn verify` (910 tests), frontend `vitest run` (72 tests across 20 files), frontend `npm run build`, Playwright (18 workflows, 18 passed), `npm audit` (0 vulnerabilities) and `docker compose config` (passed). GitHub Actions run [38109292191](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38109292191) passed all three jobs on commit `4f74d24`. **Not executed:** container image builds and smoke tests, because no Docker daemon is reachable here.
 
 No axe-based accessibility scan or pixel-diff visual-regression suite is configured. A deployment smoke test should additionally verify:
 

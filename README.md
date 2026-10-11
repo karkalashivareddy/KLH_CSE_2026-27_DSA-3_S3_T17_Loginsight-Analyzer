@@ -174,9 +174,10 @@ cd frontend
 npx playwright install chromium
 npm run test:e2e
 npm run capture:visuals
+npm run capture:report
 ```
 
-The suite loads the reproducible backend demo corpus, then checks the Command Center, direct route refresh, dataset-backed search and event details, service selection, WebGL fallback, guided-presentation exit, mobile navigation, reduced motion, the command palette, route aliases, the no-dataset and backend-error states, the 404 route, and all six requested viewport sizes. It is sequential because the backend keeps one active in-memory dataset. CI provisions Chromium and both services automatically. Test output and failure traces are written under `frontend/test-results/`. The capture script saves 19 current desktop, mobile, topology, incident, state and reduced-motion screenshots from the running backend/frontend into `docs/images/signal-atlas/`.
+The suite loads the reproducible backend demo corpus, then checks the Command Center, direct route refresh, dataset-backed search and event details, service selection, WebGL fallback, guided-presentation exit, mobile navigation, reduced motion, the command palette, route aliases, the no-dataset and backend-error states, the 404 route, and all six requested viewport sizes. It is sequential because the backend keeps one active in-memory dataset. CI provisions Chromium and both services automatically. Test output and failure traces are written under `frontend/test-results/`. The capture script saves 19 current desktop, mobile, topology, incident, state and reduced-motion screenshots from the running backend/frontend into `docs/images/signal-atlas/`. `capture:report` saves the eleven figures used by the written report into `docs/images/report/`, including a **real rendered WebGL topology** — it launches headless Chromium with SwiftShader so the 3D scene is genuinely rendered rather than captured in its fallback state, and it fails loudly if the scene falls back.
 
 The E2E and capture scripts read two environment variables: `PLAYWRIGHT_BASE_URL` (default `http://127.0.0.1:5173`) and `PLAYWRIGHT_API_BASE_URL` (default `http://127.0.0.1:8080`). The dev server's proxy target is configurable with `LOGINSIGHT_API_TARGET`, which is useful when port 8080 is already taken:
 
@@ -285,7 +286,7 @@ npm audit
 | Check | Command | Result on this revision |
 |---|---|---|
 | Backend suite | `.\mvnw.cmd -B verify` | **910 tests, 0 failures, 0 errors, 0 skipped** |
-| Frontend unit | `npm test` | **70 tests across 20 files, all passing** in one aggregate run |
+| Frontend unit | `npm test` | **72 tests across 20 files, all passing** in one aggregate run |
 | TypeScript + production build | `npm run build` | Passes (`tsc` runs before Vite, so the build is the type check) |
 | Browser E2E | `npm run test:e2e` | **18 Playwright workflows, all passing** |
 | Dependency audit | `npm audit` | 0 vulnerabilities |
@@ -297,8 +298,8 @@ There is deliberately no separate `typecheck` script.
 
 | | Before | After |
 |---|---|---|
-| First-load JS (raw) | (measured before route splitting) | **~483 kB** |
-| First-load JS (gzip) | ~281 kB | **~154 kB** |
+| First-load JS (raw) | (measured before route splitting) | **483.22 kB** |
+| First-load JS (gzip) | ~281 kB | **150.10 kB** |
 | Three.js | in a chunk loaded with the app | **`vendor-three`, deferred until the 3D topology is opened** |
 
 Route-level splitting plus vendor chunking in `vite.config.ts` moves React, Motion and the icon set
@@ -316,9 +317,8 @@ requested viewport sizes. It does **not** verify Docker execution or GPU-backed 
 is not a full accessibility-conformance audit.
 
 Earlier phase reports under `docs/archive/` carry smaller counts from their own snapshots and are
-labelled historical rather than current. The report, PDF and checked-in presentation under
-`final-submission/` still depict the previous interface and are tracked as an open submission item in
-[final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md).
+labelled historical rather than current. The report, PDF and presentation under `final-submission/` are
+regenerated from this revision — see [final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md).
 
 ## Limitations
 
@@ -332,7 +332,43 @@ labelled historical rather than current. The report, PDF and checked-in presenta
 - No WebSocket transport, research integration, ML training or inference, or external log transport. The optional WebGL topology depends on device/browser support and has an SVG fallback.
 - Docker deployment is a practical single-node evaluation setup; TLS, secrets, durable storage and horizontal scaling belong in a production platform layer.
 - Docker image builds and container smoke tests were not run in this environment: only `docker compose config` has been validated. **NOT VERIFIED.**
-- The final-submission `.pptx`, `.docx` and `.pdf` still show the previous interface. **BLOCKED** — no document-generation toolchain is available here.
+- The submission `.pptx`, `.docx` and `.pdf` are regenerated from a live run by the scripts in [Submission documents](#submission-documents). Regeneration needs Microsoft Word and PowerPoint for the PDF export and the slide renders; the DOCX and PPTX need only Python.
+
+## Submission documents
+
+The three submission documents are **generated, not hand-edited**, so they cannot drift from the code.
+With the backend and frontend running as above:
+
+```powershell
+cd frontend
+npm run capture:report       # 11 figures -> docs/images/report/
+cd ..
+
+python scripts/build_report.py            # -> final-submission/LogInsight_Final_Project_Report.docx
+powershell scripts/export_report_pdf.ps1  # -> final-submission/LogInsight_Final_Project_Report.pdf
+python scripts/verify_report.py           # 56 structural and content assertions
+
+python scripts/build_presentation.py      # -> final-submission/LogInsight_Analyzer_Final_Presentation.pptx
+python scripts/check_deck_layout.py       # 1,352 structural assertions, no Office needed
+powershell scripts/export_slides.ps1 -Pptx final-submission/LogInsight_Analyzer_Final_Presentation.pptx -OutDir slides
+```
+
+| Script | Produces | Needs |
+|---|---|---|
+| `frontend/scripts/capture-report-figures.mjs` | 11 report figures | running app + Playwright Chromium |
+| `scripts/build_report.py` | the DOCX, from the institutional sample report | Python, `python-docx`, Pillow |
+| `scripts/export_report_pdf.ps1` | the PDF | **Microsoft Word** |
+| `scripts/verify_report.py` | assertions over the DOCX | Python |
+| `scripts/build_presentation.py` | the PPTX | Python, `python-pptx` |
+| `scripts/check_deck_layout.py` | assertions over the PPTX | Python |
+| `scripts/export_slides.ps1` | one PNG per slide, for visual review | **Microsoft PowerPoint** |
+
+The report is the supplied institutional sample **corrected in place**: its page size, margins,
+Cambria/Consolas typography, chapter hierarchy, cover block and figure sizing are preserved exactly,
+while the prose, the code excerpts and the eleven screenshots are brought up to date. The PDF is Word's
+own export of that DOCX, so the two agree page for page. Presentation metadata lives in
+`scripts/submission_meta.json`; the slide-by-slide outline is in
+[final-submission/PRESENTATION_OUTLINE.md](final-submission/PRESENTATION_OUTLINE.md).
 
 ## Documentation
 

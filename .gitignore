@@ -31,3 +31,13 @@ hs_err_pid*
 replay_pid*
 logs/
 *.hprof
+
+# Office owner/lock files created when a .docx/.pptx is opened in Word/PowerPoint.
+# These are 150-byte placeholders, not deliverables, and must never be committed.
+~\$*.docx
+~\$*.pptx
+~\$*.xlsx
+
+# Python bytecode from the submission-document scripts.
+__pycache__/
+*.py[cod]

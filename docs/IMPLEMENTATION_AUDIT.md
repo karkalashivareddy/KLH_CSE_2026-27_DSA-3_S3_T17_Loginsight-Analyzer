@@ -10,7 +10,7 @@ This is the canonical description of the checked-out implementation. It is based
 
 **Frontend**
 
-- `styles/signal-atlas.css` was rewritten as the authoritative design system — warm mineral surfaces, deep-ink text, atmospheric teal accent, editorial serif display face, mono for data. It layers `global.css` and `product.css` underneath in the named cascade layer `loginsight-structure` and is itself unlayered, so it wins the cascade without editing the inherited structural sheets. It is 1,312 lines and emits a 191.81 kB stylesheet (35.61 kB gzip).
+- `styles/signal-atlas.css` was rewritten as the authoritative design system — warm mineral surfaces, deep-ink text, atmospheric teal accent, editorial serif display face, mono for data. It layers `global.css` and `product.css` underneath in the named cascade layer `loginsight-structure` and is itself unlayered, so it wins the cascade without editing the inherited structural sheets. It is 1,312 lines and emits a 189.83 kB stylesheet (35.07 kB gzip).
 - `src/motion/motion.ts` is a new token module exporting `MOTION`, `EASE`, `spring`, `fadeTransition`, `routeVariants`, `stagger`, `itemVariants`, `overlayVariants` and `surfaceVariants`. The JavaScript values mirror the CSS custom properties of the same name, so a timing change is made once per medium.
 - A decorative scroll-linked backdrop was built and later removed as visual noise.
 - `src/components/AppErrorBoundary.tsx` is a new class error boundary wrapping `<App />` in `main.tsx` with `scope="LogInsight"`. It replaces a render-time crash with a `role="alert"` recovery panel offering "Try again" and "Reload workspace", and never renders a stack trace.
@@ -40,16 +40,16 @@ Measured locally on this revision.
 | Gate | Command | Result |
 |---|---|---|
 | Backend | `cd backend; .\mvnw.cmd -o verify` | **910 tests, 0 failures, 0 errors, 0 skipped** across 108 surefire classes; BUILD SUCCESS |
-| Frontend tests | `cd frontend; npx vitest run` | **70 tests passed across 20 test files**, 0 failures, 34.09 s |
-| Frontend build | `cd frontend; npm run build` | `tsc` and Vite production build passed; 2357 modules transformed |
+| Frontend tests | `cd frontend; npx vitest run` | **72 tests passed across 20 test files**, 0 failures, 28.24 s |
+| Frontend build | `cd frontend; npm run build` | `tsc` and Vite production build passed; 2,356 modules transformed in 5.62 s |
 | Browser E2E | `cd frontend; npm run test:e2e` | **18 Playwright workflows** executed and passed in `frontend/e2e/product.spec.ts` (was 9) |
 | Visual capture | `cd frontend; npm run capture:visuals` | 19 screenshots into `docs/images/signal-atlas/` |
-| Compose syntax | `docker compose config --quiet` | Passed (earlier pass; not re-run this revision) |
+| Compose syntax | `docker compose config --quiet` | Passed |
 | Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable in this environment |
 
-**Not re-verified this revision, and not claimed:** Playwright was not re-executed on this revision, `npm audit` was not re-run, `docker compose config` was not re-run, and no GitHub Actions run exists for these changes. The CI run recorded below covers the *previous* commit only.
+**Verified on this revision:** Playwright re-executed (18 workflows, 18 passed), `npm audit` re-run (0 vulnerabilities), `docker compose config` re-run (passed), and GitHub Actions run [38109292191](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38109292191) passed all three jobs for commit `4f74d24`.
 
-GitHub Actions run [38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711), for the previous implementation commit `c6349c77f3f755c231e1172efec14b01009bf1ef`, passed its backend, frontend and browser jobs. That run reports 878 backend tests and the earlier frontend/E2E counts; it is evidence for that commit and not for this one. The Actions result for the current HEAD is reported in the push output.
+**Still not claimed:** no Docker daemon is reachable, so image builds and container smoke tests remain unexecuted. No axe scan and no screen-reader audit are configured.
 
 The Maven build targets Java 21 and uses Spring Boot 3.5.16. The frontend is React 18.3, TypeScript 5.6, Vite 6.4, `react-router-dom` 7.18, `motion` 14.1, `lucide-react` 1.48, Vitest 5 and Playwright; the Vitest suite requires Node 22.12 or newer. There is no separate lint script and no axe audit.
 
@@ -65,8 +65,8 @@ Measured on this machine with `npm run build`, before and after the code-splitti
 | `vendor-icons` | — | 32.28 kB / 7.08 kB |
 | `Topology3D` | 571.82 kB / 144.14 kB | 9.88 kB / 3.90 kB (wrapper only) |
 | `vendor-three` | — | 562.23 kB / 140.66 kB (**deferred**) |
-| **First-load JS total** | **(measured before route splitting) / ~281 kB gzip** | **~483 kB / ~154 kB gzip** |
-| `index.css` | — | 191.81 kB / 35.61 kB |
+| **First-load JS total** | **(measured before route splitting) / ~281 kB gzip** | **483.22 kB / 150.10 kB gzip** |
+| `index.css` | — | 189.83 kB / 35.07 kB |
 
 First-load JavaScript falls by roughly 54% raw and 45% gzip. The Three.js payload is unchanged in size; it is simply no longer on the critical path, and is fetched only when the 3D topology is opened.
 
@@ -187,7 +187,7 @@ Full detail is in [COMMAND_CENTER.md](COMMAND_CENTER.md). The audited facts:
 
 ## Frontend test inventory
 
-`npm test` runs Vitest over **70 tests in 20 files**. Verified on this revision.
+`npm test` runs Vitest over **72 tests in 20 files**. Verified on this revision.
 
 | File | Tests | Covers |
 |---|---:|---|
@@ -338,5 +338,15 @@ This source-level audit is supported by focused component tests, the Playwright 
 - **Docker deployment has not been runtime-smoke-tested**, because no Docker daemon was available in the development environment. `docker compose config` validated the Compose model only.
 - **`frontend/src/styles/signal-in-motion.css` is dead** — imported by nothing, superseded by the rewritten `signal-atlas.css`, and the only remaining home of the retired `#315cf5` accent. It should be deleted by the source owner.
 - `docs/images/signal-atlas/guided-presentation-mobile.png` was a leftover from an earlier capture script and has been removed.
-- **The submitted `.pptx`, `.docx` and `.pdf` under `final-submission/` were not regenerated.** No document-generation toolchain is available in this environment. They therefore still show the pre-Atmospheric-Signal interface and pre-revision test counts. This is an unresolved submission defect, tracked in [../final-submission/FINAL_SUBMISSION_INDEX.md](../final-submission/FINAL_SUBMISSION_INDEX.md).
-- **No CI run covers this revision.** Playwright, `npm audit` and `docker compose config` were not re-executed here.
+- **The submitted `.pptx`, `.docx` and `.pdf` under `final-submission/` have been regenerated from this
+  revision.** An earlier pass recorded these as blocked on the assumption that no document toolchain
+  existed here; that assumption was wrong. Microsoft Word and PowerPoint (Office 16) are installed and
+  driveable over COM, and Python provides `python-docx`, `python-pptx`, `Pillow` and `pymupdf`. The
+  report is the supplied institutional sample corrected in place by `scripts/build_report.py`; the PDF
+  is Word's own export of it via `scripts/export_report_pdf.ps1`; the deck is generated by
+  `scripts/build_presentation.py`. See
+  [../final-submission/FINAL_SUBMISSION_INDEX.md](../final-submission/FINAL_SUBMISSION_INDEX.md).
+- **CI covers this revision.** GitHub Actions run
+  [38109292191](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38109292191)
+  passed all three jobs on commit `4f74d24`. Playwright (18/18), `npm audit` (0 vulnerabilities) and
+  `docker compose config` were all re-executed here.

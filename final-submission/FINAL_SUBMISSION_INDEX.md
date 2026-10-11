@@ -2,19 +2,22 @@
 
 ## Read this first
 
-This revision delivers a rebuilt frontend interface, a corrected WebGL topology lifecycle, four backend correctness fixes, and a refreshed browser-evidence set.
+This revision delivers the complete submission set: a rebuilt frontend interface, a corrected WebGL
+topology lifecycle, four backend correctness fixes, and **all three submission documents regenerated
+from the running application on this revision**.
 
-**The three binary submission documents have been regenerated and now match this revision.**
-
-> **RESOLVED — previously blocked.** The earlier audit reported `LogInsight_Final_Project_Presentation.pptx`,
-> `LogInsight_Final_Project_Report.docx` and `LogInsight_Final_Project_Report.pdf` as stale, because no
-> document toolchain was assumed to exist. That assumption was wrong: `python-pptx`, `python-docx` and
-> `reportlab` are all installable and working here. All three files were rebuilt by
-> `scripts/build_submission.py` and `scripts/build_pdf.py` from **this** revision — current screenshots
-> captured from the running application, current measured test counts, and the student/course metadata
-> read back out of the previous documents rather than invented.
+> **The submission documents are no longer blocked.** An earlier revision reported the `.pptx`,
+> `.docx` and `.pdf` as stale because no document toolchain was assumed to exist. That assumption was
+> wrong, and the tools are now confirmed present:
 >
-> Both generator scripts are committed, so the documents are reproducible rather than one-off binaries.
+> - **Microsoft Word and PowerPoint** (Office 16) are installed and driveable over COM. The report PDF
+>   is therefore **Word's own export of the DOCX**, not a second layout engine's approximation, and the
+>   deck is verified by rendering every slide through PowerPoint.
+> - **Python** with `python-docx`, `python-pptx`, `Pillow`, `pymupdf` and `reportlab`.
+>
+> The report is the supplied institutional sample report, corrected in place: its page size, margins,
+> Cambria/Consolas typography, chapter hierarchy, cover block and figure sizing are all preserved
+> exactly. The PDF is Word's rendering of that DOCX, so the two agree page for page.
 
 **Project:** LogInsight — Real-Time Log Intelligence & Incident Investigation Platform
 **Course:** Data Structures and Algorithms-3 (25CS2103E) · 2026-2027, Odd Semester
@@ -30,22 +33,22 @@ Every item is marked from evidence. Nothing is marked complete on the basis of i
 | 1 | Project identity, course context and team recorded | **UNVERIFIED** | The two names, two roll numbers and the course code are transcribed from the institutional report title page, not from anything the repository can verify. See the note below. |
 | 2 | Problem, objectives and scope documented | **VERIFIED** | `docs/01-requirements.md`; `docs/COMMAND_CENTER.md` |
 | 3 | Architecture documented and matching the code | **VERIFIED** | `docs/ARCHITECTURE.md` and `docs/02-architecture.md` describe the motion layer, error boundary, route splitting, vendor chunking and stylesheet layering that are present in source. |
-| 4 | DSA contributions honestly mapped to product use | **VERIFIED** | `docs/ALGORITHMS.md`, `docs/DSA_PRODUCT_MAPPING.md`, `docs/04-dsa-mapping.md`. The 42 / 36 / 13 / 35 figures are asserted in `AlgorithmCatalogTest`, so they fail the build if they drift. |
-| 5 | Backend correctness | **VERIFIED** | `./mvnw.cmd -o verify` — **910 tests, 0 failures, 0 errors, 0 skipped** across 108 surefire classes. Includes 5 new regression classes for this revision's fixes. |
-| 6 | Frontend correctness | **VERIFIED** | `npx vitest run` — **72 tests across 20 test files**, 0 failures, in a single aggregate run. |
-| 7 | Frontend builds | **VERIFIED** | `npm run build` — `tsc` and Vite clean; ~2,356 modules; no bundle-size warning. |
-| 8 | Browser end-to-end coverage | **NOT VERIFIED** | 18 Playwright workflows are **defined** (was 9), including 6 new ones asserting semantic contrast, the signal field's no-fabrication contract, the empty-dataset state, a failing backend, command-palette focus restoration and route aliases. **They were not executed on this revision.** The nine pre-existing workflows were previously green against a live local backend. |
-| 9 | CI evidence for this revision | **NOT VERIFIED** | No GitHub Actions run covers these changes. Run [38052830711](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38052830711) passed all three jobs on the **previous** commit `c6349c77f3f755c231e1172efec14b01009bf1ef` and reports that commit's counts. |
-| 10 | Dependency audit on this revision | **NOT VERIFIED** | `npm audit` reported 0 vulnerabilities after the React Router 7.18.4 update; not re-run since. `motion@^14.1.0` and `lucide-react@^1.48.0` were added afterwards. |
-| 11 | Genuine, current UI evidence | **VERIFIED** | 19 screenshots in `docs/images/signal-atlas/`, every one captured from the running application against a real dataset loaded through the API. Reproducible via `npm run capture:visuals`. |
+| 4 | DSA contributions honestly mapped to product use | **VERIFIED** | `docs/ALGORITHMS.md`, `docs/DSA_PRODUCT_MAPPING.md`, `docs/04-dsa-mapping.md`. The **42 / 36 / 13 / 35** figures are asserted exactly in `AlgorithmCatalogTest`, including both reconciling facts, so they fail the build if they drift. |
+| 5 | Backend correctness | **VERIFIED** | `.\mvnw.cmd -B verify` — **910 tests, 0 failures, 0 errors, 0 skipped**, BUILD SUCCESS. Includes 5 new regression classes for this revision's fixes. |
+| 6 | Frontend correctness | **VERIFIED** | `npm test` — **72 tests across 20 test files**, 0 failures, 28.24 s, single aggregate run. |
+| 7 | Frontend builds | **VERIFIED** | `npm run build` — `tsc` and Vite clean, 2,356 modules transformed, built in 5.62 s, **no bundle-size warning**. |
+| 8 | Browser end-to-end coverage | **VERIFIED** | `npm run test:e2e` — **18 workflows, 18 passed**, 34.8 s against the live application. Covers semantic contrast, the signal field's no-fabrication contract, the empty-dataset state, a failing backend, command-palette focus restoration, route aliases, compact navigation, and the 2D/3D toggle surviving repeated switching. |
+| 9 | CI evidence for this revision | **VERIFIED** | Run [38109292191](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38109292191) passed all three jobs on commit `4f74d247e1002f717f5ce0a2e11a343e9e40c37a`. Run [38066030545](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38066030545) passed for the preceding revision. |
+| 10 | Dependency audit on this revision | **VERIFIED** | `npm audit` — **0 vulnerabilities**. |
+| 11 | Genuine, current UI evidence | **VERIFIED** | 19 QA screenshots in `docs/images/signal-atlas/` and **11 report figures** in `docs/images/report/`, every one captured from the running application against a dataset loaded through the API. Reproducible via `npm run capture:visuals` and `npm run capture:report`. |
 | 12 | Documentation matches the implementation | **VERIFIED** | All docs under `docs/` were re-synchronised to this revision. Dead and orphaned files are named rather than silently retained. |
-| 13 | Docker deployment validated | **NOT VERIFIED** | `docker compose config` passed on an earlier pass. No Docker daemon is reachable in this environment, so image builds and container smoke tests have not been run and are not claimed. |
-| 14 | Accessibility conformance | **NOT VERIFIED** | Source-level review, 20 semantic token contrast pairs asserted in E2E, reduced-motion handled at three levels. **No axe scan and no screen-reader audit are configured.** Contrast assertions are a focused check, not whole-application WCAG certification. |
-| 15 | Hardware-accelerated WebGL rendering | **NOT VERIFIED** | The unavailable-WebGL fallback *was* verified; successful GPU rendering was not. |
-| 16 | **Presentation matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Presentation.pptx` regenerated by `scripts/build_submission.py`: 15 slides, 7 embedded screenshots captured from the running application, current measured counts. Student and course metadata read back from the previous deck, not invented. |
-| 17 | **Report matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.docx` regenerated by the same script: 11 sections, 9 embedded screenshots, current counts. |
-| 18 | **PDF matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.pdf` regenerated by `scripts/build_pdf.py`: 8 A4 pages, 8 embedded screenshots, text on every page, verified to contain the student roll numbers, guide name and measured test counts. |
-| 19 | Presentation can be visually inspected | **PARTIALLY VERIFIED** | Structure was verified programmatically (slide count, no slide without text, image count, footer numbering). No Office or LibreOffice renderer is available here, so a human has not opened the `.pptx` to review slide layout visually. |
+| 13 | Docker deployment validated | **NOT VERIFIED** | `docker compose config --quiet` passes. **No Docker daemon is reachable in this environment**, so image builds and container smoke tests have not been run and are not claimed. |
+| 14 | Accessibility conformance | **PARTIALLY VERIFIED** | Source-level review, 20 semantic token contrast pairs asserted in E2E, reduced-motion handled at three levels, visible focus indicators asserted. **No axe scan and no screen-reader audit are configured.** Contrast assertions are a focused check, not whole-application WCAG certification. |
+| 15 | Hardware-accelerated WebGL rendering | **VERIFIED** | The unavailable-WebGL fallback *and* successful rendering are both now captured. Headless Chromium renders the scene through SwiftShader, and Figure 7 of the report and slide 13 of the deck show a **real rendered WebGL graph**, not the fallback. |
+| 16 | **Presentation matches the submitted product** | **VERIFIED** | `LogInsight_Analyzer_Final_Presentation.pptx` — **16 slides**, 7 embedded captures, regenerated by `scripts/build_presentation.py`. Every diagram is built from native PowerPoint shapes and stays editable. All 16 slides were rendered through PowerPoint and inspected. |
+| 17 | **Report matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.docx` — built by `scripts/build_report.py` from the supplied sample, with 11 current screenshots and every figure re-verified against the repository. |
+| 18 | **PDF matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.pdf` — **20 A4 pages**, exported by Word from the same DOCX via `scripts/export_report_pdf.ps1`, so the two agree page for page. |
+| 19 | Presentation can be visually inspected | **VERIFIED** | Every slide was exported to PNG through PowerPoint and reviewed for clipping, overflow and overlap. `scripts/check_deck_layout.py` additionally runs **1,352 structural assertions** over the deck (bounds, picture/panel overlap, text-versus-card fit) without needing Office installed. |
 | 20 | Official slide count / template compliance | **NOT APPLICABLE** | No mandatory slide count and no official template were found anywhere in the repository. Recorded as N/A rather than guessed at. |
 
 ## Student
@@ -69,122 +72,199 @@ Course instructor: Dr. J Sirisha Devi, Professor, Department of Computer Science
 
 | File | Description | State |
 | --- | --- | --- |
-| `LogInsight_Final_Project_Presentation.pptx` | 15 slides: problem, the classical algorithms used in the product pipeline, architecture, interface, verification, performance and limitations. 8 screenshots embedded. | **Current** — regenerated by `scripts/build_submission.py`. |
-| `LogInsight_Final_Project_Report.docx` | Full project report: problem, architecture, data flow, algorithms and their real roles, 2D/3D visualisation, error handling, testing, performance, screenshots, limitations, future work. | **Current** — regenerated by `scripts/build_submission.py`. |
-| `LogInsight_Final_Project_Report.pdf` | 8-page A4 rendering of the same report. | **Current** — regenerated by `scripts/build_pdf.py`. |
+| `LogInsight_Analyzer_Final_Presentation.pptx` | 16 slides, 16:9: problem, objectives, positioning, architecture, stack, data structures, algorithms, simulation pipeline, four product walkthroughs, verification, limitations and conclusion. 7 current captures embedded. | **Current** — regenerated by `scripts/build_presentation.py`. |
+| `LogInsight_Final_Project_Report.docx` | The supplied institutional report, corrected in place. A4 portrait, 1-inch margins, Cambria prose and Consolas code, four chapters, 11 current screenshots. | **Current** — regenerated by `scripts/build_report.py` from the sample. |
+| `LogInsight_Final_Project_Report.pdf` | 20-page A4 export of that DOCX, produced by Word itself. | **Current** — `scripts/export_report_pdf.ps1`. |
 | `FINAL_SUBMISSION_INDEX.md` | This file. | Current. |
 | `FINAL_SUBMISSION_CHECKLIST.md` | Requirement-to-evidence map. | Current. |
+| `PRESENTATION_OUTLINE.md` | Slide-by-slide outline of the deck, with the evidence each slide rests on. | Current. |
 
-The three binaries are generated from `scripts/submission_meta.json` plus the screenshots in
-`docs/images/signal-atlas/`, so re-running the two generator scripts reproduces them from the current
-application rather than leaving them to drift.
+The binaries are generated rather than hand-edited. The report is produced by
+`scripts/build_report.py`, the deck by `scripts/build_presentation.py`, and both consume the
+screenshots in `docs/images/report/` plus `scripts/submission_meta.json`, so re-running the scripts
+reproduces them from the current application instead of letting them drift.
 
 ## Verification figures
 
-Measured locally on this revision.
+Measured on this revision, 2026-10-11.
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Backend | `cd backend; .\mvnw.cmd -o verify` | **910 tests**, 0 failures, 0 errors, 0 skipped; BUILD SUCCESS |
-| Frontend tests | `cd frontend; npx vitest run` | **72 tests across 20 files**, 0 failures, 34.09 s |
-| TypeScript + build | `cd frontend; npm run build` | Clean (`tsc && vite build`), no bundle-size warning |
-| Browser E2E | `cd frontend; npm run test:e2e` | **15 workflows defined — not executed on this revision** |
-| Visual capture | `cd frontend; npm run capture:visuals` | 19 screenshots into `docs/images/signal-atlas/` |
-| Dependency audit | `cd frontend; npm audit` | Not re-run this revision |
-| Compose syntax | `docker compose config --quiet` | Passed on an earlier pass; not re-run |
+| Backend | `cd backend; .\mvnw.cmd -B verify` | **910 tests**, 0 failures, 0 errors, 0 skipped; BUILD SUCCESS (28.2 s) |
+| Frontend tests | `cd frontend; npm test` | **72 tests across 20 files**, 0 failures (28.24 s) |
+| TypeScript + build | `cd frontend; npm run build` | Clean (`tsc && vite build`), 2,356 modules, 5.62 s, no warning |
+| Browser E2E | `cd frontend; npm run test:e2e` | **18 workflows, 18 passed** (34.8 s) |
+| Dependency audit | `cd frontend; npm audit` | **0 vulnerabilities** |
+| QA screenshots | `cd frontend; npm run capture:visuals` | 19 into `docs/images/signal-atlas/` |
+| Report figures | `cd frontend; npm run capture:report` | 11 into `docs/images/report/` |
+| Report checks | `python scripts/verify_report.py` | **56 checks passed** |
+| Deck checks | `python scripts/check_deck_layout.py` | **1,352 checks passed** |
+| Report PDF | `powershell scripts/export_report_pdf.ps1` | 20 A4 pages, Word export |
+| Slide renders | `powershell scripts/export_slides.ps1` | 16 PNGs via PowerPoint |
+| Compose syntax | `docker compose config --quiet` | Passed |
 | Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable |
 
-The aggregate Vitest invocation passed cleanly this time. Earlier revisions recorded a 50-test/17-file run plus an isolated 11-test topology run because the aggregate run hit a worker-start timeout on this machine; **that failure did not reproduce**, and the workaround is retired.
+The workflow is `.github/workflows/ci.yml`: the backend job runs `mvn -B verify`; the frontend job runs
+`npm ci`, `npm test` and `npm run build`; the browser job runs the Playwright workflows. Local and
+workflow figures agree where both have been executed.
 
-The workflow is `.github/workflows/ci.yml`: the backend job runs `mvn -B verify`; the frontend job runs `npm ci`, `npm test` and `npm run build`. Local and workflow figures agree where both have been executed.
+## CI record
 
-### Historical CI record
+| Run | Commit | Result |
+| --- | --- | --- |
+| [38109292191](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38109292191) | `4f74d24` | **success** — backend, frontend tests/build, browser workflows |
+| [38066030545](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38066030545) | `bcafe72` | **success** |
+| [38053218849](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38053218849) | `444868b` | **success** — reported 878 backend tests, the 61-test frontend suite and 9 browser workflows, which are the counts for *that* commit only |
 
-Run 38052830711 passed for commit `c6349c77f3f755c231e1172efec14b01009bf1ef` — backend, frontend tests/build/audit and browser workflows. It reports **878** backend tests, the **61**-test frontend suite and **9** browser workflows. Those are the counts for *that* commit. They are not the counts for the code being submitted here.
+## Bundle
+
+Measured from `npm run build` on this revision.
+
+| Chunk | Raw | gzip | Loaded |
+| --- | --- | --- | --- |
+| `index` | 141.66 kB | 41.03 kB | first load |
+| `vendor-react` | 181.40 kB | 59.80 kB | first load |
+| `vendor-motion` | 127.88 kB | 42.19 kB | first load |
+| `vendor-icons` | 32.28 kB | 7.08 kB | first load |
+| **First-load JS total** | **483.22 kB** | **150.10 kB** | |
+| `vendor-three` | 562.23 kB | 140.66 kB | **deferred** until 3D is selected |
+| `Topology3D` | 10.52 kB | 4.09 kB | lazy route wrapper |
+| `index.css` | 189.83 kB | 35.07 kB | first load |
+
+`chunkSizeWarningLimit` is 600, so the deferred Three.js chunk emits no warning.
 
 ## What changed in this revision
 
 ### Frontend
 
-- **Design system rewritten.** styles/signal-atlas.css (~1,260 lines) is now the authoritative **Atmospheric Signal** system: warm mineral surfaces, deep-ink text, an atmospheric teal accent, and an editorial serif display face paired with a monospace face for operational data.
-- **Motion layer.** `src/motion/motion.ts` exports `MOTION`, `EASE`, `spring` and a variant set whose values mirror the CSS custom properties exactly. A decorative scroll-linked backdrop was built and then **removed** during review as visual noise that competed with dense log data; the motion tokens and variants remain and drive route transitions, reveals and interaction feedback.
-- **New error boundary.** `src/components/AppErrorBoundary.tsx` wraps `<App />` in `main.tsx`, replacing a render-time crash with a `role="alert"` recovery panel instead of a blank page. Three dedicated tests.
-- **Route-level code splitting.** 17 of 20 routes are `lazy()`-loaded; Command Center, Logs Explorer and Incident Workbench stay in the entry chunk. `manualChunks` pins `three`, `motion`, `react-dom`/`react-router` and `lucide-react` into `vendor-three`, `vendor-motion`, `vendor-react` and `vendor-icons`.
-- **New dependency.** `motion@^14.1.0` — the Framer Motion successor, imported from `motion/react`. `lucide-react` moved to `^1.48.0`.
-- **Scroll reveal reworked.** The hidden state now arrives from JavaScript (`.reveal-section` → `.is-revealed`), so a failed `IntersectionObserver` leaves content visible. The old `.atlas-scroll-revealed` class is gone.
+- **Design system rewritten.** styles/signal-atlas.css is now the authoritative **Atmospheric Signal**
+  system: warm mineral surfaces, deep-ink text, an atmospheric teal accent, and an editorial serif
+  display face paired with a monospace face for operational data.
+- **Command center compacted.** The hero block dropped from roughly 523 px to 335 px, moving the
+  selected-window metrics from `y≈1565` to `y≈616`, so they are readable without scrolling. The
+  decorative atmosphere and isobar backdrop was removed as noise competing with dense log data, and the
+  generated-simulation band moved below the dataset evidence so it cannot be read as part of it.
+- **Navigation reduced to five primary Workspace entries** (Overview, Logs, Incidents, Services,
+  Analytics) plus a collapsible **Advanced** group holding the remaining fourteen specialist tools. No
+  route was removed: the workspace still has **36 route declarations** (1 layout, 34 paths, 1 catch-all)
+  and all 19 navigation entries remain reachable.
+- **Motion layer.** `src/motion/motion.ts` exports `MOTION`, `EASE`, `spring` and a variant set whose
+  values mirror the CSS custom properties exactly, driving route transitions, reveals and feedback.
+- **New error boundary.** `src/components/AppErrorBoundary.tsx` wraps `<App />` in `main.tsx`, replacing
+  a render-time crash with a `role="alert"` recovery panel instead of a blank page.
+- **Route-level code splitting.** 17 of 20 routes are `lazy()`-loaded; Command Center, Logs Explorer and
+  Incident Workbench stay in the entry chunk.
 
-### Bundle
+### WebGL topology lifecycle — corrected
 
-| | Before | After |
-|---|---|---|
-| `index` | 489.32 kB / 136.95 kB gzip | 143.46 kB / 41.73 kB gzip |
-| `vendor-react` | — | 181.40 kB / 59.80 kB gzip |
-| `vendor-motion` | — | 136.14 kB / 45.41 kB gzip |
-| `vendor-icons` | — | 32.28 kB / 7.08 kB gzip |
-| `Topology3D` | 571.82 kB / 144.14 kB gzip | 9.88 kB / 3.90 kB gzip (wrapper) |
-| `vendor-three` | — | 562.23 kB / 140.66 kB gzip — **deferred** |
-| **First-load JS** | **(measured before route splitting) / ~281 kB gzip** | **~483 kB / ~154 kB gzip** |
+| Defect | Fix |
+|---|---|
+| The scene effect depended on raw `nodes`/`edges` arrays, so a parent render with unchanged data tore the scene down and rebuilt it — exhausting the browser's limited pool of WebGL contexts. | The effect is keyed on a content hash (`graphKey`, `incidentKey`), plus `reducedMotion` and an explicit retry token. |
+| `renderer.dispose()` alone leaves the underlying WebGL context alive. | `forceContextLoss()` is called on unmount, alongside disposal of controls, geometry, materials, the observer and every listener. |
+| A lost context left a permanently blank stage. | A `webglcontextrestored` listener rebuilds the scene, and a `Retry WebGL` control is offered if a context cannot be created at all. |
+| The render loop ran while the panel was off-screen or the tab was hidden. | An `IntersectionObserver` and a `visibilitychange` listener pause the loop. |
+| Raycasting against full geometry made every object pickable. | Raycasting is hit-area only. |
+| The stage subtree was pruned by `role="img"`, hiding the WebGL fallback message and its retry control from assistive technology. | Removed. |
 
-index.css is ~190 kB (35 kB gzip). **Correction:** earlier records stated the build "warns" about a 571.82 kB chunk above a 500 kB threshold. chunkSizeWarningLimit is 600 and Three.js now sits in a deferred endor-three chunk, so no warning is emitted.
+`frontend/src/components/TopologyPanelWebGL.test.tsx` adds **8 dedicated lifecycle tests**, including a
+regression guard for the churn defect, and the Playwright suite asserts the 2D/3D toggle survives
+repeated switching without duplicating canvases.
 
 ### Backend — four production fixes
 
 | File | Defect | Fix |
-|---|---|---|
+| --- | --- | --- |
 | `dsa/randomized/MillerRabin.java` | `testTracked(n, PROBABILISTIC, rng, 0)` skipped validation, produced an empty witness array, never ran the loop, and reported **composites as PRIME**. Null mode NPE'd. | Extracted `validateArguments`, shared by `test` and `testTracked`. |
 | `service/DatasetService.java` | `ingest(null, stream)` NPE'd; the empty-stream guard `!name.isEmpty() && raw.length == 0` was de-inverted, so a named empty upload bypassed it. | Name normalized first; null stream → `IllegalArgumentException`; any zero-length body → `UnsupportedLogFormatException`. |
 | `exception/GlobalExceptionHandler.java` | `ParserException` unmapped, so an empty/blank upload answered **500**. | `ParserException` added to the 400 handler. |
 | `service/RunService.java` | SSE emitter registered no completion/timeout/error callbacks; `shutdown()` did not wait. | `ReplayTask` with all three callbacks and an `AtomicBoolean` guard; bounded 5 s `awaitTermination`. |
 
-Five new test classes cover these: `MillerRabinValidationRegressionTest`, `DatasetServiceIngestRegressionTest`, `ParserExceptionMappingTest`, `RunServiceSseLifecycleTest`, `DatasetUploadErrorContractTest`. Backend total moved 878 → 910.
+Five new test classes cover these: `MillerRabinValidationRegressionTest`,
+`DatasetServiceIngestRegressionTest`, `ParserExceptionMappingTest`, `RunServiceSseLifecycleTest`,
+`DatasetUploadErrorContractTest`. Backend total moved 878 → 910.
+
+### Report corrections against the previous draft
+
+The supplied sample report predated this revision and carried figures and code excerpts that no longer
+matched the repository. Each was corrected against the source rather than restated:
+
+| Claim in the sample | Corrected to | Checked against |
+| --- | --- | --- |
+| 877 backend tests | **910** | `mvnw -B verify` |
+| 55 frontend tests across 17 files | **72 across 20 files** | `npm test` |
+| Seven services | **eight** | `GET /api/services` |
+| Five viewport widths down to 390x844 | **six, down to 360x800** | `frontend/e2e/product.spec.ts` |
+| Tree DP for "diameter, centroid and subset sum" | **diameter, rerooting and sum-over-subsets** | `GET /api/algorithms` |
+| `public Set<String> reachableFrom(...)` | **`public List<String> reachableFrom(...)`** with the `seen` set and the `outbound.containsKey` guard | `ServiceDependencyGraph.java` |
+| `public Map<String, Object> lifecycleConflict(...)` | the current `ResponseEntity<?>` handler | `GlobalExceptionHandler.java` |
+| `" cannot move from " + status + " to " + target +)` — a snippet that would not compile | the current exception constructor | `IncidentLifecycleStore.java` |
+| "Figure 3 shows a run in progress" | **Figure 2**; Figure 3 is the catalogue | report captions |
+
+The sample also forced each chapter onto a new page with a page break placed *inside* the preceding
+empty spacer paragraph, which rendered a fully blank page at every chapter boundary — four of them. The
+break now sits on the chapter heading as `pageBreakBefore`, so every chapter still opens on a fresh
+page and the document has **zero blank pages**.
 
 ### Dead and orphaned files
 
 | File | Finding |
-|---|---|
+| --- | --- |
 | `frontend/src/styles/signal-in-motion.css` | **DEAD.** Imported by nothing — a repository-wide grep for `signal-in-motion` returns no match outside the file itself. The only remaining home of the retired `#315cf5` accent. Source code, so not deleted here; flagged for the source owner. |
-| `docs/images/signal-atlas/guided-presentation-mobile.png` | **ORPHANED.** Present on disk, not produced by the current capture script (which writes 19 files; the directory holds 20). |
-| `docs/images/*.png` (11 pre-redesign screenshots) | **REMOVED.** A repository-wide content search across `*.md`, `*.tsx`, `*.ts`, `*.java`, `*.json`, `*.yml`, `*.css`, `*.html`, `*.mjs` returned zero matches for each filename. `README.md` and `docs/13-testing.md` referenced the directory generically, not the files, so no link broke. |
-| `docs/images/capture-report.json` | **REMOVED.** A generated report (`"historical": true`) listing exactly those eleven captures, whose artifacts no longer exist. Its one literal reference, in `docs/archive/POST_REBUILD_AUDIT.md`, was updated. |
-| `docs/images/klh-logo.png` | **KEPT.** A brand asset, not a screenshot, and outside the removal set. The checklist references the live asset at `frontend/public/klh-logo.png`, which is a different file and is present. |
+| `docs/images/signal-atlas/guided-presentation-mobile.png` | **ORPHANED.** Present on disk, not produced by the current capture script. |
+| `final-submission/LogInsight_Final_Project_Presentation.pptx` | **SUPERSEDED and removed.** Replaced by `LogInsight_Analyzer_Final_Presentation.pptx`, so the directory holds exactly one final deck. |
+| `docs/images/*.png` (11 pre-redesign screenshots) | **REMOVED.** Zero content references remained. |
+| `docs/images/capture-report.json` | **REMOVED.** A generated report listing captures whose artifacts no longer exist. |
 
 ## DSA contribution
 
-Three classifications are used, and no algorithm is described as a product capability unless a product path actually calls it. The counts below are the values returned by `GET /api/modules` and `GET /api/health/status`, and are pinned by `AlgorithmCatalogTest`.
+Three classifications are used, and no algorithm is described as a product capability unless a product
+path actually calls it.
 
 **Product pipeline** — genuinely exercised by a reachable product surface.
 
-| Algorithm | Complexity | Where it is called | Input | Output | Role |
-| --- | --- | --- | --- | --- | --- |
-| Knuth-Morris-Pratt | O(n + m) | `LogSearchService`, then `/api/search` and `/api/logs/explore` | haystack plus query | match offsets and measured runtime | Default free-text product search; also re-counts the dominant signature in the live detector |
-| Aho-Corasick | O(n) | `SimulationDetector` over the rolling window | concatenated searchable text plus compiled signatures | per-signature occurrence counts | One-pass multi-signature labelling for the simulation evidence panel |
-| Levenshtein | O(n·m) | product search response builder | message corpus | ranked near-miss terms | `did you mean` suggestion on a zero-hit search |
-| Fixed sliding window | O(n + W) | `RollingWindow`, then `SimulationDetector` | the emitted event stream | per-tick and rolling aggregates, p95 estimate | Baseline-relative elevated-error windows that become incidents |
-| BFS reachability | O(V + E) | `SimulationDetector` over `SimulationTopology` | the declared dependency graph | reachable service set | Blast radius over **declared** dependencies |
+| Algorithm | Complexity | Where it is called | Role |
+| --- | --- | --- | --- |
+| Knuth-Morris-Pratt | O(n + m) | `LogSearchService`, then `/api/search` and `/api/logs/explore` | Default free-text product search; also re-counts the dominant signature in the live detector |
+| Aho-Corasick | O(n) | `SimulationDetector` over the rolling window | One-pass multi-signature labelling for the simulation evidence panel |
+| Levenshtein | O(n·m) | product search response builder | `did you mean` suggestion on a zero-hit search |
+| Fixed sliding window | O(n + W) | `RollingWindow`, then `SimulationDetector` | Baseline-relative elevated-error windows that become incidents |
+| BFS reachability | O(V + E) | `SimulationDetector` over `SimulationTopology` | Blast radius over **declared** dependencies |
 
 **Algorithm engine** — a real REST or trace endpoint a user or a run session can invoke, but not
 driving a product panel: naive, Z and Rabin-Karp matchers, suffix array plus Kasai LCP, bounded edit
-distances, Needleman-Wunsch and Smith-Waterman, tree and SOS dynamic programs, the flow family
-(Ford-Fulkerson, Edmonds-Karp, Dinic, min-cut, bipartite matching, min-cost flow), bitmask TSP,
-Hamiltonian path, vertex-cover approximation and kernelization, set cover, reservoir sampling,
-Miller-Rabin, randomized quicksort, universal and perfect hashing, and the parallel family.
+distances, Needleman-Wunsch and Smith-Waterman, tree and SOS dynamic programs, the flow family,
+bitmask TSP, Hamiltonian path, vertex-cover approximation and kernelization, set cover, reservoir
+sampling, Miller-Rabin, randomized quicksort, universal and perfect hashing, and the parallel family.
 
 **Academic / Algorithm Lab** — implemented and tested but not on any product or engine path:
 bounded vertex cover internals, independent-set and knapsack reductions.
 
-The catalogue holds **42 descriptors across six modules**, backed by **35 registered query engines**;
-**36** entries are reachable through a REST or trace endpoint and **13** are trace-instrumented. The
-System page reports the exposure and traceability split per module, so the boundary is visible in the
-product rather than only in documentation. See [../docs/DSA_PRODUCT_MAPPING.md](../docs/DSA_PRODUCT_MAPPING.md).
+The catalogue holds **42 descriptors across six modules** — Strings 9, Dynamic Programming 12,
+Graph & Flow 6, Approximation 7, Randomized 5, Parallel 3. Of these, **36 are reachable** through a
+canonical or a trace endpoint, dispatched across **35 distinct query/algorithm keys**, and **13 are
+trace-instrumented**. The System page reports the exposure and traceability split per module, so the
+boundary is visible in the product rather than only in documentation. All four figures are pinned by
+`AlgorithmCatalogTest`, which also asserts both reconciling facts: 42 − 36 is the six library-only
+entries, and 36 − 35 is the single dispatch key shared by suffix-array build and suffix-array search.
 
 ## Honesty constraints
 
-- **Provenance.** Dataset replay and server-generated simulation are labelled separately at every surface; simulation is never presented as captured telemetry.
-- **Topology.** Dataset surfaces show `OBSERVED DEPENDENCIES` from request-trail adjacency; simulation surfaces show `DECLARED DEPENDENCIES` from the scenario graph. The simulation blast radius is a traversal over declared dependencies, not over observed ones.
-- **No invented numbers.** With no dataset loaded, the Command Center signal field renders em dashes, not zeros, and its footer legend says so. An empty detector result is explicitly "not evidence that the system is healthy".
-- **No false confidence.** Health bands are fixed heuristic thresholds, not a trained model. Incidents are elevated-error windows with no confidence score, because none is computed. Blast radius is graph reachability, not a confirmed root cause.
-- **No generated ML.** There is no trained model, no inference and no prediction anywhere in the product. Pattern extraction is token normalization; detection is thresholding plus multi-pattern matching.
-- **Stale artefacts are named, not hidden.** This file, the checklist and the audit documents state the verification status of every deliverable, including the ones that remain open.
+- **Provenance.** Dataset replay and server-generated simulation are labelled separately at every
+  surface; simulation is never presented as captured telemetry.
+- **Topology.** Dataset surfaces show `OBSERVED DEPENDENCIES` from request-trail adjacency; simulation
+  surfaces show `DECLARED DEPENDENCIES` from the scenario graph. The simulation blast radius is a
+  traversal over declared dependencies, not over observed ones.
+- **No invented numbers.** With no dataset loaded, the Command Center signal field renders em dashes,
+  not zeros, and its footer legend says so. An empty detector result is explicitly "not evidence that
+  the system is healthy".
+- **No false confidence.** Health bands are fixed heuristic thresholds, not a trained model. Incidents
+  are elevated-error windows with no confidence score, because none is computed. Blast radius is graph
+  reachability, not a confirmed root cause.
+- **No generated ML.** There is no trained model, no inference and no prediction anywhere in the
+  product. Pattern extraction is token normalization; detection is thresholding plus multi-pattern
+  matching.
+- **Stale artefacts are named, not hidden.** This file, the checklist and the audit documents state the
+  verification status of every deliverable, including the ones that remain open.
 
 ## Limitations
 
@@ -199,10 +279,13 @@ real runtime status is `GET /api/health/status`.
 
 ## Open items for whoever submits this
 
-1. **Regenerate the `.pptx`, `.docx` and `.pdf` from the current UI and current test counts** on a machine with a document toolchain. This is the single largest gap in the submission.
-2. **Confirm student names, roll numbers, course code, section and instructor** against the official registration record. Everything in this repository is transcribed, not verified.
-3. **Run the 18 Playwright workflows** and record the result. They are defined and unexecuted.
-4. **Push and let CI run.** No Actions run covers this revision.
-5. **Delete `frontend/src/styles/signal-in-motion.css`** — dead, and the last home of the retired accent.
-6. **Regenerate or delete `docs/images/signal-atlas/guided-presentation-mobile.png`** — orphaned.
-7. **Confirm the manifest in `EngineScopeGuardTest`** still reflects intent; it is a frozen ledger that can only shrink.
+1. **Confirm student names, roll numbers, course code, section and instructor** against the official
+   registration record. Everything in this repository is transcribed, not verified.
+2. **Push this revision and let CI run.** The current commit is verified locally and the previous
+   revision is green in CI; the run covering *this* commit will appear once it is pushed.
+3. **Delete `frontend/src/styles/signal-in-motion.css`** — dead, and the last home of the retired accent.
+4. **Regenerate or delete `docs/images/signal-atlas/guided-presentation-mobile.png`** — orphaned.
+5. **Confirm the manifest in `EngineScopeGuardTest`** still reflects intent; it is a frozen ledger that
+   can only shrink.
+6. **Run a container smoke test** on a machine with a Docker daemon, if container deployment is part of
+   the assessment.

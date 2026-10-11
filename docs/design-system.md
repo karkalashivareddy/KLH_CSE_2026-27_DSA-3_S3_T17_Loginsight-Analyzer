@@ -259,4 +259,4 @@ No full axe scan, no screen-reader audit and no pixel-diff visual-regression sui
 
 ## Bundle impact
 
-The design system's cost is one 191.81 kB stylesheet (35.61 kB gzip), served as `index.css`. See [ARCHITECTURE.md](ARCHITECTURE.md) for the code-splitting and vendor-chunking model.
+The design system's cost is one 189.83 kB stylesheet (35.07 kB gzip), served as `index.css`. See [ARCHITECTURE.md](ARCHITECTURE.md) for the code-splitting and vendor-chunking model.

@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "capture:visuals": "node scripts/capture-visuals.mjs"
+    "capture:visuals": "node scripts/capture-visuals.mjs",
+    "capture:report": "node scripts/capture-report-figures.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.48.0",

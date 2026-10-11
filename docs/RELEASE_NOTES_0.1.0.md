@@ -33,8 +33,8 @@ This is the current single-node release shape for the academic/portfolio project
 | `cd backend; .\mvnw.cmd -o verify` | 910 tests, 0 failures, 0 errors, 0 skipped |
 | `cd frontend; npx vitest run` | 72 tests across 20 files passed |
 | `cd frontend; npm run build` | Clean TypeScript/Vite production build; no bundle-size warning |
-| `cd frontend; npm run test:e2e` | 15 workflows defined; not re-executed on this revision |
-| `docker compose config --quiet` | Passed on an earlier pass; not re-run |
+| `cd frontend; npm run test:e2e` | 18 workflows, 18 passed (34.8 s) |
+| `docker compose config --quiet` | Passed |
 | Docker image build/runtime | Not run: Docker daemon unavailable in the audit environment |
 
 All three build commands are also the CI gates: the backend job runs `mvn -B verify`, and the frontend job runs `npm ci`, `npm test` and `npm run build`.
