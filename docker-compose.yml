@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: source/backend/Dockerfile
+      dockerfile: backend/Dockerfile
     image: loginsight-backend:local
     init: true
     environment:
@@ -22,7 +22,7 @@ services:
 
   frontend:
     build:
-      context: source/frontend
+      context: frontend
       dockerfile: Dockerfile
     image: loginsight-frontend:local
     init: true

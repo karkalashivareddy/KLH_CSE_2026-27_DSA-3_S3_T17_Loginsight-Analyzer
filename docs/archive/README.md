@@ -4,10 +4,10 @@ These reports preserve phase-specific implementation, readiness, and visual
 QA snapshots. Counts, routes, and screenshots inside them describe their dated
 review point and are not the current project contract.
 
-Use the current [README](../../../README.md),
+Use the current [README](../../README.md),
 [implementation audit](../IMPLEMENTATION_AUDIT.md),
 [testing guide](../13-testing.md), and
-[submission index](../../../../) for the
+[submission index](../../final-submission/FINAL_SUBMISSION_INDEX.md) for the
 current project and verification state.
 
 | Report | Historical purpose |

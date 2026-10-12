@@ -3,8 +3,8 @@
 # export preserves the sample's pagination, figure sizing and page numbering
 # exactly, which a reportlab re-layout could not guarantee.
 param(
-    [string]$Docx = (Join-Path $PSScriptRoot "..\LogInsight_Final_Project_Report.docx"),
-    [string]$Pdf  = (Join-Path $PSScriptRoot "..\LogInsight_Final_Project_Report.pdf")
+    [string]$Docx = (Join-Path $PSScriptRoot "..\final-submission\LogInsight_Final_Project_Report.docx"),
+    [string]$Pdf  = (Join-Path $PSScriptRoot "..\final-submission\LogInsight_Final_Project_Report.pdf")
 )
 
 $ErrorActionPreference = "Stop"

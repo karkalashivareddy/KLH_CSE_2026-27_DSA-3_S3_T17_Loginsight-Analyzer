@@ -24,13 +24,11 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
 REPO = Path(__file__).resolve().parents[1]
-# Deliverables are hoisted to the repository root; REPO is the source tree.
-ROOT = REPO.parent
 META = REPO / "scripts" / "submission_meta.json"
 FIGURES = REPO / "docs" / "images" / "report"
 LOGO = REPO / "frontend" / "public" / "klh-logo.png"
 WORK = REPO / "docs" / "images" / "deck"
-OUTPUT = ROOT / "LogInsight_Analyzer_Final_Presentation.pptx"
+OUTPUT = REPO / "final-submission" / "LogInsight_Analyzer_Final_Presentation.pptx"
 
 # ---------------------------------------------------------------- design tokens
 
@@ -902,7 +900,7 @@ def main() -> int:
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     prs.save(OUTPUT)
-    print(f"Wrote {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size:,} bytes, {len(prs.slides.__iter__.__self__._sldIdLst)} slides)")
+    print(f"Wrote {OUTPUT.relative_to(REPO)} ({OUTPUT.stat().st_size:,} bytes, {len(prs.slides.__iter__.__self__._sldIdLst)} slides)")
     return 0
 
 

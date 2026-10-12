@@ -4,7 +4,7 @@
 >
 > **Note on the companion document named below.** This phase architecture refers to
 > `docs/17-limitations.md`, which was never created. The current limitations are stated in
-> [README.md](../../README.md) and [FINAL_SUBMISSION_INDEX.md](../../../).
+> [README.md](../README.md) and [final-submission/FINAL_SUBMISSION_INDEX.md](../final-submission/FINAL_SUBMISSION_INDEX.md).
 > The original reference is left as written so this document still reads as the phase artifact it is.
 >
 > **Sections corrected for the current revision.** §10 (Error Handling), §11 (Frontend Architecture)

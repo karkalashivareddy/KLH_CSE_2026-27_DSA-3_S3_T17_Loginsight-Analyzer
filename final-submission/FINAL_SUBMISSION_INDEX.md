@@ -31,24 +31,24 @@ Every item is marked from evidence. Nothing is marked complete on the basis of i
 | # | Requirement | Status | Basis |
 |---|---|---|---|
 | 1 | Project identity, course context and team recorded | **UNVERIFIED** | The two names, two roll numbers and the course code are transcribed from the institutional report title page, not from anything the repository can verify. See the note below. |
-| 2 | Problem, objectives and scope documented | **VERIFIED** | `source/docs/01-requirements.md`; `source/docs/COMMAND_CENTER.md` |
-| 3 | Architecture documented and matching the code | **VERIFIED** | `source/docs/ARCHITECTURE.md` and `source/docs/02-architecture.md` describe the motion layer, error boundary, route splitting, vendor chunking and stylesheet layering that are present in source. |
-| 4 | DSA contributions honestly mapped to product use | **VERIFIED** | `source/docs/ALGORITHMS.md`, `source/docs/DSA_PRODUCT_MAPPING.md`, `source/docs/04-dsa-mapping.md`. The **42 / 36 / 13 / 35** figures are asserted exactly in `AlgorithmCatalogTest`, including both reconciling facts, so they fail the build if they drift. |
+| 2 | Problem, objectives and scope documented | **VERIFIED** | `docs/01-requirements.md`; `docs/COMMAND_CENTER.md` |
+| 3 | Architecture documented and matching the code | **VERIFIED** | `docs/ARCHITECTURE.md` and `docs/02-architecture.md` describe the motion layer, error boundary, route splitting, vendor chunking and stylesheet layering that are present in source. |
+| 4 | DSA contributions honestly mapped to product use | **VERIFIED** | `docs/ALGORITHMS.md`, `docs/DSA_PRODUCT_MAPPING.md`, `docs/04-dsa-mapping.md`. The **42 / 36 / 13 / 35** figures are asserted exactly in `AlgorithmCatalogTest`, including both reconciling facts, so they fail the build if they drift. |
 | 5 | Backend correctness | **VERIFIED** | `.\mvnw.cmd -B verify` — **910 tests, 0 failures, 0 errors, 0 skipped**, BUILD SUCCESS. Includes 5 new regression classes for this revision's fixes. |
 | 6 | Frontend correctness | **VERIFIED** | `npm test` — **72 tests across 20 test files**, 0 failures, 28.24 s, single aggregate run. |
 | 7 | Frontend builds | **VERIFIED** | `npm run build` — `tsc` and Vite clean, 2,356 modules transformed, built in 5.62 s, **no bundle-size warning**. |
 | 8 | Browser end-to-end coverage | **VERIFIED** | `npm run test:e2e` — **18 workflows, 18 passed**, 34.8 s against the live application. Covers semantic contrast, the signal field's no-fabrication contract, the empty-dataset state, a failing backend, command-palette focus restoration, route aliases, compact navigation, and the 2D/3D toggle surviving repeated switching. |
 | 9 | CI evidence for this revision | **VERIFIED** | Run [38109292191](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38109292191) passed all three jobs on commit `4f74d247e1002f717f5ce0a2e11a343e9e40c37a`. Run [38066030545](https://github.com/karkalashivareddy/KLH_CSE_2026-27_DSA-3_S3_T17_Loginsight-Analyzer/actions/runs/38066030545) passed for the preceding revision. |
 | 10 | Dependency audit on this revision | **VERIFIED** | `npm audit` — **0 vulnerabilities**. |
-| 11 | Genuine, current UI evidence | **VERIFIED** | 19 QA screenshots in `source/docs/images/signal-atlas/` and **11 report figures** in `source/docs/images/report/`, every one captured from the running application against a dataset loaded through the API. Reproducible via `npm run capture:visuals` and `npm run capture:report`. |
-| 12 | Documentation matches the implementation | **VERIFIED** | All docs under `source/docs/` were re-synchronised to this revision. Dead and orphaned files are named rather than silently retained. |
+| 11 | Genuine, current UI evidence | **VERIFIED** | 19 QA screenshots in `docs/images/signal-atlas/` and **11 report figures** in `docs/images/report/`, every one captured from the running application against a dataset loaded through the API. Reproducible via `npm run capture:visuals` and `npm run capture:report`. |
+| 12 | Documentation matches the implementation | **VERIFIED** | All docs under `docs/` were re-synchronised to this revision. Dead and orphaned files are named rather than silently retained. |
 | 13 | Docker deployment validated | **NOT VERIFIED** | `docker compose config --quiet` passes. **No Docker daemon is reachable in this environment**, so image builds and container smoke tests have not been run and are not claimed. |
 | 14 | Accessibility conformance | **PARTIALLY VERIFIED** | Source-level review, 20 semantic token contrast pairs asserted in E2E, reduced-motion handled at three levels, visible focus indicators asserted. **No axe scan and no screen-reader audit are configured.** Contrast assertions are a focused check, not whole-application WCAG certification. |
 | 15 | Hardware-accelerated WebGL rendering | **VERIFIED** | The unavailable-WebGL fallback *and* successful rendering are both now captured. Headless Chromium renders the scene through SwiftShader, and Figure 7 of the report and slide 13 of the deck show a **real rendered WebGL graph**, not the fallback. |
-| 16 | **Presentation matches the submitted product** | **VERIFIED** | `LogInsight_Analyzer_Final_Presentation.pptx` — **16 slides**, 7 embedded captures, regenerated by `source/scripts/build_presentation.py`. Every diagram is built from native PowerPoint shapes and stays editable. All 16 slides were rendered through PowerPoint and inspected. |
-| 17 | **Report matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.docx` — built by `source/scripts/build_report.py` from the supplied sample, with 11 current screenshots and every figure re-verified against the repository. |
-| 18 | **PDF matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.pdf` — **20 A4 pages**, exported by Word from the same DOCX via `source/scripts/export_report_pdf.ps1`, so the two agree page for page. |
-| 19 | Presentation can be visually inspected | **VERIFIED** | Every slide was exported to PNG through PowerPoint and reviewed for clipping, overflow and overlap. `source/scripts/check_deck_layout.py` additionally runs **1,352 structural assertions** over the deck (bounds, picture/panel overlap, text-versus-card fit) without needing Office installed. |
+| 16 | **Presentation matches the submitted product** | **VERIFIED** | `LogInsight_Analyzer_Final_Presentation.pptx` — **16 slides**, 7 embedded captures, regenerated by `scripts/build_presentation.py`. Every diagram is built from native PowerPoint shapes and stays editable. All 16 slides were rendered through PowerPoint and inspected. |
+| 17 | **Report matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.docx` — built by `scripts/build_report.py` from the supplied sample, with 11 current screenshots and every figure re-verified against the repository. |
+| 18 | **PDF matches the submitted product** | **VERIFIED** | `LogInsight_Final_Project_Report.pdf` — **20 A4 pages**, exported by Word from the same DOCX via `scripts/export_report_pdf.ps1`, so the two agree page for page. |
+| 19 | Presentation can be visually inspected | **VERIFIED** | Every slide was exported to PNG through PowerPoint and reviewed for clipping, overflow and overlap. `scripts/check_deck_layout.py` additionally runs **1,352 structural assertions** over the deck (bounds, picture/panel overlap, text-versus-card fit) without needing Office installed. |
 | 20 | Official slide count / template compliance | **NOT APPLICABLE** | No mandatory slide count and no official template were found anywhere in the repository. Recorded as N/A rather than guessed at. |
 
 ## Student
@@ -72,16 +72,16 @@ Course instructor: Dr. J Sirisha Devi, Professor, Department of Computer Science
 
 | File | Description | State |
 | --- | --- | --- |
-| `LogInsight_Analyzer_Final_Presentation.pptx` | 16 slides, 16:9: problem, objectives, positioning, architecture, stack, data structures, algorithms, simulation pipeline, four product walkthroughs, verification, limitations and conclusion. 7 current captures embedded. | **Current** — regenerated by `source/scripts/build_presentation.py`. |
-| `LogInsight_Final_Project_Report.docx` | The supplied institutional report, corrected in place. A4 portrait, 1-inch margins, Cambria prose and Consolas code, four chapters, 11 current screenshots. | **Current** — regenerated by `source/scripts/build_report.py` from the sample. |
-| `LogInsight_Final_Project_Report.pdf` | 20-page A4 export of that DOCX, produced by Word itself. | **Current** — `source/scripts/export_report_pdf.ps1`. |
+| `LogInsight_Analyzer_Final_Presentation.pptx` | 16 slides, 16:9: problem, objectives, positioning, architecture, stack, data structures, algorithms, simulation pipeline, four product walkthroughs, verification, limitations and conclusion. 7 current captures embedded. | **Current** — regenerated by `scripts/build_presentation.py`. |
+| `LogInsight_Final_Project_Report.docx` | The supplied institutional report, corrected in place. A4 portrait, 1-inch margins, Cambria prose and Consolas code, four chapters, 11 current screenshots. | **Current** — regenerated by `scripts/build_report.py` from the sample. |
+| `LogInsight_Final_Project_Report.pdf` | 20-page A4 export of that DOCX, produced by Word itself. | **Current** — `scripts/export_report_pdf.ps1`. |
 | `FINAL_SUBMISSION_INDEX.md` | This file. | Current. |
 | `FINAL_SUBMISSION_CHECKLIST.md` | Requirement-to-evidence map. | Current. |
 | `PRESENTATION_OUTLINE.md` | Slide-by-slide outline of the deck, with the evidence each slide rests on. | Current. |
 
 The binaries are generated rather than hand-edited. The report is produced by
-`source/scripts/build_report.py`, the deck by `source/scripts/build_presentation.py`, and both consume the
-screenshots in `source/docs/images/report/` plus `source/scripts/submission_meta.json`, so re-running the scripts
+`scripts/build_report.py`, the deck by `scripts/build_presentation.py`, and both consume the
+screenshots in `docs/images/report/` plus `scripts/submission_meta.json`, so re-running the scripts
 reproduces them from the current application instead of letting them drift.
 
 ## Verification figures
@@ -90,17 +90,17 @@ Measured on this revision, 2026-10-11.
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Backend | `cd source/backend; .\mvnw.cmd -B verify` | **910 tests**, 0 failures, 0 errors, 0 skipped; BUILD SUCCESS (28.2 s) |
-| Frontend tests | `cd source/frontend; npm test` | **72 tests across 20 files**, 0 failures (28.24 s) |
-| TypeScript + build | `cd source/frontend; npm run build` | Clean (`tsc && vite build`), 2,356 modules, 5.62 s, no warning |
-| Browser E2E | `cd source/frontend; npm run test:e2e` | **18 workflows, 18 passed** (34.8 s) |
-| Dependency audit | `cd source/frontend; npm audit` | **0 vulnerabilities** |
-| QA screenshots | `cd source/frontend; npm run capture:visuals` | 19 into `source/docs/images/signal-atlas/` |
-| Report figures | `cd source/frontend; npm run capture:report` | 11 into `source/docs/images/report/` |
-| Report checks | `python source/scripts/verify_report.py` | **56 checks passed** |
-| Deck checks | `python source/scripts/check_deck_layout.py` | **1,352 checks passed** |
-| Report PDF | `powershell source/scripts/export_report_pdf.ps1` | 20 A4 pages, Word export |
-| Slide renders | `powershell source/scripts/export_slides.ps1` | 16 PNGs via PowerPoint |
+| Backend | `cd backend; .\mvnw.cmd -B verify` | **910 tests**, 0 failures, 0 errors, 0 skipped; BUILD SUCCESS (28.2 s) |
+| Frontend tests | `cd frontend; npm test` | **72 tests across 20 files**, 0 failures (28.24 s) |
+| TypeScript + build | `cd frontend; npm run build` | Clean (`tsc && vite build`), 2,356 modules, 5.62 s, no warning |
+| Browser E2E | `cd frontend; npm run test:e2e` | **18 workflows, 18 passed** (34.8 s) |
+| Dependency audit | `cd frontend; npm audit` | **0 vulnerabilities** |
+| QA screenshots | `cd frontend; npm run capture:visuals` | 19 into `docs/images/signal-atlas/` |
+| Report figures | `cd frontend; npm run capture:report` | 11 into `docs/images/report/` |
+| Report checks | `python scripts/verify_report.py` | **56 checks passed** |
+| Deck checks | `python scripts/check_deck_layout.py` | **1,352 checks passed** |
+| Report PDF | `powershell scripts/export_report_pdf.ps1` | 20 A4 pages, Word export |
+| Slide renders | `powershell scripts/export_slides.ps1` | 16 PNGs via PowerPoint |
 | Compose syntax | `docker compose config --quiet` | Passed |
 | Container runtime | `docker compose up --build` | Not run: Docker daemon unavailable |
 
@@ -166,7 +166,7 @@ Measured from `npm run build` on this revision.
 | Raycasting against full geometry made every object pickable. | Raycasting is hit-area only. |
 | The stage subtree was pruned by `role="img"`, hiding the WebGL fallback message and its retry control from assistive technology. | Removed. |
 
-`source/frontend/src/components/TopologyPanelWebGL.test.tsx` adds **8 dedicated lifecycle tests**, including a
+`frontend/src/components/TopologyPanelWebGL.test.tsx` adds **8 dedicated lifecycle tests**, including a
 regression guard for the churn defect, and the Playwright suite asserts the 2D/3D toggle survives
 repeated switching without duplicating canvases.
 
@@ -193,7 +193,7 @@ matched the repository. Each was corrected against the source rather than restat
 | 877 backend tests | **910** | `mvnw -B verify` |
 | 55 frontend tests across 17 files | **72 across 20 files** | `npm test` |
 | Seven services | **eight** | `GET /api/services` |
-| Five viewport widths down to 390x844 | **six, down to 360x800** | `source/frontend/e2e/product.spec.ts` |
+| Five viewport widths down to 390x844 | **six, down to 360x800** | `frontend/e2e/product.spec.ts` |
 | Tree DP for "diameter, centroid and subset sum" | **diameter, rerooting and sum-over-subsets** | `GET /api/algorithms` |
 | `public Set<String> reachableFrom(...)` | **`public List<String> reachableFrom(...)`** with the `seen` set and the `outbound.containsKey` guard | `ServiceDependencyGraph.java` |
 | `public Map<String, Object> lifecycleConflict(...)` | the current `ResponseEntity<?>` handler | `GlobalExceptionHandler.java` |
@@ -209,11 +209,11 @@ page and the document has **zero blank pages**.
 
 | File | Finding |
 | --- | --- |
-| `source/frontend/src/styles/signal-in-motion.css` | **DEAD.** Imported by nothing — a repository-wide grep for `signal-in-motion` returns no match outside the file itself. The only remaining home of the retired `#315cf5` accent. Source code, so not deleted here; flagged for the source owner. |
-| `source/docs/images/signal-atlas/guided-presentation-mobile.png` | **ORPHANED.** Present on disk, not produced by the current capture script. |
-| `LogInsight_Final_Project_Presentation.pptx` | **SUPERSEDED and removed.** Replaced by `LogInsight_Analyzer_Final_Presentation.pptx`, so the directory holds exactly one final deck. |
-| `source/docs/images/*.png` (11 pre-redesign screenshots) | **REMOVED.** Zero content references remained. |
-| `source/docs/images/capture-report.json` | **REMOVED.** A generated report listing captures whose artifacts no longer exist. |
+| `frontend/src/styles/signal-in-motion.css` | **DEAD.** Imported by nothing — a repository-wide grep for `signal-in-motion` returns no match outside the file itself. The only remaining home of the retired `#315cf5` accent. Source code, so not deleted here; flagged for the source owner. |
+| `docs/images/signal-atlas/guided-presentation-mobile.png` | **ORPHANED.** Present on disk, not produced by the current capture script. |
+| `final-submission/LogInsight_Final_Project_Presentation.pptx` | **SUPERSEDED and removed.** Replaced by `LogInsight_Analyzer_Final_Presentation.pptx`, so the directory holds exactly one final deck. |
+| `docs/images/*.png` (11 pre-redesign screenshots) | **REMOVED.** Zero content references remained. |
+| `docs/images/capture-report.json` | **REMOVED.** A generated report listing captures whose artifacts no longer exist. |
 
 ## DSA contribution
 
@@ -283,8 +283,8 @@ real runtime status is `GET /api/health/status`.
    registration record. Everything in this repository is transcribed, not verified.
 2. **Push this revision and let CI run.** The current commit is verified locally and the previous
    revision is green in CI; the run covering *this* commit will appear once it is pushed.
-3. **Delete `source/frontend/src/styles/signal-in-motion.css`** — dead, and the last home of the retired accent.
-4. **Regenerate or delete `source/docs/images/signal-atlas/guided-presentation-mobile.png`** — orphaned.
+3. **Delete `frontend/src/styles/signal-in-motion.css`** — dead, and the last home of the retired accent.
+4. **Regenerate or delete `docs/images/signal-atlas/guided-presentation-mobile.png`** — orphaned.
 5. **Confirm the manifest in `EngineScopeGuardTest`** still reflects intent; it is a frozen ledger that
    can only shrink.
 6. **Run a container smoke test** on a machine with a Docker daemon, if container deployment is part of

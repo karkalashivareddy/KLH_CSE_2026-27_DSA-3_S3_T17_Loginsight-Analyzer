@@ -16,9 +16,7 @@ from pptx import Presentation
 from pptx.util import Emu
 
 REPO = Path(__file__).resolve().parents[1]
-# Deliverables are hoisted to the repository root; REPO is the source tree.
-ROOT = REPO.parent
-DECK = ROOT / "LogInsight_Analyzer_Final_Presentation.pptx"
+DECK = REPO / "final-submission" / "LogInsight_Analyzer_Final_Presentation.pptx"
 
 FONT_PATH = Path(r"C:\Windows\Fonts\segoeui.ttf")
 BOLD_PATH = Path(r"C:\Windows\Fonts\segoeuib.ttf")

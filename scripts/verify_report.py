@@ -15,8 +15,6 @@ from docx.shared import Emu
 from PIL import Image
 
 REPO = Path(__file__).resolve().parents[1]
-# Deliverables are hoisted to the repository root; REPO is the source tree.
-ROOT = REPO.parent
 
 # The institutional sample is not committed here; set LOGINSIGHT_SAMPLE_REPORT
 # to point at it. The fallback covers the author's machine.
@@ -26,7 +24,7 @@ SAMPLE = Path(
         r"C:\Users\karka\Downloads\LogInsight_Final_Project_Report (1) (1).docx",
     )
 )
-REPORT = ROOT / "LogInsight_Final_Project_Report.docx"
+REPORT = REPO / "final-submission" / "LogInsight_Final_Project_Report.docx"
 FIGURES = REPO / "docs" / "images" / "report"
 
 NS = {
