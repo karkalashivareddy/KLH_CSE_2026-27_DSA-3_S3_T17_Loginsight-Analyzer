@@ -79,7 +79,7 @@ defect is closed:
   editable shape diagrams, seven current captures. All 16 slides were rendered through PowerPoint and
   reviewed, and scripts/check_deck_layout.py asserts the layout structurally.
 
-See [../final-submission/FINAL_SUBMISSION_INDEX.md](../final-submission/FINAL_SUBMISSION_INDEX.md).
+See [../../../](../../../).
 
 ## Deletion evidence
 

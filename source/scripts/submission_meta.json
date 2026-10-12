@@ -1,5 +1,5 @@
 {
-  "_comment": "Single source of truth for the submission metadata. These values were transcribed from the institutional report title page and final-submission/FINAL_SUBMISSION_INDEX.md so that regenerating the documents cannot invent or drift them. They are NOT derived from source code and must be confirmed against the institution's records. Consumed by scripts/build_presentation.py.",
+  "_comment": "Single source of truth for the submission metadata. These values were transcribed from the institutional report title page and FINAL_SUBMISSION_INDEX.md so that regenerating the documents cannot invent or drift them. They are NOT derived from source code and must be confirmed against the institution's records. Consumed by scripts/build_presentation.py.",
   "course": "DATA STRUCTURES AND ALGORITHMS-3  ·  25CS2103E  ·  PBL",
   "students": [
     { "name": "KARKALA SHIVA REDDY", "roll": "2520030105" },

@@ -5,7 +5,7 @@
 Academic project for **Data Structures and Algorithms-3 (`25CS2103E`)**, 2026-2027 odd
 semester, Koneru Lakshmaiah Education Foundation (KL University), KLH Campus.
 The submission deliverables, student roster and course record are in
-[final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md).
+[FINAL_SUBMISSION_INDEX.md](FINAL_SUBMISSION_INDEX.md).
 
 LogInsight is a full-stack, in-memory log investigation workspace. It combines a React 18 + TypeScript + Vite shell with a Java 21 Spring Boot REST/SSE API, classical data-structure and algorithm engines, and a backend-owned dataset lifecycle.
 
@@ -20,9 +20,9 @@ teal accent, and a restrained grid backdrop. Type pairs an editorial serif for d
 sans for controls and a monospace face for log lines, timestamps and algorithm traces. Motion is
 centralised on one duration/easing scale and honours `prefers-reduced-motion`. Start **Guided Demo**
 from the Command Center to walk through real dataset, search, analytics, observed topology, incident and
-algorithm-trace APIs. Current screenshots are in [`docs/images/signal-atlas/`](docs/images/signal-atlas/).
+algorithm-trace APIs. Current screenshots are in [`source/docs/images/signal-atlas/`](source/docs/images/signal-atlas/).
 
-![LogInsight Command Center: a compact operational header, a four-stage signal field carrying real backend values, and the selected-window metrics in the first viewport](docs/images/signal-atlas/command-center-desktop.png)
+![LogInsight Command Center: a compact operational header, a four-stage signal field carrying real backend values, and the selected-window metrics in the first viewport](source/docs/images/signal-atlas/command-center-desktop.png)
 
 ## The problem
 
@@ -40,7 +40,7 @@ Ingest a dataset or start a generated scenario, observe service health and live 
 |---|---|
 | Frontend | React 18, TypeScript, Vite 6, React Router 7, Motion 14 (`motion/react`) for transitions and scroll-linked values, hand-rolled SVG charts, Three.js (lazy-loaded WebGL topology), Vitest + Testing Library, Playwright |
 | Backend | Java 21, Spring Boot 3.5 (REST + Server-Sent Events), in-memory dataset store, JUnit 5 |
-| Data | Backend-held in-memory dataset, JSONL and pipe-delimited uploads, bundled `sample-data/` samples |
+| Data | Backend-held in-memory dataset, JSONL and pipe-delimited uploads, bundled `source/sample-data/` samples |
 | Transport | HTTP REST plus three SSE endpoints. No WebSocket, no external log collector, no cloud integration |
 
 ## Architecture
@@ -68,8 +68,8 @@ Three SSE surfaces, and they are not interchangeable: the **generated simulation
 replay**, and **recorded trace replay**. Simulation sessions are bounded by a fixed thread pool with a
 bounded queue, retained for a bounded number of sessions for operator actions, and released on shutdown.
 
-Full detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
-[docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md).
+Full detail: [source/docs/ARCHITECTURE.md](source/docs/ARCHITECTURE.md) and
+[source/docs/ARCHITECTURE_DIAGRAM.md](source/docs/ARCHITECTURE_DIAGRAM.md).
 
 ### Frontend structure
 
@@ -122,7 +122,7 @@ view, an accessible service list and a 2D fallback. Topology provenance is label
 show `OBSERVED DEPENDENCIES`, simulation surfaces show `DECLARED DEPENDENCIES`. There is no WebSocket
 client.
 
-The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](docs/IMPLEMENTATION_AUDIT.md). The API contract is [docs/API.md](docs/API.md). See [docs/COMMAND_CENTER.md](docs/COMMAND_CENTER.md) for the Overview semantics.
+The canonical route and implementation audit is [source/docs/IMPLEMENTATION_AUDIT.md](source/docs/IMPLEMENTATION_AUDIT.md). The API contract is [source/docs/API.md](source/docs/API.md). See [source/docs/COMMAND_CENTER.md](source/docs/COMMAND_CENTER.md) for the Overview semantics.
 
 ## Command Center
 
@@ -138,7 +138,7 @@ The canonical route and implementation audit is [docs/IMPLEMENTATION_AUDIT.md](d
 - **Signal field**: a four-stage figure — Dataset → Window → Services → Detector — where every value is a backend response. With no dataset loaded each stage renders an em dash, never a zero, and the panel states that no telemetry is shown until a source exists.
 - **Shared replay context**: Overview and Dataset Replay read one `ReplayProvider` subscription, so a replay started on either screen is visible on both.
 
-The topology panel renders an interactive 2D SVG by default. Its optional Three.js/WebGL view is lazy-loaded and disposes renderer resources, controls, geometry, materials, observers and listeners on unmount. If WebGL is unavailable, the same backend data remains available through 2D and accessible lists. Edges describe request-trail associations, not verified infrastructure or causality. See [docs/design-system.md](docs/design-system.md) for visual encodings and constraints.
+The topology panel renders an interactive 2D SVG by default. Its optional Three.js/WebGL view is lazy-loaded and disposes renderer resources, controls, geometry, materials, observers and listeners on unmount. If WebGL is unavailable, the same backend data remains available through 2D and accessible lists. Edges describe request-trail associations, not verified infrastructure or causality. See [source/docs/design-system.md](source/docs/design-system.md) for visual encodings and constraints.
 
 ## Run locally
 
@@ -147,7 +147,7 @@ Prerequisites: Java 21 or newer, Node.js 22.12 or newer for the Vitest suite, an
 ### Backend
 
 ```powershell
-cd backend
+cd source/backend
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -158,7 +158,7 @@ The API listens on `http://localhost:8080`.
 In a second terminal:
 
 ```powershell
-cd frontend
+cd source/frontend
 npm install
 npm run dev
 ```
@@ -170,14 +170,14 @@ Open `http://localhost:5173`. The Vite development server preserves the local pr
 With the backend and frontend running as above, install the browser once and run the real browser workflows:
 
 ```powershell
-cd frontend
+cd source/frontend
 npx playwright install chromium
 npm run test:e2e
 npm run capture:visuals
 npm run capture:report
 ```
 
-The suite loads the reproducible backend demo corpus, then checks the Command Center, direct route refresh, dataset-backed search and event details, service selection, WebGL fallback, guided-presentation exit, mobile navigation, reduced motion, the command palette, route aliases, the no-dataset and backend-error states, the 404 route, and all six requested viewport sizes. It is sequential because the backend keeps one active in-memory dataset. CI provisions Chromium and both services automatically. Test output and failure traces are written under `frontend/test-results/`. The capture script saves 19 current desktop, mobile, topology, incident, state and reduced-motion screenshots from the running backend/frontend into `docs/images/signal-atlas/`. `capture:report` saves the eleven figures used by the written report into `docs/images/report/`, including a **real rendered WebGL topology** — it launches headless Chromium with SwiftShader so the 3D scene is genuinely rendered rather than captured in its fallback state, and it fails loudly if the scene falls back.
+The suite loads the reproducible backend demo corpus, then checks the Command Center, direct route refresh, dataset-backed search and event details, service selection, WebGL fallback, guided-presentation exit, mobile navigation, reduced motion, the command palette, route aliases, the no-dataset and backend-error states, the 404 route, and all six requested viewport sizes. It is sequential because the backend keeps one active in-memory dataset. CI provisions Chromium and both services automatically. Test output and failure traces are written under `source/frontend/test-results/`. The capture script saves 19 current desktop, mobile, topology, incident, state and reduced-motion screenshots from the running source/backend/frontend into `source/docs/images/signal-atlas/`. `capture:report` saves the eleven figures used by the written report into `source/docs/images/report/`, including a **real rendered WebGL topology** — it launches headless Chromium with SwiftShader so the 3D scene is genuinely rendered rather than captured in its fallback state, and it fails loudly if the scene falls back.
 
 The E2E and capture scripts read two environment variables: `PLAYWRIGHT_BASE_URL` (default `http://127.0.0.1:5173`) and `PLAYWRIGHT_API_BASE_URL` (default `http://127.0.0.1:8080`). The dev server's proxy target is configurable with `LOGINSIGHT_API_TARGET`, which is useful when port 8080 is already taken:
 
@@ -194,8 +194,8 @@ To see the real-time product without loading data, open **Scenario Lab** and pre
 
 Docker Compose uses two images:
 
-- `backend/Dockerfile` is a multi-stage Maven build with a non-root Java 21 runtime. The repository `sample-data/` directory is copied into `/app/sample-data` and selected with `LOGINSIGHT_SAMPLE_DATA_DIR`.
-- `frontend/Dockerfile` is a multi-stage Node build with a non-root Nginx runtime. `frontend/nginx.conf` serves the SPA, proxies `/api/` to the backend service, disables proxy buffering for SSE, and falls back to `index.html` for client routes.
+- `source/backend/Dockerfile` is a multi-stage Maven build with a non-root Java 21 runtime. The repository `source/sample-data/` directory is copied into `/app/sample-data` and selected with `LOGINSIGHT_SAMPLE_DATA_DIR`.
+- `source/frontend/Dockerfile` is a multi-stage Node build with a non-root Nginx runtime. `source/frontend/nginx.conf` serves the SPA, proxies `/api/` to the backend service, disables proxy buffering for SSE, and falls back to `index.html` for client routes.
 
 ```powershell
 Copy-Item .env.example .env
@@ -203,18 +203,18 @@ docker compose up --build -d
 docker compose ps
 ```
 
-Open `http://localhost:8088`. The default host mappings are backend `8080` and frontend `8088`; change them in `.env` when needed. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for healthchecks, operations and limitations.
+Open `http://localhost:8088`. The default host mappings are backend `8080` and frontend `8088`; change them in `.env` when needed. See [source/docs/DEPLOYMENT.md](source/docs/DEPLOYMENT.md) for healthchecks, operations and limitations.
 
 The Compose file was syntax-validated with `docker compose config`. The Docker daemon was not available in the audit environment, so image builds and live container smoke tests were not run here.
 
 ## Data and replay honesty
 
 - **Demo Dataset**: 14,000 deterministic synthetic events generated by `DemoDatasetGenerator` with seed `20260913L`, re-anchored to the current hour. It is not production telemetry.
-- **Bundled samples**: committed text and JSONL files under `sample-data/`, selectable from the Datasets screen.
+- **Bundled samples**: committed text and JSONL files under `source/sample-data/`, selectable from the Datasets screen.
 - **Upload**: multipart JSONL or canonical pipe-delimited text. The parser reports successful and failed line counts.
 - **Current state**: one dataset is held in backend memory at a time. Restarting the backend clears it.
 - **Dataset Replay**: a bounded Server-Sent Events replay of the loaded dataset, emitted oldest-first by `(timestamp, id)`. It is labelled `demo-replay` and "not real-time" in the API and UI. It is not an external log collector, WebSocket feed, or live ingestion path.
-- **Shared replay state**: `ReplayProvider` in `frontend/src/replay/ReplayContext.tsx` owns the single subscription, the recent-event buffer (capped at 300) and the dataset-invalidation reset. Overview and Dataset Replay are two views of that one subscription, not two streams.
+- **Shared replay state**: `ReplayProvider` in `source/frontend/src/replay/ReplayContext.tsx` owns the single subscription, the recent-event buffer (capped at 300) and the dataset-invalidation reset. Overview and Dataset Replay are two views of that one subscription, not two streams.
 
 ### Terminology
 
@@ -239,13 +239,13 @@ All browser API calls use `/api`. Dataset-backed requests return a safe JSON err
 }
 ```
 
-The current handler maps validation and malformed requests to `400`, missing dataset state to `404`, unsupported methods/media to `405`/`415`, and unexpected failures to a sanitized `500`. Upload size is 64 MB, product-search pages use `size=1..200`, log slices use `limit=1..1000`, replay controls are validated at `batchSize=1..200` and `intervalMs=100..60000`, and run history is capped at 64 records. The complete contract and limit table are in [docs/API.md](docs/API.md).
+The current handler maps validation and malformed requests to `400`, missing dataset state to `404`, unsupported methods/media to `405`/`415`, and unexpected failures to a sanitized `500`. Upload size is 64 MB, product-search pages use `size=1..200`, log slices use `limit=1..1000`, replay controls are validated at `batchSize=1..200` and `intervalMs=100..60000`, and run history is capped at 64 records. The complete contract and limit table are in [source/docs/API.md](source/docs/API.md).
 
 ## Algorithms
 
 ### DSA-3 relationship
 
-The six catalogue modules map directly onto the DSA-3 subject groupings: **Strings**, **Dynamic Programming**, **Graph & Flow**, **Approximation**, **Randomized**, and **Parallel**. Each descriptor is classified as a **product feature** (genuinely exercised by a product path), an **algorithm engine** (a real REST or trace endpoint that a user or a run session can invoke), or an **academic lab** entry (implemented and tested, but not wired into a product panel). The per-algorithm classification is in [docs/DSA_PRODUCT_MAPPING.md](docs/DSA_PRODUCT_MAPPING.md), and the subject-by-subject breakdown is in [docs/04-dsa-mapping.md](docs/04-dsa-mapping.md). No algorithm is presented as a product capability unless a product path actually calls it.
+The six catalogue modules map directly onto the DSA-3 subject groupings: **Strings**, **Dynamic Programming**, **Graph & Flow**, **Approximation**, **Randomized**, and **Parallel**. Each descriptor is classified as a **product feature** (genuinely exercised by a product path), an **algorithm engine** (a real REST or trace endpoint that a user or a run session can invoke), or an **academic lab** entry (implemented and tested, but not wired into a product panel). The per-algorithm classification is in [source/docs/DSA_PRODUCT_MAPPING.md](source/docs/DSA_PRODUCT_MAPPING.md), and the subject-by-subject breakdown is in [source/docs/04-dsa-mapping.md](source/docs/04-dsa-mapping.md). No algorithm is presented as a product capability unless a product path actually calls it.
 
 The backend catalogue contains **42 descriptors** across six modules, **36** reachable through a REST or trace endpoint, **35** registered dispatch keys, and **13** trace-instrumented. The four numbers describe different things, so they are reconciled here rather than left to look like a contradiction:
 
@@ -264,7 +264,7 @@ Product-facing algorithm use is intentionally narrower than any of those counts:
 - The remaining catalogue entries are exposed algorithm engines, library-only implementations, or trace/run-session capabilities; they are not all claimed to drive a product panel.
 - The course rule against `java.util` delegation in `dsa/**` is enforced by `EngineScopeGuardTest`: it freezes today's exact `java.util` imports per `dsa` source file in a manifest, fails the build on any new `java.util` import under `dsa/`, and allows the ledger to shrink. `java.util.concurrent` (parallel) and `java.util.Random` (randomized) are course-licensed and recorded in that manifest.
 
-The implementation inventory and exposure rules are in [docs/ALGORITHMS.md](docs/ALGORITHMS.md). The frontend includes a Three.js/WebGL topology view; there is no WebSocket transport, external research integration, trained ML model, or production telemetry integration.
+The implementation inventory and exposure rules are in [source/docs/ALGORITHMS.md](source/docs/ALGORITHMS.md). The frontend includes a Three.js/WebGL topology view; there is no WebSocket transport, external research integration, trained ML model, or production telemetry integration.
 
 ## Verification
 
@@ -273,7 +273,7 @@ running Spring Boot backend and Vite dev server. They are not GitHub Actions evi
 says so.
 
 ```powershell
-cd backend
+cd source/backend
 .\mvnw.cmd -B verify
 
 cd ..\frontend
@@ -316,9 +316,9 @@ aliases, the no-dataset state, a failing backend, the 404 route, and responsive 
 requested viewport sizes. It does **not** verify Docker execution or GPU-backed WebGL rendering, and it
 is not a full accessibility-conformance audit.
 
-Earlier phase reports under `docs/archive/` carry smaller counts from their own snapshots and are
-labelled historical rather than current. The report, PDF and presentation under `final-submission/` are
-regenerated from this revision — see [final-submission/FINAL_SUBMISSION_INDEX.md](final-submission/FINAL_SUBMISSION_INDEX.md).
+Earlier phase reports under `source/docs/archive/` carry smaller counts from their own snapshots and are
+labelled historical rather than current. The report, PDF and presentation under `` are
+regenerated from this revision — see [FINAL_SUBMISSION_INDEX.md](FINAL_SUBMISSION_INDEX.md).
 
 ## Limitations
 
@@ -340,60 +340,60 @@ The three submission documents are **generated, not hand-edited**, so they canno
 With the backend and frontend running as above:
 
 ```powershell
-cd frontend
-npm run capture:report       # 11 figures -> docs/images/report/
+cd source/frontend
+npm run capture:report       # 11 figures -> source/docs/images/report/
 cd ..
 
-python scripts/build_report.py            # -> final-submission/LogInsight_Final_Project_Report.docx
-powershell scripts/export_report_pdf.ps1  # -> final-submission/LogInsight_Final_Project_Report.pdf
-python scripts/verify_report.py           # 56 structural and content assertions
+python source/scripts/build_report.py            # -> LogInsight_Final_Project_Report.docx
+powershell source/scripts/export_report_pdf.ps1  # -> LogInsight_Final_Project_Report.pdf
+python source/scripts/verify_report.py           # 56 structural and content assertions
 
-python scripts/build_presentation.py      # -> final-submission/LogInsight_Analyzer_Final_Presentation.pptx
-python scripts/check_deck_layout.py       # 1,352 structural assertions, no Office needed
-powershell scripts/export_slides.ps1 -Pptx final-submission/LogInsight_Analyzer_Final_Presentation.pptx -OutDir slides
+python source/scripts/build_presentation.py      # -> LogInsight_Analyzer_Final_Presentation.pptx
+python source/scripts/check_deck_layout.py       # 1,352 structural assertions, no Office needed
+powershell source/scripts/export_slides.ps1 -Pptx LogInsight_Analyzer_Final_Presentation.pptx -OutDir slides
 ```
 
 | Script | Produces | Needs |
 |---|---|---|
-| `frontend/scripts/capture-report-figures.mjs` | 11 report figures | running app + Playwright Chromium |
-| `scripts/build_report.py` | the DOCX, from the institutional sample report | Python, `python-docx`, Pillow |
-| `scripts/export_report_pdf.ps1` | the PDF | **Microsoft Word** |
-| `scripts/verify_report.py` | assertions over the DOCX | Python |
-| `scripts/build_presentation.py` | the PPTX | Python, `python-pptx` |
-| `scripts/check_deck_layout.py` | assertions over the PPTX | Python |
-| `scripts/export_slides.ps1` | one PNG per slide, for visual review | **Microsoft PowerPoint** |
+| `source/frontend/source/scripts/capture-report-figures.mjs` | 11 report figures | running app + Playwright Chromium |
+| `source/scripts/build_report.py` | the DOCX, from the institutional sample report | Python, `python-docx`, Pillow |
+| `source/scripts/export_report_pdf.ps1` | the PDF | **Microsoft Word** |
+| `source/scripts/verify_report.py` | assertions over the DOCX | Python |
+| `source/scripts/build_presentation.py` | the PPTX | Python, `python-pptx` |
+| `source/scripts/check_deck_layout.py` | assertions over the PPTX | Python |
+| `source/scripts/export_slides.ps1` | one PNG per slide, for visual review | **Microsoft PowerPoint** |
 
 The report is the supplied institutional sample **corrected in place**: its page size, margins,
 Cambria/Consolas typography, chapter hierarchy, cover block and figure sizing are preserved exactly,
 while the prose, the code excerpts and the eleven screenshots are brought up to date. The PDF is Word's
 own export of that DOCX, so the two agree page for page. Presentation metadata lives in
-`scripts/submission_meta.json`; the slide-by-slide outline is in
-[final-submission/PRESENTATION_OUTLINE.md](final-submission/PRESENTATION_OUTLINE.md).
+`source/scripts/submission_meta.json`; the slide-by-slide outline is in
+[PRESENTATION_OUTLINE.md](PRESENTATION_OUTLINE.md).
 
 ## Documentation
 
 **Product contract**
 
-- [Current implementation audit](docs/IMPLEMENTATION_AUDIT.md) — canonical route and implementation description
-- [Architecture](docs/ARCHITECTURE.md) · [Architecture diagram](docs/ARCHITECTURE_DIAGRAM.md)
-- [API reference](docs/API.md)
-- [Algorithms](docs/ALGORITHMS.md) · [DSA to product mapping](docs/DSA_PRODUCT_MAPPING.md) · [Course map](docs/COURSE_MAP.md)
-- [Overview semantics](docs/COMMAND_CENTER.md) · [Datasets and replay](docs/DATASET.md)
-- [UI, accessibility and design system](docs/UI-UX.md) · [Design system](docs/design-system.md)
-- [Trace engine](docs/TRACE_ENGINE.md) · [Engineering decisions](docs/ENGINEERING_DECISIONS.md)
-- [Deployment](docs/DEPLOYMENT.md)
+- [Current implementation audit](source/docs/IMPLEMENTATION_AUDIT.md) — canonical route and implementation description
+- [Architecture](source/docs/ARCHITECTURE.md) · [Architecture diagram](source/docs/ARCHITECTURE_DIAGRAM.md)
+- [API reference](source/docs/API.md)
+- [Algorithms](source/docs/ALGORITHMS.md) · [DSA to product mapping](source/docs/DSA_PRODUCT_MAPPING.md) · [Course map](source/docs/COURSE_MAP.md)
+- [Overview semantics](source/docs/COMMAND_CENTER.md) · [Datasets and replay](source/docs/DATASET.md)
+- [UI, accessibility and design system](source/docs/UI-UX.md) · [Design system](source/docs/design-system.md)
+- [Trace engine](source/docs/TRACE_ENGINE.md) · [Engineering decisions](source/docs/ENGINEERING_DECISIONS.md)
+- [Deployment](source/docs/DEPLOYMENT.md)
 
 **Using and verifying it**
 
-- [Demo guide](docs/DEMO_GUIDE.md) — the live demonstration, step by step
-- [Testing and verification](docs/13-testing.md)
-- [Project walkthrough](docs/PROJECT_WALKTHROUGH.md)
-- [Portfolio summary](docs/PORTFOLIO_SUMMARY.md) · [Interview guide](docs/INTERVIEW_GUIDE.md)
+- [Demo guide](source/docs/DEMO_GUIDE.md) — the live demonstration, step by step
+- [Testing and verification](source/docs/13-testing.md)
+- [Project walkthrough](source/docs/PROJECT_WALKTHROUGH.md)
+- [Portfolio summary](source/docs/PORTFOLIO_SUMMARY.md) · [Interview guide](source/docs/INTERVIEW_GUIDE.md)
 
 **Release record**
 
-- [Final submission index](final-submission/FINAL_SUBMISSION_INDEX.md) — deliverables, verified figures and limitations
-- [Release notes 0.1.0](docs/RELEASE_NOTES_0.1.0.md)
-- [Archived phase and release reports](docs/archive/README.md) — historical snapshots, not current specifications
+- [Final submission index](FINAL_SUBMISSION_INDEX.md) — deliverables, verified figures and limitations
+- [Release notes 0.1.0](source/docs/RELEASE_NOTES_0.1.0.md)
+- [Archived phase and release reports](source/docs/archive/README.md) — historical snapshots, not current specifications
 
-Older reports are kept under `docs/archive/`; the current implementation and test contract is in the links above.
+Older reports are kept under `source/docs/archive/`; the current implementation and test contract is in the links above.

@@ -17,7 +17,7 @@ The sample file itself is never modified. Figure sizes in the sample are already
 swapping the image parts leaves every extent and the page layout untouched.
 
 Run with the repository root as the working directory:
-    python scripts/build_report.py
+    python source/scripts/build_report.py
 """
 from __future__ import annotations
 
@@ -32,6 +32,8 @@ from docx.oxml.ns import qn
 from PIL import Image
 
 REPO = Path(__file__).resolve().parents[1]
+# Deliverables are hoisted to the repository root; REPO is the source tree.
+ROOT = REPO.parent
 
 # The institutional sample report is not committed to this repository, so its
 # location has to be supplied. Set LOGINSIGHT_SAMPLE_REPORT to the file; the
@@ -43,7 +45,7 @@ SAMPLE = Path(
     )
 )
 FIGURES = REPO / "docs" / "images" / "report"
-OUTPUT = REPO / "final-submission" / "LogInsight_Final_Project_Report.docx"
+OUTPUT = ROOT / "LogInsight_Final_Project_Report.docx"
 
 # Sample image part -> report figure, in sample document order.
 FIGURE_MAP = {
@@ -623,7 +625,7 @@ def main() -> int:
     print(f"  trimmed {trim_trailing_blanks(doc)} trailing blank paragraph(s)")
 
     doc.save(OUTPUT)
-    print(f"\nWrote {OUTPUT.relative_to(REPO)} ({OUTPUT.stat().st_size:,} bytes)")
+    print(f"\nWrote {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size:,} bytes)")
     return 0
 
 

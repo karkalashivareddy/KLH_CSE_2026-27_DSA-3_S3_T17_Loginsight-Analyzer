@@ -5,7 +5,7 @@
 > that build. Two of its findings were later resolved and its test and typography figures were later
 > corrected against the current tree; those corrections are marked inline below. For the authoritative
 > current figures see [testing guide](../13-testing.md),
-> [final-submission/FINAL_SUBMISSION_INDEX.md](../../final-submission/FINAL_SUBMISSION_INDEX.md) and
+> [FINAL_SUBMISSION_INDEX.md](../../../../) and
 > [FINAL_RELEASE_READINESS.md](FINAL_RELEASE_READINESS.md).
 
 **Date:** 2026-09-27 (historical)
